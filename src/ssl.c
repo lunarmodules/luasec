@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.3.2
+ * LuaSec 0.3.3
  * Copyright (C) 2006-2009 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
@@ -63,11 +63,13 @@ static int meth_destroy(lua_State *L)
  */
 static int handshake(p_ssl ssl)
 {
+  int err;
   p_timeout tm = timeout_markstart(&ssl->tm);
   if (ssl->state == ST_SSL_CLOSED)
     return IO_CLOSED;
   for ( ; ; ) {
-    int err = SSL_do_handshake(ssl->ssl);
+    ERR_clear_error();
+    err = SSL_do_handshake(ssl->ssl);
     ssl->error = SSL_get_error(ssl->ssl, err);
     switch(ssl->error) {
     case SSL_ERROR_NONE:
@@ -104,12 +106,14 @@ static int handshake(p_ssl ssl)
 static int ssl_send(void *ctx, const char *data, size_t count, size_t *sent,
    p_timeout tm)
 {
+  int err;
   p_ssl ssl = (p_ssl) ctx;
   if (ssl->state == ST_SSL_CLOSED)
     return IO_CLOSED;
   *sent = 0;
   for ( ; ; ) {
-    int err = SSL_write(ssl->ssl, data, (int) count);
+    ERR_clear_error();
+    err = SSL_write(ssl->ssl, data, (int) count);
     ssl->error = SSL_get_error(ssl->ssl, err);
     switch(ssl->error) {
     case SSL_ERROR_NONE:
@@ -146,12 +150,14 @@ static int ssl_send(void *ctx, const char *data, size_t count, size_t *sent,
 static int ssl_recv(void *ctx, char *data, size_t count, size_t *got,
   p_timeout tm)
 {
+  int err;
   p_ssl ssl = (p_ssl) ctx;
   if (ssl->state == ST_SSL_CLOSED)
     return IO_CLOSED;
   *got = 0;
   for ( ; ; ) {
-    int err = SSL_read(ssl->ssl, data, (int) count);
+    ERR_clear_error();
+    err = SSL_read(ssl->ssl, data, (int) count);
     ssl->error = SSL_get_error(ssl->ssl, err);
     switch(ssl->error) {
     case SSL_ERROR_NONE:

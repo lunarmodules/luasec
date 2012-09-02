@@ -1,4 +1,11 @@
 --------------------------------------------------------------------------------
+LuaSec 0.3.3
+------------
+- BUG: Clear the error queue before call I/O functions (see SSL_get_error 
+  manual).
+  (thanks Matthew Wild)
+
+--------------------------------------------------------------------------------
 LuaSec 0.3.2
 ------------
 - BUG: Windows uses a different way to report socket error.
