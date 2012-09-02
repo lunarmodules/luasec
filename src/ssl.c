@@ -1,10 +1,9 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.3.1
+ * LuaSec 0.3.2
  * Copyright (C) 2006-2009 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
-#include <errno.h>
 #include <string.h>
 
 #include <openssl/ssl.h>
@@ -91,7 +90,7 @@ static int handshake(p_ssl ssl)
       }
       if (err == 0)
         return IO_CLOSED;
-      return errno;
+      return socket_error();
     default:
       return IO_SSL;
     }
@@ -133,7 +132,7 @@ static int ssl_send(void *ctx, const char *data, size_t count, size_t *sent,
       }
       if (err == 0)
         return IO_CLOSED;
-      return errno;
+      return socket_error();
     default:
       return IO_SSL;
     }
@@ -178,7 +177,7 @@ static int ssl_recv(void *ctx, char *data, size_t count, size_t *got,
       }
       if (err == 0)
         return IO_CLOSED;
-      return errno;
+      return socket_error();
     default:
       return IO_SSL;
     }

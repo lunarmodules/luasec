@@ -150,7 +150,6 @@ static const char *wstrerror(int err) {
 const char *socket_strerror(int err) {
     if (err <= 0) return io_strerror(err);
     switch (err) {
-        case ERROR_FILE_NOT_FOUND: return "closed";
         case WSAEADDRINUSE: return "address already in use";
         case WSAECONNREFUSED: return "connection refused";
         case WSAEISCONN: return "already connected";
@@ -160,5 +159,11 @@ const char *socket_strerror(int err) {
         case WSAETIMEDOUT: return "timeout";
         default: return wstrerror(err);
     }
+}
+
+/* Socket error code */
+int socket_error()
+{
+   return WSAGetLastError();
 }
 

@@ -43,5 +43,6 @@ void socket_setnonblocking(p_socket ps);
 void socket_setblocking(p_socket ps);
 int socket_waitfd(p_socket ps, int sw, p_timeout tm);
 const char *socket_strerror(int err);
+int socket_error();
 
 #endif /* SOCKET_H */

@@ -1,4 +1,10 @@
 --------------------------------------------------------------------------------
+LuaSec 0.3.2
+------------
+- BUG: Windows uses a different way to report socket error.
+  (thanks Sebastien Perin)
+
+--------------------------------------------------------------------------------
 LuaSec 0.3.1
 ------------
 - BUG: receive("a") returns 'closed' error instead of the content when the
