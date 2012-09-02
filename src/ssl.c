@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.3
- * Copyright (C) 2006-2008 Bruno Silvestre
+ * LuaSec 0.3.1
+ * Copyright (C) 2006-2009 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
@@ -158,6 +158,9 @@ static int ssl_recv(void *ctx, char *data, size_t count, size_t *got,
     case SSL_ERROR_NONE:
       *got = err;
       return IO_DONE;
+    case SSL_ERROR_ZERO_RETURN:
+      *got = err;
+      return IO_CLOSED;
     case SSL_ERROR_WANT_READ:
       err = socket_waitfd(&ssl->sock, WAITFD_R, tm);
       if (err == IO_TIMEOUT) return IO_SSL;

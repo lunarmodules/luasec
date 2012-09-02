@@ -1,13 +1,19 @@
 --------------------------------------------------------------------------------
+LuaSec 0.3.1
+------------
+- BUG: receive("a") returns 'closed' error instead of the content when the
+  SSL/TLS connection is shut down cleanly. (thanks Matthias Diener)
+
+--------------------------------------------------------------------------------
 LuaSec 0.3
 ----------
 - Add functions ssl.rawcontext() and ssl.rawconnection()
-- Add support to encrypted key password.
+- Add support to encrypted key password. (thanks Norbert Kiesel)
 
 --------------------------------------------------------------------------------
 LuaSec 0.2.1
 ------------
-- 'key' and 'certificate' configurations become optional.
+- 'key' and 'certificate' configurations become optional. (thanks René Rebe)
 - Add '_VERSION' variable to module.
 
 --------------------------------------------------------------------------------
