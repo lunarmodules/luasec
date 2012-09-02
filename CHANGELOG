@@ -1,4 +1,11 @@
 --------------------------------------------------------------------------------
+LuaSec 0.4.1
+------------
+- SSL options updated --- based on OpenSSL 1.0.0d.
+- Activate SSL_MODE_RELEASE_BUFFERS by default if it is available.
+  (thanks Prosody project)
+
+---------------------------------------------------------------------------------
 LuaSec 0.4
 ------------
 - Add option 'no_ticket' (included in OpenSSL 0.9.8f).
