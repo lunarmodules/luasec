@@ -29,3 +29,6 @@ Directories:
 
 * want
  Test want().
+
+* key
+ Test encrypted private key.

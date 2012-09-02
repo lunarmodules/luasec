@@ -1,6 +1,6 @@
 ------------------------------------------------------------------------------
--- LuaSec 0.2
--- Copyright (C) 2006-2007 Bruno Silvestre
+-- LuaSec 0.3
+-- Copyright (C) 2006-2008 Bruno Silvestre
 --
 ------------------------------------------------------------------------------
 
@@ -9,9 +9,14 @@ module("ssl", package.seeall)
 require("ssl.core")
 require("ssl.context")
 
-             
-_COPYRIGHT = "LuaSec 0.2 - Copyright (C) 2006-2007 Bruno Silvestre\n" .. 
+
+_VERSION   = "0.3"
+_COPYRIGHT = "LuaSec 0.3 - Copyright (C) 2006-2008 Bruno Silvestre\n" .. 
              "LuaSocket 2.0.2 - Copyright (C) 2004-2007 Diego Nehab"
+
+-- Export functions
+rawconnection = core.rawconnection
+rawcontext    = context.rawcontext
 
 --
 --
@@ -39,11 +44,15 @@ function newcontext(cfg)
    succ, msg = context.setmode(ctx, cfg.mode)
    if not succ then return nil, msg end
    -- Load the key
-   succ, msg = context.loadkey(ctx, cfg.key)
-   if not succ then return nil, msg end
+   if cfg.key then
+      succ, msg = context.loadkey(ctx, cfg.key, cfg.password)
+      if not succ then return nil, msg end
+   end
    -- Load the certificate
-   succ, msg = context.loadcert(ctx, cfg.certificate)
-   if not succ then return nil, msg end
+   if cfg.certificate then
+      succ, msg = context.loadcert(ctx, cfg.certificate)
+      if not succ then return nil, msg end
+   end
    -- Load the CA certificates
    if cfg.cafile or cfg.capath then
       succ, msg = context.locations(ctx, cfg.cafile, cfg.capath)

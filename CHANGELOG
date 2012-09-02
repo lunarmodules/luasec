@@ -1,0 +1,16 @@
+--------------------------------------------------------------------------------
+LuaSec 0.3
+----------
+- Add functions ssl.rawcontext() and ssl.rawconnection()
+- Add support to encrypted key password.
+
+--------------------------------------------------------------------------------
+LuaSec 0.2.1
+------------
+- 'key' and 'certificate' configurations become optional.
+- Add '_VERSION' variable to module.
+
+--------------------------------------------------------------------------------
+LuaSec 0.2
+----------
+Initial version

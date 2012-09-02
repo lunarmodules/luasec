@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.2
- * Copyright (C) 2006-2007 Bruno Silvestre
+ * LuaSec 0.3
+ * Copyright (C) 2006-2008 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
@@ -334,6 +334,16 @@ static int meth_want(lua_State *L)
   return 1;
 }
   
+/**
+ * Return a pointer to SSL structure.
+ */
+static int meth_rawconn(lua_State *L)
+{
+  p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
+  lua_pushlightuserdata(L, (void*)ssl->ssl);
+  return 1;
+}
+
 /*---------------------------------------------------------------------------*/
 
 
@@ -356,9 +366,10 @@ static luaL_Reg meta[] = {
  * SSL functions 
  */
 static luaL_Reg funcs[] = {
-  {"create", meth_create},
-  {"setfd",  meth_setfd},
-  {NULL,     NULL}
+  {"create",        meth_create},
+  {"setfd",         meth_setfd},
+  {"rawconnection", meth_rawconn},
+  {NULL,            NULL}
 };
 
 /**
