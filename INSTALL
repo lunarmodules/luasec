@@ -1,0 +1,23 @@
+LuaSec 0.2
+-----------
+
+* On Linux, BSD, and Mac OS X:
+
+  - Edit 'Makefile'
+    * Inform the path to install the modules.
+    * If Lua or OpenSSL are not in the default path, set the 
+      variables INCDIR and LIBDIR.
+    * For Mac OS X, set the variable MACOSX_VERSION.
+
+  - Use 'make <platform>' to compile
+    * Platforms: linux, bsd, or macosx
+
+  - Use 'make install' to install the modules.
+
+* On Windows:
+  
+  - Use the Visual C++ project to compile the library.
+
+  - Copy the 'ssl.lua' file to some place in your LUA_PATH.
+
+  - Copy the 'ssl.dll' file to some place in your LUA_CPATH.
