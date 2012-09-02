@@ -121,7 +121,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="C:\devel\openssl\include;C:\devel\lua-dll9\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LUASEC_EXPORTS;BUFFER_DEBUG;LUASEC_API=__declspec(dllexport)"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;BUFFER_DEBUG"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -141,7 +141,7 @@
 				AdditionalDependencies="ws2_32.lib libeay32MD.lib ssleay32MD.lib lua5.1.lib"
 				OutputFile="$(OutDir)/ssl.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="C:\devel\openssl\lib\VC;C:\devel\lua-dll9"
+				AdditionalLibraryDirectories="C:\devel\openssl\lib\VC;C:\devel\lua-dll9\lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"

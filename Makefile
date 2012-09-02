@@ -1,6 +1,6 @@
 # Inform the location to intall the modules
 LUAPATH=/usr/local/share/lua/5.1
-CPATH=/usr/local/lib/lua/5.1
+LUACPATH=/usr/local/lib/lua/5.1
 
 # Edit the lines below to inform new path, if necessary
 #
@@ -26,7 +26,7 @@ none:
 	@echo "  * macosx"
 
 install:
-	@cd src ; $(MAKE) CPATH="$(CPATH)" LUAPATH="$(LUAPATH)" install
+	@cd src ; $(MAKE) LUACPATH="$(LUACPATH)" LUAPATH="$(LUAPATH)" install
 
 linux:
 	@echo "---------------------"

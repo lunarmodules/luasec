@@ -1,4 +1,10 @@
 --------------------------------------------------------------------------------
+LuaSec 0.4
+------------
+- Add option 'no_ticket' (included in OpenSSL 0.9.8f).
+- Add HTTPS module. (thanks Tomas Guisasola and Pablo Musa)
+
+--------------------------------------------------------------------------------
 LuaSec 0.3.3
 ------------
 - BUG: Clear the error queue before call I/O functions (see SSL_get_error 

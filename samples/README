@@ -1,14 +1,8 @@
-In all examples, the SSL/TLS  layer can be disable just commenting the
-wrap  section.   In this  case,  the  examples  work with  normal  TCP
-communication.
-
 Directories: 
 ------------
 * certs
- It  contains a set of  certificates used in the examples.  You can use
- the  scrits  to  recreate  them  if  necessary  (due  to  certificates
- expiration  date,  for example).  First,  generate the Root CA 'A' and 
- 'B', then the servers and clients.
+ Contains scripts to generate the certificates used by the examples.
+ Generate Root CA 'A' and 'B' first, then the servers and clients.
 
 * oneshot
  A simple connection example.
@@ -19,7 +13,7 @@ Directories:
 
 * loop-gc
  Same of above,  but the connection is not  explicit closed, the gabage
- collector is encharge of it.
+ collector is encharge of that.
 
 * wantread
  Test timeout in handshake() and receive().

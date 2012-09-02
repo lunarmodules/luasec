@@ -1,10 +1,11 @@
-LuaSec 0.3.3
+LuaSec 0.4
 ------------
 
 * On Linux, BSD, and Mac OS X:
 
   - Edit 'Makefile'
-    * Inform the path to install the modules.
+    * Inform the path to where install the Lua modules (LUAPATH) and binaries 
+      modules (LUACPATH)
     * If Lua or OpenSSL are not in the default path, set the 
       variables INCDIR and LIBDIR.
     * For Mac OS X, set the variable MACOSX_VERSION.
@@ -21,3 +22,5 @@ LuaSec 0.3.3
   - Copy the 'ssl.lua' file to some place in your LUA_PATH.
 
   - Copy the 'ssl.dll' file to some place in your LUA_CPATH.
+
+  - Create a directory 'ssl' in your LUA_PATH and copy 'https.lua' to it.

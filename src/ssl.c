@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.3.3
+ * LuaSec 0.4
  * Copyright (C) 2006-2009 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
@@ -16,7 +16,6 @@
 #include "buffer.h"
 #include "timeout.h"
 #include "socket.h"
-#include "context.h"
 #include "ssl.h"
 
 /**

@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
--- LuaSec 0.3.3
+-- LuaSec 0.4
 -- Copyright (C) 2006-2009 Bruno Silvestre
 --
 ------------------------------------------------------------------------------
@@ -10,8 +10,8 @@ require("ssl.core")
 require("ssl.context")
 
 
-_VERSION   = "0.3.3"
-_COPYRIGHT = "LuaSec 0.3.3 - Copyright (C) 2006-2009 Bruno Silvestre\n" .. 
+_VERSION   = "0.4"
+_COPYRIGHT = "LuaSec 0.4 - Copyright (C) 2006-2009 Bruno Silvestre\n" .. 
              "LuaSocket 2.0.2 - Copyright (C) 2004-2007 Diego Nehab"
 
 -- Export functions

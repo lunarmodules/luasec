@@ -23,7 +23,6 @@ MAC_ENV=env MACOSX_DEPLOYMENT_TARGET='$(MACVER)'
 MAC_CFLAGS=-O2 -fno-common $(WARN) $(INCDIR) $(DEFS)
 MAC_LDFLAGS=-bundle -undefined dynamic_lookup $(LIBDIR)
 
-CP=cp
 CC=gcc
 LD=$(MYENV) gcc
 CFLAGS=$(MYCFLAGS)
@@ -34,8 +33,10 @@ LDFLAGS=$(MYLDFLAGS)
 all:
 
 install: $(CMOD) $(LMOD)
-	$(CP) $(CMOD) $(CPATH)
-	$(CP) $(LMOD) $(LUAPATH)
+	mkdir -p $(LUAPATH)/ssl
+	cp $(CMOD) $(LUACPATH)
+	cp $(LMOD) $(LUAPATH)
+	cp https.lua $(LUAPATH)/ssl
 
 linux:
 	@$(MAKE) $(CMOD) MYCFLAGS="$(LNX_CFLAGS)" MYLDFLAGS="$(LNX_LDFLAGS)"

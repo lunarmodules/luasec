@@ -2,7 +2,7 @@
 #define __CONTEXT_H__
 
 /*--------------------------------------------------------------------------
- * LuaSec 0.3.3
+ * LuaSec 0.4
  * Copyright (C) 2006-2009 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
@@ -10,7 +10,9 @@
 #include <lua.h>
 #include <openssl/ssl.h>
 
-#ifndef LUASEC_API
+#if defined(_WIN32)
+#define LUASEC_API __declspec(dllexport) 
+#else
 #define LUASEC_API extern
 #endif
 

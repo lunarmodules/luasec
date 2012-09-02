@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.3.3
+ * LuaSec 0.4
  * Copyright (C) 2006-2009 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
@@ -51,6 +51,10 @@ static ssl_option_t ssl_options[] = {
   {"cookie_exchange",                  SSL_OP_COOKIE_EXCHANGE},
   {"no_query_mtu",                     SSL_OP_NO_QUERY_MTU},
   {"single_ecdh_use",                  SSL_OP_SINGLE_ECDH_USE},
+#endif
+  /* OpenSSL 0.9.8f and above */
+#if defined(SSL_OP_NO_TICKET)
+  {"no_ticket",                        SSL_OP_NO_TICKET},
 #endif
   {NULL, 0L}
 };
