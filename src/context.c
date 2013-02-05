@@ -11,6 +11,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 
+#include "compat.h"
 #include "context.h"
 #include "options.h"
 

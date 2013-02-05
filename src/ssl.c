@@ -12,6 +12,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 
+#include "compat.h"
 #include "io.h"
 #include "buffer.h"
 #include "timeout.h"

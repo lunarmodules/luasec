@@ -4,14 +4,13 @@
 --
 ------------------------------------------------------------------------------
 
-module("ssl", package.seeall)
+local core    = require("ssl.core")
+local context = require("ssl.context")
 
-require("ssl.core")
-require("ssl.context")
+local M = {}
 
-
-_VERSION   = "0.4.1"
-_COPYRIGHT = "LuaSec 0.4.1 - Copyright (C) 2006-2011 Bruno Silvestre\n" .. 
+M._VERSION   = "0.4.1"
+M._COPYRIGHT = "LuaSec 0.4.1 - Copyright (C) 2006-2011 Bruno Silvestre\n" .. 
              "LuaSocket 2.0.2 - Copyright (C) 2004-2007 Diego Nehab"
 
 -- Export functions
@@ -35,7 +34,7 @@ end
 --
 --
 --
-function newcontext(cfg)
+function M.newcontext(cfg)
    local succ, msg, ctx
    -- Create the context
    ctx, msg = context.create(cfg.protocol)
@@ -75,10 +74,10 @@ end
 --
 --
 --
-function wrap(sock, cfg)
+function M.wrap(sock, cfg)
    local ctx, msg
    if type(cfg) == "table" then
-      ctx, msg = newcontext(cfg)
+      ctx, msg = M.newcontext(cfg)
       if not ctx then return nil, msg end
    else
       ctx = cfg
@@ -91,3 +90,6 @@ function wrap(sock, cfg)
    end
    return nil, msg 
 end
+
+return M
+
