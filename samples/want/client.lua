@@ -3,8 +3,8 @@
 --
 -- Public domain
 --
-require("socket")
-require("ssl")
+local socket = require("socket")
+local ssl    = require("ssl")
 
 local params = {
    mode = "client",

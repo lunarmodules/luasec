@@ -1,8 +1,8 @@
 --
 -- Public domain
 --
-require("socket")
-require("ssl")
+local socket = require("socket")
+local ssl    = require("ssl")
 
 print("Use Ctrl+S and Ctrl+Q to suspend and resume the server.")
 

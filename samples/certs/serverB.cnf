@@ -172,7 +172,7 @@ basicConstraints=CA:FALSE
 # the certificate can be used for anything *except* object signing.
 
 # This is OK for an SSL server.
-# nsCertType			= server
+nsCertType			= server
 
 # For an object signing certificate this would be used.
 # nsCertType = objsign

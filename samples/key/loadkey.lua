@@ -1,7 +1,7 @@
 --
 -- Public domain
 --
-require("ssl")
+local ssl = require("ssl")
 
 local pass = "foobar"
 local cfg = {

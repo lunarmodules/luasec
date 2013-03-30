@@ -1,66 +1,25 @@
+#ifndef LSEC_OPTIONS_H
+#define LSEC_OPTIONS_H
+
 /*--------------------------------------------------------------------------
  * LuaSec 0.4.1
  * Copyright (C) 2006-2011 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
+#include <openssl/ssl.h>
+
+/* If you need to generate these options again, see options.lua */
+
+/* 
+  OpenSSL version: OpenSSL 1.0.1 14 Mar 2012
+*/
+
 struct ssl_option_s {
   const char *name;
   unsigned long code;
 };
 typedef struct ssl_option_s ssl_option_t;
-
-/*
--- Supported SSL options and script in Lua 5.1 to generate the file.
--- Ugly, but easier to maintain.
-
-local options = [[
-SSL_OP_ALL
-SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION
-SSL_OP_CIPHER_SERVER_PREFERENCE
-SSL_OP_CISCO_ANYCONNECT
-SSL_OP_COOKIE_EXCHANGE
-SSL_OP_CRYPTOPRO_TLSEXT_BUG
-SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS
-SSL_OP_EPHEMERAL_RSA
-SSL_OP_LEGACY_SERVER_CONNECT
-SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER
-SSL_OP_MICROSOFT_SESS_ID_BUG
-SSL_OP_MSIE_SSLV2_RSA_PADDING
-SSL_OP_NETSCAPE_CA_DN_BUG
-SSL_OP_NETSCAPE_CHALLENGE_BUG
-SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG
-SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG
-SSL_OP_NO_COMPRESSION
-SSL_OP_NO_QUERY_MTU
-SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION
-SSL_OP_NO_SSLv2
-SSL_OP_NO_SSLv3
-SSL_OP_NO_TICKET
-SSL_OP_NO_TLSv1
-SSL_OP_PKCS1_CHECK_1
-SSL_OP_PKCS1_CHECK_2
-SSL_OP_SINGLE_DH_USE
-SSL_OP_SINGLE_ECDH_USE
-SSL_OP_SSLEAY_080_CLIENT_DH_BUG
-SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG
-SSL_OP_TLS_BLOCK_PADDING_BUG
-SSL_OP_TLS_D5_BUG
-SSL_OP_TLS_ROLLBACK_BUG
-]]
-
-print([[static ssl_option_t ssl_options[] = {]])
-
-for option in string.gmatch(options, "(%S+)") do
-  local name = string.lower(string.sub(option, 8))
-  print(string.format([[#if defined(%s)]], option))
-  print(string.format([[  {"%s", %s},]], name, option))
-  print([[#endif]])
-end
-
-print([[  {NULL, 0L}]])
-print([[};]])
-*/
 
 static ssl_option_t ssl_options[] = {
 #if defined(SSL_OP_ALL)
@@ -132,6 +91,12 @@ static ssl_option_t ssl_options[] = {
 #if defined(SSL_OP_NO_TLSv1)
   {"no_tlsv1", SSL_OP_NO_TLSv1},
 #endif
+#if defined(SSL_OP_NO_TLSv1_1)
+  {"no_tlsv1_1", SSL_OP_NO_TLSv1_1},
+#endif
+#if defined(SSL_OP_NO_TLSv1_2)
+  {"no_tlsv1_2", SSL_OP_NO_TLSv1_2},
+#endif
 #if defined(SSL_OP_PKCS1_CHECK_1)
   {"pkcs1_check_1", SSL_OP_PKCS1_CHECK_1},
 #endif
@@ -159,5 +124,12 @@ static ssl_option_t ssl_options[] = {
 #if defined(SSL_OP_TLS_ROLLBACK_BUG)
   {"tls_rollback_bug", SSL_OP_TLS_ROLLBACK_BUG},
 #endif
+#if !defined(SSL_OP_NO_COMPRESSION) && (OPENSSL_VERSION_NUMBER >= 0x0090800f) && (OPENSSL_VERSION_NUMBER < 0x1000000fL)
+  /* Add SSL_OP_NO_COMPRESSION manually if built against 0.9.8. */
+  {"no_compression", 0L},
+#endif
   {NULL, 0L}
 };
+
+#endif
+

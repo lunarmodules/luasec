@@ -1,6 +1,6 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luasec", "luasec.vcproj", "{A629932F-8819-4C0B-8835-CBF1FEED6376}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "luasec", "luasec.vcxproj", "{A629932F-8819-4C0B-8835-CBF1FEED6376}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
