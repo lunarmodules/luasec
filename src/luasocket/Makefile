@@ -4,16 +4,18 @@ OBJS= \
  timeout.o \
  usocket.o
 
-CC=gcc
-CFLAGS=$(MYCFLAGS) -DLUASOCKET_DEBUG
+CC	?= cc
+CFLAGS	+= $(MYCFLAGS) -DLUASOCKET_DEBUG
+AR	:= ar rcu
+RANLIB	?= ranlib
 
 .PHONY: all clean
 
 all: libluasocket.a
 
 libluasocket.a: $(OBJS)
-	ar rcu $@ $(OBJS)
-	ranlib $@
+	$(AR) $@ $(OBJS)
+	$(RANLIB) $@
 
 clean:
 	rm -f $(OBJS) libluasocket.a
