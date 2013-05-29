@@ -42,7 +42,7 @@ static int set_option_flag(const char *opt, unsigned long *flag)
 /**
  * Find the protocol.
  */
-static SSL_METHOD* str2method(const char *method)
+const static SSL_METHOD* str2method(const char *method)
 {
   if (!strcmp(method, "sslv3"))  return SSLv3_method();
   if (!strcmp(method, "tlsv1"))  return TLSv1_method();
@@ -103,7 +103,7 @@ static int passwd_cb(char *buf, int size, int flag, void *udata)
 static int create(lua_State *L)
 {
   p_context ctx;
-  SSL_METHOD *method;
+  const SSL_METHOD *method;
 
   method = str2method(luaL_checkstring(L, 1));
   if (!method) {
