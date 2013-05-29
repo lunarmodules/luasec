@@ -1,0 +1,5 @@
+*.o
+ssl.so
+samples/certs/*.pem
+samples/certs/*.srl
+samples/key/*.pem
