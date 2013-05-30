@@ -9,8 +9,9 @@ local ctx = assert( ssl.newcontext {
 	cafile = "../certs/rootA.pem",
 	verify = {"peer", "fail_if_no_peer_cert"},
 	options = {"all", "no_sslv2"},
-	cachecontext = "serversample",
 	cache = "server" ;
+	cachesize = 1e6 ;
+	cachecontext = "serversample" ;
 } )
 
 local server = socket.tcp()

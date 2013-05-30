@@ -370,6 +370,28 @@ static int set_session_cache_mode(lua_State *L)
   return 1;
 }
 
+/*
+ * Set context's session cache size, see SSL_CTX_sess_set_cache_size(3)
+ */
+static int set_cache_size(lua_State *L)
+{
+  SSL_CTX *ctx = ctx_getcontext(L, 1);
+  long n = luaL_checklong(L, 2);
+  SSL_CTX_sess_set_cache_size(ctx, n);
+  lua_pushboolean(L, 1);
+  return 1;
+}
+
+/*
+ * Get context's session cache size, see SSL_CTX_sess_set_cache_size(3)
+ */
+static int get_cache_size(lua_State *L)
+{
+  SSL_CTX *ctx = ctx_getcontext(L, 1);
+  lua_pushnumber(L, SSL_CTX_sess_get_cache_size(ctx));
+  return 1;
+}
+
 /**
  * Return a table of context statistics
  */
@@ -436,6 +458,8 @@ static luaL_Reg methods[] = {
   {"setmode",    set_mode},
   {"setsessionidcontext", set_session_id_context},
   {"setsessioncachemode", set_session_cache_mode},
+  {"setcachesize",        set_cache_size},
+  {"getcachesize",        get_cache_size},
   {"stats",      ctx_stats},
   {"rawcontext", raw_ctx},
   {NULL, NULL}
