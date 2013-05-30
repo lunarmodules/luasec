@@ -24,7 +24,7 @@ while true do
    -- [[ SSL wrapper
    peer = assert( ssl.wrap(peer, params) )
    if session then
-      session = peer:setsession(session)
+      peer:setsession(session)
    end
    assert( peer:dohandshake() )
    --]]
