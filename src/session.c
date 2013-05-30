@@ -19,12 +19,12 @@ void pushSSL_SESSION (lua_State *L, SSL_SESSION *p) {
 }
 
 SSL_SESSION * checkSSL_SESSION (lua_State *L, int narg) {
-	SSL_SESSION **psess = (SSL_SESSION **)luaL_checkudata(L, narg, "SSL:Session");
-	if(psess == NULL) {
+	SSL_SESSION *sess = *(SSL_SESSION **)luaL_checkudata(L, narg, "SSL:Session");
+	if(sess == NULL) {
 		/* Doesn't return */
 		luaL_argerror(L, narg, "freed session");
 	}
-	return *psess;
+	return sess;
 }
 
 /**
@@ -33,9 +33,9 @@ SSL_SESSION * checkSSL_SESSION (lua_State *L, int narg) {
 static int session_free(lua_State *L)
 {
 	SSL_SESSION **psess = luaL_checkudata(L, 1, "SSL:Session");
-	if (psess != NULL) {
+	if (*psess != NULL) {
 		SSL_SESSION_free(*psess);
-		psess = NULL;
+		*psess = NULL;
 	}
 	return 0;
 }
