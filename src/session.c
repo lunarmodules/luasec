@@ -32,6 +32,20 @@ static int session_free(lua_State *L)
 }
 
 /**
+ * Returns ASN1 representation of session
+ */
+static int session_asn1(lua_State *L)
+{
+	SSL_SESSION *sess = checkSSL_SESSION(L, 1);
+	int len = i2d_SSL_SESSION(sess , NULL);
+	/* Allocate room for ASN1 representation on lua stack */
+	void* buff = lua_newuserdata(L,len);
+	i2d_SSL_SESSION(sess , (unsigned char**)&buff);
+	lua_pushlstring(L, (char*)buff, len);
+	return 1;
+}
+
+/**
  * SSL session -- tostring metamethod.
  */
 static int session_tostring(lua_State *L)
@@ -46,6 +60,7 @@ static int session_tostring(lua_State *L)
 static luaL_Reg meta[] = {
 	{"__gc",        session_free},
 	{"__tostring",  session_tostring},
+	{"asn1",        session_asn1},
 	{NULL,          NULL}
 };
 
