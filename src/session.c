@@ -41,6 +41,18 @@ static int session_free(lua_State *L)
 }
 
 /**
+ * Get a session's (binary) id
+ */
+static int session_get_id (lua_State *L)
+{
+	SSL_SESSION *sess = checkSSL_SESSION(L, 1);
+	unsigned int len;
+	const unsigned char *str = SSL_SESSION_get_id(sess, &len);
+	lua_pushlstring(L, (const char*)str, len);
+	return 1;
+}
+
+/**
  * Returns ASN1 representation of session
  */
 static int session_asn1(lua_State *L)
@@ -70,6 +82,7 @@ static luaL_Reg meta[] = {
 	{"__gc",        session_free},
 	{"__tostring",  session_tostring},
 	{"asn1",        session_asn1},
+	{"id",      session_get_id},
 	{NULL,          NULL}
 };
 
