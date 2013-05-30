@@ -41,6 +41,23 @@ static int session_free(lua_State *L)
 }
 
 /**
+ * Maniplate a session's timeout value, this can be used to extend or shorten the lifetime of the session.
+ */
+static int session_get_timeout (lua_State *L)
+{
+	SSL_SESSION *sess = checkSSL_SESSION(L, 1);
+	lua_pushinteger(L, SSL_SESSION_get_timeout(sess));
+	return 1;
+}
+static int session_set_timeout (lua_State *L)
+{
+	SSL_SESSION *sess = checkSSL_SESSION(L, 1);
+	long t = luaL_checklong(L, 2);
+	lua_pushinteger(L, SSL_SESSION_set_timeout(sess, t));
+	return 1;
+}
+
+/**
  * Get a session's (binary) id
  */
 static int session_get_id (lua_State *L)
@@ -82,6 +99,8 @@ static luaL_Reg meta[] = {
 	{"__gc",        session_free},
 	{"__tostring",  session_tostring},
 	{"asn1",        session_asn1},
+	{"get_timeout", session_get_timeout},
+	{"set_timeout", session_set_timeout},
 	{"id",      session_get_id},
 	{NULL,          NULL}
 };
