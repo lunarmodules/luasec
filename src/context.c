@@ -298,6 +298,40 @@ static int set_mode(lua_State *L)
 }   
 
 /**
+ * Return a table of context statistics
+ */
+static int ctx_stats(lua_State *L)
+{
+  SSL_CTX *ctx = ctx_getcontext(L, 1);
+  lua_createtable(L,0,12);
+  lua_pushnumber(L, SSL_CTX_sess_number(ctx));
+  lua_setfield(L,-2,"number");
+  lua_pushnumber(L, SSL_CTX_sess_connect(ctx));
+  lua_setfield(L,-2,"connect");
+  lua_pushnumber(L, SSL_CTX_sess_connect_good(ctx));
+  lua_setfield(L,-2,"connect_good");
+  lua_pushnumber(L, SSL_CTX_sess_connect_renegotiate(ctx));
+  lua_setfield(L,-2,"connect_renegotiate");
+  lua_pushnumber(L, SSL_CTX_sess_accept(ctx));
+  lua_setfield(L,-2,"accept");
+  lua_pushnumber(L, SSL_CTX_sess_accept_good(ctx));
+  lua_setfield(L,-2,"accept_good");
+  lua_pushnumber(L, SSL_CTX_sess_accept_renegotiate(ctx));
+  lua_setfield(L,-2,"accept_renegotiate");
+  lua_pushnumber(L, SSL_CTX_sess_hits(ctx));
+  lua_setfield(L,-2,"hits");
+  lua_pushnumber(L, SSL_CTX_sess_cb_hits(ctx));
+  lua_setfield(L,-2,"cb_hits");
+  lua_pushnumber(L, SSL_CTX_sess_misses(ctx));
+  lua_setfield(L,-2,"misses");
+  lua_pushnumber(L, SSL_CTX_sess_timeouts(ctx));
+  lua_setfield(L,-2,"timeouts");
+  lua_pushnumber(L, SSL_CTX_sess_cache_full(ctx));
+  lua_setfield(L,-2,"cache_full");
+  return 1;
+}
+
+/**
  * Return a pointer to SSL_CTX structure.
  */
 static int raw_ctx(lua_State *L)
@@ -320,6 +354,7 @@ static luaL_Reg funcs[] = {
   {"setverify",  set_verify},
   {"setoptions", set_options},
   {"setmode",    set_mode},
+  {"stats",      ctx_stats},
   {"rawcontext", raw_ctx},
   {NULL, NULL}
 };
