@@ -76,6 +76,9 @@ function newcontext(cfg)
    if cfg.cache then
       context.setsessioncachemode(ctx, cfg.cache)
    end
+   if cfg.cachetimeout then
+      context.settimeout(ctx, cfg.timeout)
+   end
    if cfg.cachesize then
       context.setcachesize(ctx, cfg.cachesize)
    end

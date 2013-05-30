@@ -296,6 +296,17 @@ static int set_mode(lua_State *L)
 }   
 
 /**
+ * Set context's session cache timeout
+ */
+static int set_timeout(lua_State *L)
+{
+  SSL_CTX *ctx = ctx_getcontext(L, 1);
+  long t = luaL_checklong(L, 2);
+  lua_pushinteger(L,SSL_CTX_set_timeout(ctx, t));
+  return 1;
+}
+
+/**
  * Set context's session id context, see SSL_CTX_set_session_id_context(3)
  */
 static int set_session_id_context(lua_State *L)
@@ -456,6 +467,7 @@ static luaL_Reg methods[] = {
   {"setverify",  set_verify},
   {"setoptions", set_options},
   {"setmode",    set_mode},
+  {"settimeout", set_timeout},
   {"setsessionidcontext", set_session_id_context},
   {"setsessioncachemode", set_session_cache_mode},
   {"setcachesize",        set_cache_size},
