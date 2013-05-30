@@ -7,6 +7,7 @@ OBJS= \
  io.o \
  usocket.o \
  context.o \
+ session.o \
  ssl.o
 
 LIBS=-lssl -lcrypto

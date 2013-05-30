@@ -42,7 +42,7 @@ static int set_option_flag(const char *opt, unsigned long *flag)
 /**
  * Find the protocol.
  */
-static SSL_METHOD* str2method(const char *method)
+const static SSL_METHOD* str2method(const char *method)
 {
   if (!strcmp(method, "sslv3"))  return SSLv3_method();
   if (!strcmp(method, "tlsv1"))  return TLSv1_method();
@@ -103,7 +103,7 @@ static int passwd_cb(char *buf, int size, int flag, void *udata)
 static int create(lua_State *L)
 {
   p_context ctx;
-  SSL_METHOD *method;
+  const SSL_METHOD *method;
 
   method = str2method(luaL_checkstring(L, 1));
   if (!method) {
@@ -124,8 +124,6 @@ static int create(lua_State *L)
     return 2;
   }
   ctx->mode = MD_CTX_INVALID;
-  /* No session support */
-  SSL_CTX_set_session_cache_mode(ctx->context, SSL_SESS_CACHE_OFF);
   luaL_getmetatable(L, "SSL:Context");
   lua_setmetatable(L, -2);
   return 1;
@@ -298,6 +296,148 @@ static int set_mode(lua_State *L)
 }   
 
 /**
+ * Set context's session cache timeout
+ */
+static int set_timeout(lua_State *L)
+{
+  SSL_CTX *ctx = ctx_getcontext(L, 1);
+  long t = luaL_checklong(L, 2);
+  lua_pushinteger(L,SSL_CTX_set_timeout(ctx, t));
+  return 1;
+}
+
+/**
+ * Set context's session id context, see SSL_CTX_set_session_id_context(3)
+ */
+static int set_session_id_context(lua_State *L)
+{
+  SSL_CTX *ctx = ctx_getcontext(L, 1);
+  size_t len;
+  const unsigned char *str = (const unsigned char*)luaL_checklstring(L,2,&len);
+  if (SSL_CTX_set_session_id_context(ctx,str,len) == 1) {
+    lua_pushboolean(L,1);
+    return 1;
+  } else {
+    lua_pushboolean(L,0);
+    lua_pushfstring(L, "error setting session id (%s)",
+        ERR_reason_error_string(ERR_get_error()));
+    return 2;
+  }
+}
+
+/**
+ * Set context's session cache mode, see SSL_CTX_set_session_cache_mode(3)
+ * Takes a vararg of items to be or'd together
+ */
+static int set_session_cache_mode(lua_State *L)
+{
+  SSL_CTX *ctx = ctx_getcontext(L, 1);
+  long mode = 0;
+  const char *str;
+  int i;
+  int top = lua_gettop(L);
+  for (i=2;i<=top;i++) {
+    switch(lua_type(L,i)) {
+      case LUA_TBOOLEAN:
+        if (lua_toboolean(L,i)) {
+          mode |= SSL_SESS_CACHE_BOTH;
+        } else {
+          mode |= SSL_SESS_CACHE_OFF;
+        }
+        break;
+      case LUA_TSTRING:
+        str = lua_tostring(L,i);
+        if (!strcmp("off",str)) {
+          mode |= SSL_SESS_CACHE_OFF;
+          break;
+        } else if (!strcmp("client",str)) {
+          mode |= SSL_SESS_CACHE_CLIENT;
+          break;
+        } else if (!strcmp("server",str)) {
+          mode |= SSL_SESS_CACHE_SERVER;
+          break;
+        } else if (!strcmp("both",str)) {
+          mode |= SSL_SESS_CACHE_BOTH;
+          break;
+        } else if (!strcmp("no_auto_clear",str)) {
+          mode |= SSL_SESS_CACHE_NO_AUTO_CLEAR;
+          break;
+        } else if (!strcmp("no_internal_lookup",str)) {
+          mode |= SSL_SESS_CACHE_NO_INTERNAL_LOOKUP;
+          break;
+        } else if (!strcmp("no_internal_store",str)) {
+          mode |= SSL_SESS_CACHE_NO_INTERNAL_STORE;
+          break;
+        } else if (!strcmp("no_internal",str)) {
+          mode |= SSL_SESS_CACHE_NO_INTERNAL;
+          break;
+        }
+      default:
+        return luaL_argerror(L,i,"unknown session cache mode");
+    }
+  }
+  SSL_CTX_set_session_cache_mode(ctx,mode);
+  lua_pushboolean(L,1);
+  return 1;
+}
+
+/*
+ * Set context's session cache size, see SSL_CTX_sess_set_cache_size(3)
+ */
+static int set_cache_size(lua_State *L)
+{
+  SSL_CTX *ctx = ctx_getcontext(L, 1);
+  long n = luaL_checklong(L, 2);
+  SSL_CTX_sess_set_cache_size(ctx, n);
+  lua_pushboolean(L, 1);
+  return 1;
+}
+
+/*
+ * Get context's session cache size, see SSL_CTX_sess_set_cache_size(3)
+ */
+static int get_cache_size(lua_State *L)
+{
+  SSL_CTX *ctx = ctx_getcontext(L, 1);
+  lua_pushnumber(L, SSL_CTX_sess_get_cache_size(ctx));
+  return 1;
+}
+
+/**
+ * Return a table of context statistics
+ */
+static int ctx_stats(lua_State *L)
+{
+  SSL_CTX *ctx = ctx_getcontext(L, 1);
+  lua_createtable(L,0,12);
+  lua_pushnumber(L, SSL_CTX_sess_number(ctx));
+  lua_setfield(L,-2,"number");
+  lua_pushnumber(L, SSL_CTX_sess_connect(ctx));
+  lua_setfield(L,-2,"connect");
+  lua_pushnumber(L, SSL_CTX_sess_connect_good(ctx));
+  lua_setfield(L,-2,"connect_good");
+  lua_pushnumber(L, SSL_CTX_sess_connect_renegotiate(ctx));
+  lua_setfield(L,-2,"connect_renegotiate");
+  lua_pushnumber(L, SSL_CTX_sess_accept(ctx));
+  lua_setfield(L,-2,"accept");
+  lua_pushnumber(L, SSL_CTX_sess_accept_good(ctx));
+  lua_setfield(L,-2,"accept_good");
+  lua_pushnumber(L, SSL_CTX_sess_accept_renegotiate(ctx));
+  lua_setfield(L,-2,"accept_renegotiate");
+  lua_pushnumber(L, SSL_CTX_sess_hits(ctx));
+  lua_setfield(L,-2,"hits");
+  lua_pushnumber(L, SSL_CTX_sess_cb_hits(ctx));
+  lua_setfield(L,-2,"cb_hits");
+  lua_pushnumber(L, SSL_CTX_sess_misses(ctx));
+  lua_setfield(L,-2,"misses");
+  lua_pushnumber(L, SSL_CTX_sess_timeouts(ctx));
+  lua_setfield(L,-2,"timeouts");
+  lua_pushnumber(L, SSL_CTX_sess_cache_full(ctx));
+  lua_setfield(L,-2,"cache_full");
+  return 1;
+}
+
+/**
  * Return a pointer to SSL_CTX structure.
  */
 static int raw_ctx(lua_State *L)
@@ -312,6 +452,13 @@ static int raw_ctx(lua_State *L)
  */
 static luaL_Reg funcs[] = {
   {"create",     create},
+  {NULL, NULL}
+};
+
+/*
+ * Context methods
+ */
+static luaL_Reg methods[] = {
   {"locations",  load_locations},
   {"loadcert",   load_cert},
   {"loadkey",    load_key},
@@ -320,6 +467,12 @@ static luaL_Reg funcs[] = {
   {"setverify",  set_verify},
   {"setoptions", set_options},
   {"setmode",    set_mode},
+  {"settimeout", set_timeout},
+  {"setsessionidcontext", set_session_id_context},
+  {"setsessioncachemode", set_session_cache_mode},
+  {"setcachesize",        set_cache_size},
+  {"getcachesize",        get_cache_size},
+  {"stats",      ctx_stats},
   {"rawcontext", raw_ctx},
   {NULL, NULL}
 };
@@ -387,7 +540,11 @@ char ctx_getmode(lua_State *L, int idx)
 int luaopen_ssl_context(lua_State *L)
 {
   luaL_newmetatable(L, "SSL:Context");
+  lua_newtable(L);
+  luaL_register(L, NULL, methods);
+  lua_setfield(L,-2,"__index");
   luaL_register(L, NULL, meta);
   luaL_register(L, "ssl.context", funcs);
+  luaL_register(L, NULL, methods); /* Add methods to require-returned table (COMPAT) */
   return 1;
 }
