@@ -124,8 +124,6 @@ static int create(lua_State *L)
     return 2;
   }
   ctx->mode = MD_CTX_INVALID;
-  /* No session support */
-  SSL_CTX_set_session_cache_mode(ctx->context, SSL_SESS_CACHE_OFF);
   luaL_getmetatable(L, "SSL:Context");
   lua_setmetatable(L, -2);
   return 1;
@@ -298,6 +296,81 @@ static int set_mode(lua_State *L)
 }   
 
 /**
+ * Set context's session id context, see SSL_CTX_set_session_id_context(3)
+ */
+static int set_session_id_context(lua_State *L)
+{
+  SSL_CTX *ctx = ctx_getcontext(L, 1);
+  size_t len;
+  const unsigned char *str = (const unsigned char*)luaL_checklstring(L,2,&len);
+  if (SSL_CTX_set_session_id_context(ctx,str,len) == 1) {
+    lua_pushboolean(L,1);
+    return 1;
+  } else {
+    lua_pushboolean(L,0);
+    lua_pushfstring(L, "error setting session id (%s)",
+        ERR_reason_error_string(ERR_get_error()));
+    return 2;
+  }
+}
+
+/**
+ * Set context's session cache mode, see SSL_CTX_set_session_cache_mode(3)
+ * Takes a vararg of items to be or'd together
+ */
+static int set_session_cache_mode(lua_State *L)
+{
+  SSL_CTX *ctx = ctx_getcontext(L, 1);
+  long mode = 0;
+  const char *str;
+  int i;
+  int top = lua_gettop(L);
+  for (i=2;i<=top;i++) {
+    switch(lua_type(L,i)) {
+      case LUA_TBOOLEAN:
+        if (lua_toboolean(L,i)) {
+          mode |= SSL_SESS_CACHE_BOTH;
+        } else {
+          mode |= SSL_SESS_CACHE_OFF;
+        }
+        break;
+      case LUA_TSTRING:
+        str = lua_tostring(L,i);
+        if (!strcmp("off",str)) {
+          mode |= SSL_SESS_CACHE_OFF;
+          break;
+        } else if (!strcmp("client",str)) {
+          mode |= SSL_SESS_CACHE_CLIENT;
+          break;
+        } else if (!strcmp("server",str)) {
+          mode |= SSL_SESS_CACHE_SERVER;
+          break;
+        } else if (!strcmp("both",str)) {
+          mode |= SSL_SESS_CACHE_BOTH;
+          break;
+        } else if (!strcmp("no_auto_clear",str)) {
+          mode |= SSL_SESS_CACHE_NO_AUTO_CLEAR;
+          break;
+        } else if (!strcmp("no_internal_lookup",str)) {
+          mode |= SSL_SESS_CACHE_NO_INTERNAL_LOOKUP;
+          break;
+        } else if (!strcmp("no_internal_store",str)) {
+          mode |= SSL_SESS_CACHE_NO_INTERNAL_STORE;
+          break;
+        } else if (!strcmp("no_internal",str)) {
+          mode |= SSL_SESS_CACHE_NO_INTERNAL;
+          break;
+        }
+      default:
+        return luaL_argerror(L,i,"unknown session cache mode");
+    }
+  }
+  SSL_CTX_set_session_cache_mode(ctx,mode);
+  lua_pushboolean(L,1);
+  return 1;
+}
+
+/**
  * Return a table of context statistics
  */
 static int ctx_stats(lua_State *L)
@@ -354,6 +427,8 @@ static luaL_Reg funcs[] = {
   {"setverify",  set_verify},
   {"setoptions", set_options},
   {"setmode",    set_mode},
+  {"setsessionidcontext", set_session_id_context},
+  {"setsessioncachemode", set_session_cache_mode},
   {"stats",      ctx_stats},
   {"rawcontext", raw_ctx},
   {NULL, NULL}
