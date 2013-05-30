@@ -69,6 +69,13 @@ function newcontext(cfg)
       succ, msg = context.setdepth(ctx, cfg.depth)
       if not succ then return nil, msg end
    end
+   if cfg.mode == "server" and cfg.cachecontext then
+      succ, msg = context.setsessionidcontext(ctx, cfg.cachecontext)
+      if not succ then return nil, msg end
+   end
+   if cfg.cache then
+      context.setsessioncachemode(ctx, cfg.cache)
+   end
    return ctx
 end
 
