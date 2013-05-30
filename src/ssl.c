@@ -382,6 +382,16 @@ static int meth_setsession(lua_State *L)
   return 1;
 }
 
+/**
+ * Return if a reused session was negotiated during handshake
+ */
+static int meth_session_reused(lua_State *L)
+{
+  p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
+  lua_pushboolean(L,SSL_session_reused(ssl->ssl));
+  return 1;
+}
+
 /*---------------------------------------------------------------------------*/
 
 
@@ -399,6 +409,7 @@ static luaL_Reg meta[] = {
   {"want",        meth_want},
   {"getsession",  meth_getsession},
   {"setsession",  meth_setsession},
+  {"reused",      meth_session_reused},
   {NULL,          NULL}
 };
 
