@@ -17,6 +17,7 @@
 #include "timeout.h"
 #include "socket.h"
 #include "ssl.h"
+#include "session.h"
 
 /**
  * Map error code into string.
@@ -354,6 +355,33 @@ static int meth_rawconn(lua_State *L)
   return 1;
 }
 
+/**
+ * Returns the session used by the SSL object
+ */
+static int meth_getsession(lua_State *L)
+{
+  p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
+  pushSSL_SESSION(L,SSL_get1_session(ssl->ssl));
+  return 1;
+}
+
+/**
+ * Returns the session used by the SSL object
+ */
+static int meth_setsession(lua_State *L)
+{
+  p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
+  SSL_SESSION *sess = checkSSL_SESSION(L, 2);
+  if (!SSL_set_session(ssl->ssl, sess)) {
+    lua_pushnil(L);
+    lua_pushstring(L,ERR_reason_error_string(ERR_get_error()));
+    return 2;
+  }
+
+  lua_pushboolean(L,1);
+  return 1;
+}
+
 /*---------------------------------------------------------------------------*/
 
 
@@ -369,6 +397,8 @@ static luaL_Reg meta[] = {
   {"send",        meth_send},
   {"settimeout",  meth_settimeout},
   {"want",        meth_want},
+  {"getsession",  meth_getsession},
+  {"setsession",  meth_setsession},
   {NULL,          NULL}
 };
 
