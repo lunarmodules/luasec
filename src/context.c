@@ -419,6 +419,13 @@ static int raw_ctx(lua_State *L)
  */
 static luaL_Reg funcs[] = {
   {"create",     create},
+  {NULL, NULL}
+};
+
+/*
+ * Context methods
+ */
+static luaL_Reg methods[] = {
   {"locations",  load_locations},
   {"loadcert",   load_cert},
   {"loadkey",    load_key},
@@ -497,7 +504,11 @@ char ctx_getmode(lua_State *L, int idx)
 int luaopen_ssl_context(lua_State *L)
 {
   luaL_newmetatable(L, "SSL:Context");
+  lua_newtable(L);
+  luaL_register(L, NULL, methods);
+  lua_setfield(L,-2,"__index");
   luaL_register(L, NULL, meta);
   luaL_register(L, "ssl.context", funcs);
+  luaL_register(L, NULL, methods); /* Add methods to require-returned table (COMPAT) */
   return 1;
 }
