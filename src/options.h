@@ -12,7 +12,7 @@
 /* If you need to generate these options again, see options.lua */
 
 /* 
-  OpenSSL version: OpenSSL 1.0.1 14 Mar 2012
+  OpenSSL version: OpenSSL 1.0.1e 2013-06-12
 */
 
 struct ssl_option_s {
@@ -123,10 +123,6 @@ static ssl_option_t ssl_options[] = {
 #endif
 #if defined(SSL_OP_TLS_ROLLBACK_BUG)
   {"tls_rollback_bug", SSL_OP_TLS_ROLLBACK_BUG},
-#endif
-#if !defined(SSL_OP_NO_COMPRESSION) && (OPENSSL_VERSION_NUMBER >= 0x0090800f) && (OPENSSL_VERSION_NUMBER < 0x1000000fL)
-  /* Add SSL_OP_NO_COMPRESSION manually if built against 0.9.8. */
-  {"no_compression", 0L},
 #endif
   {NULL, 0L}
 };

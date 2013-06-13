@@ -51,11 +51,6 @@ typedef struct ssl_option_s ssl_option_t;
     print(string.format([[  {"%s", %s},]], name, option))
     print([[#endif]])
   end
-  print([[
-#if !defined(SSL_OP_NO_COMPRESSION) && (OPENSSL_VERSION_NUMBER >= 0x0090800f) && (OPENSSL_VERSION_NUMBER < 0x1000000fL)
-  /* Add SSL_OP_NO_COMPRESSION manually if built against 0.9.8. */
-  {"no_compression", 0L},
-#endif]])
   print([[  {NULL, 0L}]])
   print([[
 };
