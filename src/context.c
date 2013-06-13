@@ -62,9 +62,13 @@ static int set_option_flag(const char *opt, unsigned long *flag)
  */
 static LSEC_SSL_METHOD* str2method(const char *method)
 {
-  if (!strcmp(method, "sslv3"))  return SSLv3_method();
-  if (!strcmp(method, "tlsv1"))  return TLSv1_method();
-  if (!strcmp(method, "sslv23")) return SSLv23_method();
+  if (!strcmp(method, "sslv23"))  return SSLv23_method();
+  if (!strcmp(method, "sslv3"))   return SSLv3_method();
+  if (!strcmp(method, "tlsv1"))   return TLSv1_method();
+#if (OPENSSL_VERSION_NUMBER >= 0x1000100fL)
+  if (!strcmp(method, "tlsv1_1")) return TLSv1_1_method();
+  if (!strcmp(method, "tlsv1_2")) return TLSv1_2_method();
+#endif
   return NULL;
 }
 
@@ -406,12 +410,6 @@ static int set_verify(lua_State *L)
   int max = lua_gettop(L);
   for (i = 2; i <= max; i++) {
     str = luaL_checkstring(L, i);
-#if !defined(SSL_OP_NO_COMPRESSION) && (OPENSSL_VERSION_NUMBER >= 0x0090800f) && (OPENSSL_VERSION_NUMBER < 0x1000000fL)
-    /* Version 0.9.8 has a different way to disable compression */
-    if (!strcmp(luaL_checkstring(L, i), "no_compression"))
-      ctx->comp_methods = NULL;
-    else
-#endif
     if (!set_verify_flag(str, &flag)) {
       lua_pushboolean(L, 0);
       lua_pushstring(L, "invalid verify option");
@@ -429,13 +427,21 @@ static int set_verify(lua_State *L)
 static int set_options(lua_State *L)
 {
   int i;
+  const char *str;
   unsigned long flag = 0L;
   SSL_CTX *ctx = lsec_checkcontext(L, 1);
   int max = lua_gettop(L);
   /* any option? */
   if (max > 1) {
     for (i = 2; i <= max; i++) {
-      if (!set_option_flag(luaL_checkstring(L, i), &flag)) {
+      str = luaL_checkstring(L, i);
+#if !defined(SSL_OP_NO_COMPRESSION) && (OPENSSL_VERSION_NUMBER >= 0x0090800f) && (OPENSSL_VERSION_NUMBER < 0x1000000fL)
+      /* Version 0.9.8 has a different way to disable compression */
+      if (!strcmp(str, "no_compression"))
+        ctx->comp_methods = NULL;
+      else
+#endif
+      if (!set_option_flag(str, &flag)) {
         lua_pushboolean(L, 0);
         lua_pushstring(L, "invalid option");
         return 2;
