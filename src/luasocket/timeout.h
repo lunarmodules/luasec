@@ -1,14 +1,10 @@
 #ifndef TIMEOUT_H
 #define TIMEOUT_H
 /*=========================================================================*\
-* LuaSocket 2.0.2
-* Copyright (C) 2004-2007 Diego Nehab
-*
 * Timeout management functions
-*
-* RCS ID: $Id: timeout.h 2 2006-04-30 19:30:47Z brunoos $
+* LuaSocket toolkit
 \*=========================================================================*/
-#include <lua.h>
+#include "lua.h"
 
 /* timeout control structure */
 typedef struct t_timeout_ {

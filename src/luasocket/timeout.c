@@ -1,12 +1,15 @@
 /*=========================================================================*\
-* LuaSocket 2.0.2
-* Copyright (C) 2004-2007 Diego Nehab
-*
 * Timeout management functions
-*
-* RCS ID: $Id: timeout.c,v 1.30 2005/10/07 04:40:59 diego Exp $
+* LuaSocket toolkit
 \*=========================================================================*/
 #include <stdio.h>
+#include <limits.h>
+#include <float.h>
+
+#include "lua.h"
+#include "lauxlib.h"
+
+#include "timeout.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -15,11 +18,6 @@
 #include <sys/time.h>
 #endif
 
-#include <lua.h>
-#include <lauxlib.h>
-
-#include "timeout.h"
-
 /* min and max macros */
 #ifndef MIN
 #define MIN(x, y) ((x) < (y) ? x : y)
@@ -27,6 +25,18 @@
 #ifndef MAX
 #define MAX(x, y) ((x) > (y) ? x : y)
 #endif
+
+/*=========================================================================*\
+* Internal function prototypes
+\*=========================================================================*/
+static int timeout_lua_gettime(lua_State *L);
+static int timeout_lua_sleep(lua_State *L);
+
+static luaL_Reg func[] = {
+    { "gettime", timeout_lua_gettime },
+    { "sleep", timeout_lua_sleep },
+    { NULL, NULL }
+};
 
 /*=========================================================================*\
 * Exported functions.
@@ -130,6 +140,18 @@ double timeout_gettime(void) {
 #endif
 
 /*-------------------------------------------------------------------------*\
+* Initializes module
+\*-------------------------------------------------------------------------*/
+int timeout_open(lua_State *L) {
+#if LUA_VERSION_NUM > 501 && !defined(LUA_COMPAT_MODULE)
+    luaL_setfuncs(L, func, 0);
+#else
+    luaL_openlib(L, NULL, func, 0);
+#endif
+    return 0;
+}
+
+/*-------------------------------------------------------------------------*\
 * Sets timeout values for IO operations
 * Lua Input: base, time [, mode]
 *   time: time out value in seconds
@@ -153,3 +175,46 @@ int timeout_meth_settimeout(lua_State *L, p_timeout tm) {
     return 1;
 }
 
+/*=========================================================================*\
+* Test support functions
+\*=========================================================================*/
+/*-------------------------------------------------------------------------*\
+* Returns the time the system has been up, in secconds.
+\*-------------------------------------------------------------------------*/
+static int timeout_lua_gettime(lua_State *L)
+{
+    lua_pushnumber(L, timeout_gettime());
+    return 1;
+}
+
+/*-------------------------------------------------------------------------*\
+* Sleep for n seconds.
+\*-------------------------------------------------------------------------*/
+#ifdef _WIN32
+int timeout_lua_sleep(lua_State *L)
+{
+    double n = luaL_checknumber(L, 1);
+    if (n < 0.0) n = 0.0;
+    if (n < DBL_MAX/1000.0) n *= 1000.0;
+    if (n > INT_MAX) n = INT_MAX;
+    Sleep((int)n);
+    return 0;
+}
+#else
+int timeout_lua_sleep(lua_State *L)
+{
+    double n = luaL_checknumber(L, 1);
+    struct timespec t, r;
+    if (n < 0.0) n = 0.0;
+    if (n > INT_MAX) n = INT_MAX;
+    t.tv_sec = (int) n;
+    n -= t.tv_sec;
+    t.tv_nsec = (int) (n * 1000000000);
+    if (t.tv_nsec >= 1000000000) t.tv_nsec = 999999999;
+    while (nanosleep(&t, &r) != 0) {
+        t.tv_sec = r.tv_sec;
+        t.tv_nsec = r.tv_nsec;
+    }
+    return 0;
+}
+#endif

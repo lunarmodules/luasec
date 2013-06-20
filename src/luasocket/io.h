@@ -1,10 +1,8 @@
 #ifndef IO_H
 #define IO_H
 /*=========================================================================*\
-* LuaSocket 2.0.2
-* Copyright (C) 2004-2007 Diego Nehab
-*
 * Input/Output abstraction
+* LuaSocket toolkit
 *
 * This module defines the interface that LuaSocket expects from the
 * transport layer for streamed input/output. The idea is that if any
@@ -13,21 +11,18 @@
 *
 * The module socket.h implements this interface, and thus the module tcp.h
 * is very simple.
-*
-* RCS ID: $Id: io.h 6 2006-04-30 20:33:05Z brunoos $
 \*=========================================================================*/
 #include <stdio.h>
-#include <lua.h>
+#include "lua.h"
 
 #include "timeout.h"
 
 /* IO error codes */
 enum {
-    IO_DONE = 0,      /* operation completed successfully */
-    IO_TIMEOUT = -1,  /* operation timed out */
-    IO_CLOSED = -2,   /* the connection has been closed */
-    IO_UNKNOWN = -3,  /* Unknown error */
-    IO_SSL = -4       /* SSL error */
+    IO_DONE = 0,        /* operation completed successfully */
+    IO_TIMEOUT = -1,    /* operation timed out */
+    IO_CLOSED = -2,     /* the connection has been closed */
+	IO_UNKNOWN = -3     
 };
 
 /* interface to error message function */

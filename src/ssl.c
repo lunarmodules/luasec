@@ -287,6 +287,22 @@ static int meth_receive(lua_State *L) {
 }
 
 /**
+ * Get the buffer's statistics.
+ */
+static int meth_getstats(lua_State *L) {
+  p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
+  return buffer_meth_getstats(L, &ssl->buf);
+}
+
+/**
+ * Set the buffer's statistics.
+ */
+static int meth_setstats(lua_State *L) {
+  p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
+  return buffer_meth_setstats(L, &ssl->buf);
+}
+
+/**
  * Select support methods
  */
 static int meth_getfd(lua_State *L)
@@ -655,6 +671,8 @@ static luaL_Reg methods[] = {
   {"getpeerchain",        meth_getpeerchain},
   {"getpeerverification", meth_getpeerverification},
   {"getpeerfinished",     meth_getpeerfinished},
+  {"getstats",            meth_getstats},
+  {"setstats",            meth_setstats},
   {"dirty",               meth_dirty},
   {"dohandshake",         meth_handshake},
   {"receive",             meth_receive},
