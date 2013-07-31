@@ -252,6 +252,7 @@ static int verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
   return (verify & LSEC_VERIFY_CONTINUE ? 1 : preverify_ok);
 }
 
+#ifndef OPENSSL_NO_ECDH
 static EC_KEY *find_ec_key(const char *str)
 {
   p_ec ptr;
@@ -261,6 +262,7 @@ static EC_KEY *find_ec_key(const char *str)
   }
   return NULL;
 }
+#endif
 
 /*------------------------------ Lua Functions -------------------------------*/
 
