@@ -167,7 +167,7 @@ static DH *dhparam_cb(SSL *ssl, int is_export, int keylength)
   lua_gettable(L, -2);
 
   /* Invoke the callback */
-  lua_pushnumber(L, is_export);
+  lua_pushboolean(L, is_export);
   lua_pushnumber(L, keylength);
   lua_call(L, 2, 1);
 
