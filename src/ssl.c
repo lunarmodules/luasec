@@ -645,7 +645,8 @@ static int meth_info(lua_State *L)
   lua_pushstring(L, buf);
   lua_pushnumber(L, bits);
   lua_pushnumber(L, algbits);
-  return 3;
+  lua_pushstring(L, SSL_get_version(ssl->ssl));
+  return 4;
 }
 
 static int meth_copyright(lua_State *L)
