@@ -507,15 +507,22 @@ static int set_curve(lua_State *L)
 #else
 static int set_curve(lua_State *L)
 {
+  long ret;
   SSL_CTX *ctx = lsec_checkcontext(L, 1);
   const char *str = luaL_checkstring(L, 2);
   EC_KEY *key = find_ec_key(str);
+
   if (!key) {
     lua_pushboolean(L, 0);
     lua_pushstring(L, "elliptic curve not supported");
     return 2;
   }
-  if (!SSL_CTX_set_tmp_ecdh(ctx, key)) {
+
+  ret = SSL_CTX_set_tmp_ecdh(ctx, key);
+  /* SSL_CTX_set_tmp_ecdh takes its own reference */
+  EC_KEY_free(key);
+
+  if (!ret) {
     lua_pushboolean(L, 0);
     lua_pushstring(L, "error setting elliptic curve");
     return 2;
