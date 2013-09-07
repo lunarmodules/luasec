@@ -272,12 +272,14 @@ static EC_KEY *find_ec_key(const char *str)
 static int create(lua_State *L)
 {
   p_context ctx;
+  const char *str_method;
   LSEC_SSL_METHOD *method;
 
-  method = str2method(luaL_checkstring(L, 1));
+  str_method = luaL_checkstring(L, 1);
+  method = str2method(str_method);
   if (!method) {
     lua_pushnil(L);
-    lua_pushstring(L, "invalid protocol");
+    lua_pushfstring(L, "invalid protocol (%s)", str_method);
     return 2;
   }
   ctx = (p_context) lua_newuserdata(L, sizeof(t_context));
@@ -285,11 +287,12 @@ static int create(lua_State *L)
     lua_pushnil(L);
     lua_pushstring(L, "error creating context");
     return 2;
-  }  
+  }
   ctx->context = SSL_CTX_new(method);
   if (!ctx->context) {
     lua_pushnil(L);
-    lua_pushstring(L, "error creating context");
+    lua_pushfstring(L, "error creating context (%s)",
+      ERR_reason_error_string(ERR_get_error()));
     return 2;
   }
   ctx->mode = LSEC_MODE_INVALID;
@@ -414,7 +417,7 @@ static int set_verify(lua_State *L)
     str = luaL_checkstring(L, i);
     if (!set_verify_flag(str, &flag)) {
       lua_pushboolean(L, 0);
-      lua_pushstring(L, "invalid verify option");
+      lua_pushfstring(L, "invalid verify option (%s)", str);
       return 2;
     }
   }
@@ -445,7 +448,7 @@ static int set_options(lua_State *L)
 #endif
       if (!set_option_flag(str, &flag)) {
         lua_pushboolean(L, 0);
-        lua_pushstring(L, "invalid option");
+        lua_pushfstring(L, "invalid option (%s)", str);
         return 2;
       }
     }
@@ -473,7 +476,7 @@ static int set_mode(lua_State *L)
     return 1;
   }
   lua_pushboolean(L, 0);
-  lua_pushstring(L, "invalid mode");
+  lua_pushfstring(L, "invalid mode (%s)", str);
   return 1;
 }   
 
@@ -514,7 +517,7 @@ static int set_curve(lua_State *L)
 
   if (!key) {
     lua_pushboolean(L, 0);
-    lua_pushstring(L, "elliptic curve not supported");
+    lua_pushfstring(L, "elliptic curve %s not supported", str);
     return 2;
   }
 
@@ -524,7 +527,8 @@ static int set_curve(lua_State *L)
 
   if (!ret) {
     lua_pushboolean(L, 0);
-    lua_pushstring(L, "error setting elliptic curve");
+    lua_pushfstring(L, "error setting elliptic curve (%s)",
+      ERR_reason_error_string(ERR_get_error()));
     return 2;
   }
   lua_pushboolean(L, 1);
@@ -608,7 +612,7 @@ static int meth_set_verify_ext(lua_State *L)
       crl_flag |= X509_V_FLAG_CRL_CHECK_ALL;
     } else {
       lua_pushboolean(L, 0);
-      lua_pushstring(L, "invalid verify option");
+      lua_pushfstring(L, "invalid verify option (%s)", str);
       return 2;
     }
   }
