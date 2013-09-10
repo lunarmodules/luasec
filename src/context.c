@@ -159,7 +159,9 @@ static DH *dhparam_cb(SSL *ssl, int is_export, int keylength)
   lua_State *L;
   DH *dh_tmp = NULL;
   SSL_CTX *ctx = SSL_get_SSL_CTX(ssl);
-  L = (lua_State*)SSL_CTX_get_app_data(ctx);
+  p_context pctx = (p_context)SSL_CTX_get_app_data(ctx);
+
+  L = pctx->L;
 
   /* Get the callback */
   luaL_getmetatable(L, "SSL:DH:Registry");
@@ -194,8 +196,9 @@ static int cert_verify_cb(X509_STORE_CTX *x509_ctx, void *ptr)
   int verify;
   lua_State *L;
   SSL_CTX *ctx = (SSL_CTX*)ptr;
+  p_context pctx = (p_context)SSL_CTX_get_app_data(ctx);
 
-  L = (lua_State*)SSL_CTX_get_app_data(ctx);
+  L = pctx->L;
 
   /* Get verify flags */
   luaL_getmetatable(L, "SSL:Verify:Registry");
@@ -226,6 +229,7 @@ static int verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
   int verify;
   SSL *ssl;
   SSL_CTX *ctx;
+  p_context pctx;
   lua_State *L;
 
   /* Short-circuit optimization */
@@ -235,7 +239,8 @@ static int verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
   ssl = X509_STORE_CTX_get_ex_data(x509_ctx,
     SSL_get_ex_data_X509_STORE_CTX_idx());
   ctx = SSL_get_SSL_CTX(ssl);
-  L = (lua_State*)SSL_CTX_get_app_data(ctx);
+  pctx = (p_context)SSL_CTX_get_app_data(ctx);
+  L = pctx->L;
 
   /* Get verify flags */
   luaL_getmetatable(L, "SSL:Verify:Registry");
@@ -296,13 +301,14 @@ static int create(lua_State *L)
     return 2;
   }
   ctx->mode = LSEC_MODE_INVALID;
+  ctx->L = L;
   luaL_getmetatable(L, "SSL:Context");
   lua_setmetatable(L, -2);
 
   /* No session support */
   SSL_CTX_set_session_cache_mode(ctx->context, SSL_SESS_CACHE_OFF);
-  /* Link lua_State with the context */
-  SSL_CTX_set_app_data(ctx->context, (void*)L);
+  /* Link LuaSec context with the OpenSSL context */
+  SSL_CTX_set_app_data(ctx->context, ctx);
 
   return 1;
 }
