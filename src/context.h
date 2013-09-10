@@ -22,6 +22,7 @@
 typedef struct t_context_ {
   SSL_CTX *context;
   lua_State *L;
+  DH *dh_param;
   int mode;
 } t_context;
 typedef t_context* p_context;

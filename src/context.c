@@ -184,6 +184,16 @@ static DH *dhparam_cb(SSL *ssl, int is_export, int keylength)
     dh_tmp = PEM_read_bio_DHparams(bio, NULL, NULL, NULL);
     BIO_free(bio);
   }
+
+  /*
+   * OpenSSL exepcts the callback to maintain a reference to the DH*.  So,
+   * cache it here, and clean up the previous set of parameters.  Any remaining
+   * set is cleaned up when destroying the LuaSec context.
+   */
+  if (pctx->dh_param)
+    DH_free(pctx->dh_param);
+  pctx->dh_param = dh_tmp;
+
   lua_pop(L, 2);    /* Remove values from stack */
   return dh_tmp;
 }
@@ -293,6 +303,7 @@ static int create(lua_State *L)
     lua_pushstring(L, "error creating context");
     return 2;
   }
+  memset(ctx, 0, sizeof(t_context));
   ctx->context = SSL_CTX_new(method);
   if (!ctx->context) {
     lua_pushnil(L);
@@ -582,6 +593,11 @@ static int meth_destroy(lua_State *L)
     SSL_CTX_free(ctx->context);
     ctx->context = NULL;
   }
+  if (ctx->dh_param) {
+    DH_free(ctx->dh_param);
+    ctx->dh_param = NULL;
+  }
+
   return 0;
 }
 
