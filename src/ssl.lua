@@ -82,6 +82,11 @@ function newcontext(cfg)
       succ, msg = context.setdepth(ctx, cfg.depth)
       if not succ then return nil, msg end
    end
+
+   -- NOTE: Setting DH parameters and elliptic curves needs to come after
+   -- setoptions(), in case the user has specified the single_{dh,ecdh}_use
+   -- options.
+
    -- Set DH parameters
    if cfg.dhparam then
       if type(cfg.dhparam) ~= "function" then

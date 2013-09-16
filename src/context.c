@@ -159,7 +159,9 @@ static DH *dhparam_cb(SSL *ssl, int is_export, int keylength)
   lua_State *L;
   DH *dh_tmp = NULL;
   SSL_CTX *ctx = SSL_get_SSL_CTX(ssl);
-  L = (lua_State*)SSL_CTX_get_app_data(ctx);
+  p_context pctx = (p_context)SSL_CTX_get_app_data(ctx);
+
+  L = pctx->L;
 
   /* Get the callback */
   luaL_getmetatable(L, "SSL:DH:Registry");
@@ -167,7 +169,7 @@ static DH *dhparam_cb(SSL *ssl, int is_export, int keylength)
   lua_gettable(L, -2);
 
   /* Invoke the callback */
-  lua_pushnumber(L, is_export);
+  lua_pushboolean(L, is_export);
   lua_pushnumber(L, keylength);
   lua_call(L, 2, 1);
 
@@ -182,6 +184,16 @@ static DH *dhparam_cb(SSL *ssl, int is_export, int keylength)
     dh_tmp = PEM_read_bio_DHparams(bio, NULL, NULL, NULL);
     BIO_free(bio);
   }
+
+  /*
+   * OpenSSL exepcts the callback to maintain a reference to the DH*.  So,
+   * cache it here, and clean up the previous set of parameters.  Any remaining
+   * set is cleaned up when destroying the LuaSec context.
+   */
+  if (pctx->dh_param)
+    DH_free(pctx->dh_param);
+  pctx->dh_param = dh_tmp;
+
   lua_pop(L, 2);    /* Remove values from stack */
   return dh_tmp;
 }
@@ -194,8 +206,9 @@ static int cert_verify_cb(X509_STORE_CTX *x509_ctx, void *ptr)
   int verify;
   lua_State *L;
   SSL_CTX *ctx = (SSL_CTX*)ptr;
+  p_context pctx = (p_context)SSL_CTX_get_app_data(ctx);
 
-  L = (lua_State*)SSL_CTX_get_app_data(ctx);
+  L = pctx->L;
 
   /* Get verify flags */
   luaL_getmetatable(L, "SSL:Verify:Registry");
@@ -226,6 +239,7 @@ static int verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
   int verify;
   SSL *ssl;
   SSL_CTX *ctx;
+  p_context pctx;
   lua_State *L;
 
   /* Short-circuit optimization */
@@ -235,7 +249,8 @@ static int verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
   ssl = X509_STORE_CTX_get_ex_data(x509_ctx,
     SSL_get_ex_data_X509_STORE_CTX_idx());
   ctx = SSL_get_SSL_CTX(ssl);
-  L = (lua_State*)SSL_CTX_get_app_data(ctx);
+  pctx = (p_context)SSL_CTX_get_app_data(ctx);
+  L = pctx->L;
 
   /* Get verify flags */
   luaL_getmetatable(L, "SSL:Verify:Registry");
@@ -252,6 +267,7 @@ static int verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
   return (verify & LSEC_VERIFY_CONTINUE ? 1 : preverify_ok);
 }
 
+#ifndef OPENSSL_NO_ECDH
 static EC_KEY *find_ec_key(const char *str)
 {
   p_ec ptr;
@@ -261,6 +277,7 @@ static EC_KEY *find_ec_key(const char *str)
   }
   return NULL;
 }
+#endif
 
 /*------------------------------ Lua Functions -------------------------------*/
 
@@ -270,12 +287,14 @@ static EC_KEY *find_ec_key(const char *str)
 static int create(lua_State *L)
 {
   p_context ctx;
+  const char *str_method;
   LSEC_SSL_METHOD *method;
 
-  method = str2method(luaL_checkstring(L, 1));
+  str_method = luaL_checkstring(L, 1);
+  method = str2method(str_method);
   if (!method) {
     lua_pushnil(L);
-    lua_pushstring(L, "invalid protocol");
+    lua_pushfstring(L, "invalid protocol (%s)", str_method);
     return 2;
   }
   ctx = (p_context) lua_newuserdata(L, sizeof(t_context));
@@ -283,21 +302,24 @@ static int create(lua_State *L)
     lua_pushnil(L);
     lua_pushstring(L, "error creating context");
     return 2;
-  }  
+  }
+  memset(ctx, 0, sizeof(t_context));
   ctx->context = SSL_CTX_new(method);
   if (!ctx->context) {
     lua_pushnil(L);
-    lua_pushstring(L, "error creating context");
+    lua_pushfstring(L, "error creating context (%s)",
+      ERR_reason_error_string(ERR_get_error()));
     return 2;
   }
   ctx->mode = LSEC_MODE_INVALID;
+  ctx->L = L;
   luaL_getmetatable(L, "SSL:Context");
   lua_setmetatable(L, -2);
 
   /* No session support */
   SSL_CTX_set_session_cache_mode(ctx->context, SSL_SESS_CACHE_OFF);
-  /* Link lua_State with the context */
-  SSL_CTX_set_app_data(ctx->context, (void*)L);
+  /* Link LuaSec context with the OpenSSL context */
+  SSL_CTX_set_app_data(ctx->context, ctx);
 
   return 1;
 }
@@ -412,7 +434,7 @@ static int set_verify(lua_State *L)
     str = luaL_checkstring(L, i);
     if (!set_verify_flag(str, &flag)) {
       lua_pushboolean(L, 0);
-      lua_pushstring(L, "invalid verify option");
+      lua_pushfstring(L, "invalid verify option (%s)", str);
       return 2;
     }
   }
@@ -443,7 +465,7 @@ static int set_options(lua_State *L)
 #endif
       if (!set_option_flag(str, &flag)) {
         lua_pushboolean(L, 0);
-        lua_pushstring(L, "invalid option");
+        lua_pushfstring(L, "invalid option (%s)", str);
         return 2;
       }
     }
@@ -471,7 +493,7 @@ static int set_mode(lua_State *L)
     return 1;
   }
   lua_pushboolean(L, 0);
-  lua_pushstring(L, "invalid mode");
+  lua_pushfstring(L, "invalid mode (%s)", str);
   return 1;
 }   
 
@@ -505,17 +527,25 @@ static int set_curve(lua_State *L)
 #else
 static int set_curve(lua_State *L)
 {
+  long ret;
   SSL_CTX *ctx = lsec_checkcontext(L, 1);
   const char *str = luaL_checkstring(L, 2);
   EC_KEY *key = find_ec_key(str);
+
   if (!key) {
     lua_pushboolean(L, 0);
-    lua_pushstring(L, "elliptic curve not supported");
+    lua_pushfstring(L, "elliptic curve %s not supported", str);
     return 2;
   }
-  if (!SSL_CTX_set_tmp_ecdh(ctx, key)) {
+
+  ret = SSL_CTX_set_tmp_ecdh(ctx, key);
+  /* SSL_CTX_set_tmp_ecdh takes its own reference */
+  EC_KEY_free(key);
+
+  if (!ret) {
     lua_pushboolean(L, 0);
-    lua_pushstring(L, "error setting elliptic curve");
+    lua_pushfstring(L, "error setting elliptic curve (%s)",
+      ERR_reason_error_string(ERR_get_error()));
     return 2;
   }
   lua_pushboolean(L, 1);
@@ -563,6 +593,11 @@ static int meth_destroy(lua_State *L)
     SSL_CTX_free(ctx->context);
     ctx->context = NULL;
   }
+  if (ctx->dh_param) {
+    DH_free(ctx->dh_param);
+    ctx->dh_param = NULL;
+  }
+
   return 0;
 }
 
@@ -599,7 +634,7 @@ static int meth_set_verify_ext(lua_State *L)
       crl_flag |= X509_V_FLAG_CRL_CHECK_ALL;
     } else {
       lua_pushboolean(L, 0);
-      lua_pushstring(L, "invalid verify option");
+      lua_pushfstring(L, "invalid verify option (%s)", str);
       return 2;
     }
   }
