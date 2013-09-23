@@ -75,11 +75,19 @@ static void push_asn1_objname(lua_State* L, ASN1_OBJECT *object, int no_name)
  */
 static void push_asn1_string(lua_State* L, ASN1_STRING *string)
 {
-  if (string)
-    lua_pushlstring(L, (char*)ASN1_STRING_data(string),
-                       ASN1_STRING_length(string));
-  else
+  if (string) {
+    unsigned char *data;
+    size_t len = ASN1_STRING_to_UTF8(&data, string);
+
+    if (len >= 0) {
+      lua_pushlstring(L, (char *)data, len);
+      OPENSSL_free(data);
+    } else {
+      lua_pushnil(L);
+    }
+  } else {
     lua_pushnil(L);
+  }
 }
 
 /**
