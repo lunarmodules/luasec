@@ -284,6 +284,52 @@ static int meth_pem(lua_State* L)
 }
 
 /**
+ * Extract public key in PEM format.
+ */
+static int meth_pubkey(lua_State* L)
+{
+  char* data;
+  long bytes;
+  int ret = 1;
+  X509* cert = lsec_checkx509(L, 1);
+  BIO *bio = BIO_new(BIO_s_mem());
+  EVP_PKEY *pkey = X509_get_pubkey(cert);
+  if(PEM_write_bio_PUBKEY(bio, pkey)) {
+    bytes = BIO_get_mem_data(bio, &data);
+    if (bytes > 0) {
+      lua_pushlstring(L, data, bytes);
+      switch(EVP_PKEY_type(pkey->type)) {
+        case EVP_PKEY_RSA:
+          lua_pushstring(L, "RSA");
+          break;
+        case EVP_PKEY_DSA:
+          lua_pushstring(L, "DSA");
+          break;
+        case EVP_PKEY_DH:
+          lua_pushstring(L, "DH");
+          break;
+        case EVP_PKEY_EC:
+          lua_pushstring(L, "EC");
+          break;
+        default:
+          lua_pushstring(L, "Unknown");
+          break;
+      }
+      lua_pushinteger(L, EVP_PKEY_bits(pkey));
+      ret = 3;
+    }
+    else
+      lua_pushnil(L);
+  }
+  else
+    lua_pushnil(L);
+  /* Cleanup */
+  BIO_free(bio);
+  EVP_PKEY_free(pkey);
+  return ret;
+}
+
+/**
  * Compute the fingerprint.
  */
 static int meth_digest(lua_State* L)
@@ -415,6 +461,7 @@ static luaL_Reg methods[] = {
   {"notbefore",  meth_notbefore},
   {"notafter",   meth_notafter},
   {"pem",        meth_pem},
+  {"pubkey",     meth_pubkey},
   {"serial",     meth_serial},
   {"subject",    meth_subject},
   {"validat",    meth_valid_at},
