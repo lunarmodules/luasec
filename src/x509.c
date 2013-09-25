@@ -77,7 +77,7 @@ static void push_asn1_string(lua_State* L, ASN1_STRING *string)
 {
   if (string) {
     unsigned char *data;
-    size_t len = ASN1_STRING_to_UTF8(&data, string);
+    int len = ASN1_STRING_to_UTF8(&data, string);
 
     if (len >= 0) {
       lua_pushlstring(L, (char *)data, len);
