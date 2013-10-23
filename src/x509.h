@@ -12,8 +12,12 @@
 
 #include "config.h"
 
+/* We do not support UniversalString nor BMPString as ASN.1 String types */
+enum { LSEC_AI5_STRING, LSEC_UTF8_STRING };
+
 typedef struct t_x509_ {
   X509 *cert;
+  int  encode;
 } t_x509;
 typedef t_x509* p_x509;
 
