@@ -329,12 +329,13 @@ static int meth_digest(lua_State* L)
   }
   if (!digest) {
     lua_pushnil(L);
-    lua_pushstring(L, "digest algorithm not supported");
+    lua_pushfstring(L, "digest algorithm not supported (%s)", str);
     return 2;
   }
   if (!X509_digest(cert, digest, buffer, &bytes)) {
     lua_pushnil(L);
-    lua_pushstring(L, "error processing the certificate");
+    lua_pushfstring(L, "error processing the certificate (%s)",
+      ERR_reason_error_string(ERR_get_error()));
     return 2;
   }
   to_hex((char*)buffer, bytes, hex_buffer);

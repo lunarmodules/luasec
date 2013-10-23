@@ -245,7 +245,8 @@ static int meth_create(lua_State *L)
   ssl->ssl = SSL_new(ctx);
   if (!ssl->ssl) {
     lua_pushnil(L);
-    lua_pushstring(L, "error creating SSL object");
+    lua_pushfstring(L, "error creating SSL object (%s)",
+      ERR_reason_error_string(ERR_get_error()));
     return 2;
   }
   ssl->state = LSEC_STATE_NEW;
@@ -645,7 +646,8 @@ static int meth_info(lua_State *L)
   lua_pushstring(L, buf);
   lua_pushnumber(L, bits);
   lua_pushnumber(L, algbits);
-  return 3;
+  lua_pushstring(L, SSL_get_version(ssl->ssl));
+  return 4;
 }
 
 static int meth_copyright(lua_State *L)

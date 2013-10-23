@@ -82,6 +82,11 @@ function newcontext(cfg)
       succ, msg = context.setdepth(ctx, cfg.depth)
       if not succ then return nil, msg end
    end
+
+   -- NOTE: Setting DH parameters and elliptic curves needs to come after
+   -- setoptions(), in case the user has specified the single_{dh,ecdh}_use
+   -- options.
+
    -- Set DH parameters
    if cfg.dhparam then
       if type(cfg.dhparam) ~= "function" then
@@ -128,7 +133,7 @@ end
 -- Extract connection information.
 --
 local function info(ssl, field)
-  local str, comp, err 
+  local str, comp, err, protocol
   comp, err = core.compression(ssl)
   if err then
     return comp, err
@@ -138,13 +143,16 @@ local function info(ssl, field)
     return comp
   end
   local info = {compression = comp}
-  str, info.bits, info.algbits = core.info(ssl)
+  str, info.bits, info.algbits, protocol = core.info(ssl)
   if str then
     info.cipher, info.protocol, info.key,
     info.authentication, info.encryption, info.mac =
         string.match(str, 
           "^(%S+)%s+(%S+)%s+Kx=(%S+)%s+Au=(%S+)%s+Enc=(%S+)%s+Mac=(%S+)")
     info.export = (string.match(str, "%sexport%s*$") ~= nil)
+  end
+  if protocol then
+    info.protocol = protocol
   end
   if field then
     return info[field]
