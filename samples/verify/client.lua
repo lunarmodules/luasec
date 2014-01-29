@@ -11,16 +11,11 @@ local params = {
    certificate = "../certs/serverB.pem",
    cafile = "../certs/rootB.pem",
    verify = {"peer", "fail_if_no_peer_cert"},
+   verifyext = {"lsec_continue", "lsec_ignore_purpose"},
    options = {"all", "no_sslv2"},
 }
 
 local ctx = assert(ssl.newcontext(params))
-
--- [[ Ignore error on certificate verification
-ctx:setverifyext("lsec_continue")
---ctx:setverifyext("lsec_ignore_purpose")
---ctx:setverifyext();                           -- Clear all flags set
---]]
 
 local peer = socket.tcp()
 peer:connect("127.0.0.1", 8888)

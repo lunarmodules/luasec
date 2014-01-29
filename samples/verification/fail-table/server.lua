@@ -12,14 +12,12 @@ local params = {
    cafile = "../../certs/rootA.pem",
    verify = {"peer", "fail_if_no_peer_cert"},
    options = {"all", "no_sslv2"},
+   verifyext = {"lsec_continue", "crl_check", "crl_check_chain"},
 }
-
 
 -- [[ SSL context
 local ctx = assert(ssl.newcontext(params))
 --]]
-
-ctx:setverifyext("lsec_continue", "crl_check", "crl_check_chain")
 
 local server = socket.tcp()
 server:setoption('reuseaddr', true)

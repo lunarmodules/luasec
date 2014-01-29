@@ -14,7 +14,6 @@ local params = {
    options = {"all", "no_sslv2"},
 }
 
-
 -- [[ SSL context
 local ctx = assert(ssl.newcontext(params))
 --]]

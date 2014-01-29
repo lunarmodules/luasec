@@ -12,13 +12,12 @@ local params = {
    cafile = "../../certs/rootB.pem",
    verify = {"peer", "fail_if_no_peer_cert"},
    options = {"all", "no_sslv2"},
+   verifyext = {"lsec_continue"},
 }
 
 -- [[ SSL context
 local ctx = assert(ssl.newcontext(params))
 --]]
-
-ctx:setverifyext("lsec_continue")
 
 local peer = socket.tcp()
 peer:connect("127.0.0.1", 8888)

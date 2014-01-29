@@ -4,8 +4,23 @@ Directories:
  Contains scripts to generate the certificates used by the examples.
  Generate Root CA 'A' and 'B' first, then the servers and clients.
 
-* oneshot
- A simple connection example.
+* chain
+ Example of certificate chain in handshake.
+
+* dhparam
+ DH parameters for handshake.
+
+* digest
+ Certificate digest.
+
+* ecdh
+ Elliptic curve cipher.
+
+* info
+ Informations about the connection.
+
+* key
+ Test encrypted private key.
 
 * loop
  Test successive connections between the server and the client 
@@ -15,6 +30,15 @@ Directories:
  Same of above,  but the connection is not  explicit closed, the gabage
  collector is encharge of that.
 
+* oneshot
+ A simple connection example.
+
+* verification
+ Retrieve the certificate verification errors from the handshake.
+
+* verify
+ Ignore handshake errors and proceed.
+
 * wantread
  Test timeout in handshake() and receive().
 
@@ -22,7 +46,4 @@ Directories:
  Test timeout in send().
 
 * want
- Test want().
-
-* key
- Test encrypted private key.
+ Test want() method.

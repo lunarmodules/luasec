@@ -11,17 +11,12 @@ local params = {
    certificate = "../certs/serverA.pem",
    cafile = "../certs/rootA.pem",
    verify = {"peer", "fail_if_no_peer_cert"},
+   verifyext = {"lsec_continue", "lsec_ignore_purpose"},
    options = {"all", "no_sslv2"},
 }
 
 
 local ctx = assert(ssl.newcontext(params))
-
--- [[ Ignore error on certificate verification
-ctx:setverifyext("lsec_continue")
---ctx:setverifyext("lsec_ignore_purpose")
---ctx:setverifyext();                           -- Clear all flags set
---]]
 
 local server = socket.tcp()
 server:setoption('reuseaddr', true)
