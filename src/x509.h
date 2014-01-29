@@ -1,11 +1,13 @@
-#ifndef LSEC_X509_H
-#define LSEC_X509_H
-
 /*--------------------------------------------------------------------------
- * LuaSec 0.4.1
- * Copyright (C) 2012
+ * LuaSec 0.5
+ *
+ * Copyright (C) 2014 Kim Alvefur, Paul Aurich, Tobias Markmann
+ *                    Matthew Wild, Bruno Silvestre.
  *
  *--------------------------------------------------------------------------*/
+
+#ifndef LSEC_X509_H
+#define LSEC_X509_H
 
 #include <openssl/x509v3.h>
 #include <lua.h>

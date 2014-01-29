@@ -1,6 +1,9 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.4.1
- * Copyright (C) 2006-2011 Bruno Silvestre
+ * LuaSec 0.5
+ *
+ * Copyright (C) 2014 Kim Alvefur, Paul Aurich, Tobias Markmann, 
+ *                    Matthew Wild.
+ * Copyright (C) 2006-2014 Bruno Silvestre.
  *
  *--------------------------------------------------------------------------*/
 
@@ -652,9 +655,9 @@ static int meth_info(lua_State *L)
 
 static int meth_copyright(lua_State *L)
 {
-  lua_pushstring(L, "LuaSec 0.4.1 - Copyright (C) 2006-2011 Bruno Silvestre"
+  lua_pushstring(L, "LuaSec 0.5 - Copyright (C) 2006-2011 Bruno Silvestre"
 #if defined(WITH_LUASOCKET)
-                    "\nLuaSocket 2.0.2 - Copyright (C) 2004-2007 Diego Nehab"
+                    "\nLuaSocket 3.0-RC1 - Copyright (C) 2004-2013 Diego Nehab"
 #endif
   );
   return 1;

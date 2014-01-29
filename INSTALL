@@ -1,5 +1,16 @@
-LuaSec 0.4.1
+LuaSec 0.5
 ------------
+
+* OpenSSL options:
+
+    By default, LuaSec 0.5 includes options for OpenSSL 1.0.1e.
+
+    If you need to generate the options for a different version of OpenSSL:
+
+      $ cd src
+      $ lua options.lua -g /usr/include/openssl/ssl.h > options.h
+
+--------------------------------------------------------------------------------
 
 * On Linux, BSD, and Mac OS X:
 
@@ -14,6 +25,8 @@ LuaSec 0.4.1
     * Platforms: linux, bsd, or macosx
 
   - Use 'make install' to install the modules.
+
+--------------------------------------------------------------------------------
 
 * On Windows:
   
