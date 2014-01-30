@@ -6,7 +6,7 @@ OBJS= \
  context.o \
  ssl.o
 
-LIBS=-lssl -lcrypto -lluasocket
+LIBS=-lssl -lcrypto
 
 WARN=-Wall -pedantic
 
@@ -46,14 +46,10 @@ bsd:
 macosx:
 	@$(MAKE) $(CMOD) MYCFLAGS="$(MAC_CFLAGS)" MYLDFLAGS="$(MAC_LDFLAGS)" MYENV="$(MAC_ENV)" EXTRA="$(EXTRA)"
 
-luasocket:
-	@cd luasocket && $(MAKE)
-
 $(CMOD): $(EXTRA) $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 clean:
-	cd luasocket && $(MAKE) clean
 	rm -f $(OBJS) $(CMOD)
 
 x509.o: x509.c x509.h config.h
