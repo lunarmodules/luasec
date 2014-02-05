@@ -58,12 +58,12 @@ function newcontext(cfg)
    end
    -- Load the certificate
    if cfg.certificate then
-      succ, msg = context.loadcert(ctx, cfg.certificate)
-      if not succ then return nil, msg end
-   end
-   if context.checkkey then
-     succ = context.checkkey(ctx)
-     if not succ then return nil, "private key does not match public key" end
+     succ, msg = context.loadcert(ctx, cfg.certificate)
+     if not succ then return nil, msg end
+     if cfg.key and context.checkkey then
+       succ = context.checkkey(ctx)
+       if not succ then return nil, "private key does not match public key" end
+     end
    end
    -- Load the CA certificates
    if cfg.cafile or cfg.capath then
