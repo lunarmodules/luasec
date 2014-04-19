@@ -394,6 +394,17 @@ static int meth_notafter(lua_State *L)
 }
 
 /**
+ * Check if this certificate issued some other certificate
+ */
+static int meth_issued(lua_State *L)
+{
+  X509* issuer = lsec_checkx509(L, 1);
+  X509* subject = lsec_checkx509(L, 2);
+	lua_pushboolean(L, X509_check_issued(issuer, subject) == X509_V_OK);
+	return 1;
+}
+
+/**
  * Collect X509 objects.
  */
 static int meth_destroy(lua_State* L)
@@ -459,6 +470,7 @@ static luaL_Reg methods[] = {
   {"issuer",     meth_issuer},
   {"notbefore",  meth_notbefore},
   {"notafter",   meth_notafter},
+  {"issued",     meth_issued},
   {"pem",        meth_pem},
   {"serial",     meth_serial},
   {"subject",    meth_subject},
