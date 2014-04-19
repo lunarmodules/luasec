@@ -506,6 +506,7 @@ static luaL_Reg methods[] = {
   {"notbefore",  meth_notbefore},
   {"notafter",   meth_notafter},
   {"pem",        meth_pem},
+  {"pubkey",     meth_pubkey},
   {"serial",     meth_serial},
   {"subject",    meth_subject},
   {"validat",    meth_valid_at},
