@@ -400,8 +400,13 @@ static int meth_issued(lua_State *L)
 {
   X509* issuer = lsec_checkx509(L, 1);
   X509* subject = lsec_checkx509(L, 2);
-	lua_pushboolean(L, X509_check_issued(issuer, subject) == X509_V_OK);
-	return 1;
+  int ret = X509_check_issued(issuer, subject);
+  lua_pushboolean(L, ret == X509_V_OK);
+  if (ret != X509_V_OK) {
+    lua_pushstring(L, X509_verify_cert_error_string(ret));
+    return 2;
+  }
+  return 1;
 }
 
 /**
