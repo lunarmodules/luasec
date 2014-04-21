@@ -20,22 +20,21 @@ MAC_ENV=env MACOSX_DEPLOYMENT_TARGET='$(MACVER)'
 MAC_CFLAGS=-O2 -fno-common $(WARN) $(INCDIR) $(DEFS)
 MAC_LDFLAGS=-bundle -undefined dynamic_lookup $(LIBDIR)
 
-INSTALL	?= install
-CC	?= cc
-LD	?= $(MYENV) cc
-CFLAGS	+= $(MYCFLAGS)
-LDFLAGS	+= $(MYLDFLAGS)
-DESTDIR	?= /
+INSTALL  = install
+CC       = cc
+LD       = $(MYENV) cc
+CFLAGS  += $(MYCFLAGS)
+LDFLAGS += $(MYLDFLAGS)
 
 .PHONY: all clean install none linux bsd macosx luasocket
 
 all:
 
 install: $(CMOD) $(LMOD)
-	$(INSTALL) -d $(DESTDIR)$(LUAPATH)/ssl $(DESTDIR)$(LUACPATH)
-	$(INSTALL) -D $(CMOD) $(DESTDIR)$(LUACPATH)
-	$(INSTALL) -m644 -D $(LMOD) $(DESTDIR)$(LUAPATH)
-	$(INSTALL) -m644 -D https.lua $(DESTDIR)$(LUAPATH)/ssl
+	$(INSTALL) -d $(LUAPATH)/ssl $(LUACPATH)
+	$(INSTALL) $(CMOD) $(LUACPATH)
+	$(INSTALL) -m644 $(LMOD) $(LUAPATH)
+	$(INSTALL) -m644 https.lua $(LUAPATH)/ssl
 
 linux:
 	@$(MAKE) $(CMOD) MYCFLAGS="$(LNX_CFLAGS)" MYLDFLAGS="$(LNX_LDFLAGS)" EXTRA="$(EXTRA)"

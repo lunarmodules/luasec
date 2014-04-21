@@ -10,7 +10,7 @@ local x509    = require("ssl.x509")
 
 module("ssl", package.seeall)
 
-_VERSION   = "0.5.PR"
+_VERSION   = "0.5"
 _COPYRIGHT = core.copyright()
 
 -- Export
