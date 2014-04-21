@@ -396,6 +396,17 @@ static int load_key(lua_State *L)
 }
 
 /**
+ * Check that the certificate public key matches the private key
+ */
+
+static int check_key(lua_State *L)
+{
+  SSL_CTX *ctx = lsec_checkcontext(L, 1);
+  lua_pushboolean(L, SSL_CTX_check_private_key(ctx));
+  return 1;
+}
+
+/**
  * Set the cipher list.
  */
 static int set_cipher(lua_State *L)
@@ -564,6 +575,7 @@ static luaL_Reg funcs[] = {
   {"locations",    load_locations},
   {"loadcert",     load_cert},
   {"loadkey",      load_key},
+  {"checkkey",     check_key},
   {"setcipher",    set_cipher},
   {"setdepth",     set_depth},
   {"setdhparam",   set_dhparam},
