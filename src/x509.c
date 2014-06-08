@@ -262,7 +262,7 @@ int meth_extensions(lua_State* L)
       case GEN_IPADD:
         lua_pushstring(L, "iPAddress");
         push_subtable(L, -2);
-        push_asn1_string(L, general_name->d.iPAddress, px->encode);
+        push_asn1_string(L, general_name->d.iPAddress, LSEC_AI5_STRING);
         lua_rawseti(L, -2, lua_rawlen(L, -2)+1);
         lua_pop(L, 1);
         break;
