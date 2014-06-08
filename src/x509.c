@@ -20,6 +20,8 @@
 #include <openssl/bio.h>
 #include <openssl/bn.h>
 
+#include <arpa/inet.h>
+
 #include <lua.h>
 #include <lauxlib.h>
 
@@ -121,6 +123,31 @@ static int push_asn1_time(lua_State *L, ASN1_UTCTIME *tm)
   lua_pushlstring(L, tmp, size);
   BIO_free(out);
   return 1;
+}
+
+/**
+ * Return a human readable IP address.
+ */
+static void push_asn1_ip(lua_State *L, ASN1_STRING *string)
+{
+  unsigned char *ip = ASN1_STRING_data(string);
+  char dst[INET6_ADDRSTRLEN];
+  int typ;
+  switch(ASN1_STRING_length(string)) {
+  case 4:
+    typ = AF_INET;
+    break;
+  case 16:
+    typ = AF_INET6;
+    break;
+  default:
+    lua_pushnil(L);
+    return;
+  }
+  if(inet_ntop(typ, ip, dst, INET6_ADDRSTRLEN))
+    lua_pushstring(L, dst);
+  else
+    lua_pushnil(L);
 }
 
 /**
@@ -262,7 +289,7 @@ int meth_extensions(lua_State* L)
       case GEN_IPADD:
         lua_pushstring(L, "iPAddress");
         push_subtable(L, -2);
-        push_asn1_string(L, general_name->d.iPAddress, LSEC_AI5_STRING);
+        push_asn1_ip(L, general_name->d.iPAddress);
         lua_rawseti(L, -2, lua_rawlen(L, -2)+1);
         lua_pop(L, 1);
         break;
