@@ -88,8 +88,10 @@ static void push_asn1_string(lua_State* L, ASN1_STRING *string, int encode)
 {
   int len;
   unsigned char *data;
-  if (!string)
+  if (!string) {
     lua_pushnil(L);
+    return;
+  }
   switch (encode) {
   case LSEC_AI5_STRING:
     lua_pushlstring(L, (char*)ASN1_STRING_data(string),
