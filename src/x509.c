@@ -101,6 +101,8 @@ static void push_asn1_string(lua_State* L, ASN1_STRING *string, int encode)
       lua_pushlstring(L, (char*)data, len);
       OPENSSL_free(data);
     }
+    else
+      lua_pushnil(L);
   }
 }
 
