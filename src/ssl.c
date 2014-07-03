@@ -30,6 +30,7 @@
 #include "x509.h"
 #include "context.h"
 #include "ssl.h"
+#include "options.h"
 
 /**
  * Underline socket error.
@@ -782,6 +783,8 @@ static luaL_Reg funcs[] = {
 #if (LUA_VERSION_NUM == 501)
 LSEC_API int luaopen_ssl_core(lua_State *L)
 {
+  ssl_option_t *p;
+
   /* Initialize SSL */
   if (!SSL_library_init()) {
     lua_pushstring(L, "unable to initialize SSL library");
@@ -809,11 +812,20 @@ LSEC_API int luaopen_ssl_core(lua_State *L)
   lua_pushnumber(L, SOCKET_INVALID);
   lua_setfield(L, -2, "invalidfd");
 
+  lua_newtable(L);
+  for (p = ssl_options; p->name; p++) {
+    lua_pushboolean(L, 1);
+    lua_setfield(L, -2, p->name);
+  }
+  lua_setfield(L, -2, "options");
+
   return 1;
 }
 #else
 LSEC_API int luaopen_ssl_core(lua_State *L)
 {
+  ssl_option_t *p;
+
   /* Initialize SSL */
   if (!SSL_library_init()) {
     lua_pushstring(L, "unable to initialize SSL library");
@@ -841,6 +853,13 @@ LSEC_API int luaopen_ssl_core(lua_State *L)
   luaL_setfuncs(L, funcs, 0);
   lua_pushnumber(L, SOCKET_INVALID);
   lua_setfield(L, -2, "invalidfd");
+
+  lua_newtable(L);
+  for (p = ssl_options; p->name; p++) {
+    lua_pushboolean(L, 1);
+    lua_setfield(L, -2, p->name);
+  }
+  lua_setfield(L, -2, "options");
 
   return 1;
 }
