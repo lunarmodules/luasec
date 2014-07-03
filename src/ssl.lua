@@ -8,10 +8,10 @@ local core    = require("ssl.core")
 local context = require("ssl.context")
 local x509    = require("ssl.x509")
 
-module("ssl", package.seeall)
+local _M = {}
 
-_VERSION   = "0.5"
-_COPYRIGHT = core.copyright()
+_M._VERSION   = "0.5"
+_M._COPYRIGHT = core.copyright()
 
 -- Export
 loadcertificate = x509.load
@@ -37,7 +37,7 @@ end
 --
 --
 --
-function newcontext(cfg)
+function _M.newcontext(cfg)
    local succ, msg, ctx
    -- Create the context
    ctx, msg = context.create(cfg.protocol)
@@ -115,10 +115,10 @@ end
 --
 --
 --
-function wrap(sock, cfg)
+function _M.wrap(sock, cfg)
    local ctx, msg
    if type(cfg) == "table" then
-      ctx, msg = newcontext(cfg)
+      ctx, msg = _M.newcontext(cfg)
       if not ctx then return nil, msg end
    else
       ctx = cfg
@@ -170,3 +170,4 @@ end
 --
 core.setmethod("info", info)
 
+return _M

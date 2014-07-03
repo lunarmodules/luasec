@@ -20,13 +20,13 @@ local type         = type
 local pairs        = pairs
 local getmetatable = getmetatable
 
-module("ssl.https")
+local _M = {}
 
-_VERSION   = "0.5"
-_COPYRIGHT = "LuaSec 0.5 - Copyright (C) 2009-2014 PUC-Rio"
+_M._VERSION   = "0.5"
+_M._COPYRIGHT = "LuaSec 0.5 - Copyright (C) 2009-2014 PUC-Rio"
 
 -- Default settings
-PORT = 443
+_M.PORT = 443
 
 local cfg = {
   protocol = "tlsv1",
@@ -40,7 +40,7 @@ local cfg = {
 
 -- Insert default HTTPS port.
 local function default_https_port(u)
-   return url.build(url.parse(u, {port = PORT}))
+   return url.build(url.parse(u, {port = _M.PORT}))
 end
 
 -- Convert an URL to a table according to Luasocket needs.
@@ -113,7 +113,7 @@ end
 -- @param body optional (string)
 -- @return (string if url == string or 1), code, headers, status
 --
-function request(url, body)
+function _M.request(url, body)
   local result_table = {}
   local stringrequest = type(url) == "string"
   if stringrequest then
@@ -136,3 +136,5 @@ function request(url, body)
   end
   return res, code, headers, status
 end
+
+return _M
