@@ -28,6 +28,14 @@ LuaSec 0.5
 
 --------------------------------------------------------------------------------
 
+* On Windows with mingw (win32) or mingw-w64 (win32/win64)
+
+  - mingw32-make CC=gcc INC_PATH="-Ic:\OpenSSL-Win32\include -Ic:\lua51\include" LIB_PATH="-Lc:\OpenSSL-Win32 -Lc:\lua51" EXT_LIBS=-llua5.1 windows
+
+  - Use 'make install' to install the modules.
+
+--------------------------------------------------------------------------------
+
 * On Windows:
   
   - Use the Visual C++ project to compile the library.

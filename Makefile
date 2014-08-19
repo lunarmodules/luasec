@@ -12,6 +12,7 @@ DEFS  = -DWITH_LUASOCKET
 # Path below points to internal LuaSocket's help files.
 INC_PATH ?= -I/usr/include
 LIB_PATH ?= -L/usr/lib
+EXT_LIBS ?= -llua51
 INCDIR    = -I. $(INC_PATH)
 LIBDIR    = -L./luasocket $(LIB_PATH)
 
@@ -30,6 +31,7 @@ none:
 	@echo "  * linux"
 	@echo "  * bsd"
 	@echo "  * macosx"
+	@echo "  * windows"
 
 install:
 	@cd src && $(MAKE) LUACPATH="$(LUACPATH)" LUAPATH="$(LUAPATH)" install
@@ -51,6 +53,12 @@ macosx:
 	@echo "** Build for Mac OS X $(MACOSX_VERSION) **"
 	@echo "------------------------------"
 	@cd src && $(MAKE) INCDIR="$(INCDIR)" LIBDIR="$(LIBDIR)" MACVER="$(MACOSX_VERSION)" DEFS="$(DEFS)" EXTRA="$(EXTRA)" $@
+
+windows:
+	@echo "---------------------"
+	@echo "** Build for Windows **"
+	@echo "---------------------"
+	@cd src && $(MAKE) INCDIR="$(INCDIR)" LIBDIR="$(LIBDIR)" DEFS="$(DEFS)" EXTRA="$(EXTRA)" EXT_LIBS=$(EXT_LIBS) $@
 
 clean:
 	@cd src && $(MAKE) clean

@@ -1,4 +1,3 @@
-CMOD=ssl.so
 LMOD=ssl.lua
 
 OBJS= \
@@ -6,7 +5,13 @@ OBJS= \
  context.o \
  ssl.o
 
-LIBS=-lssl -lcrypto -lluasocket
+ifeq ($(OS),Windows_NT)
+  CMOD=ssl.dll
+  LIBS = -lssl32 -leay32 -lluasocket -lws2_32 $(EXT_LIBS)
+else
+  CMOD=ssl.so
+  LIBS = -lssl -lcrypto -lluasocket $(EXT_LIBS)
+endif
 
 WARN=-Wall -pedantic
 
@@ -20,9 +25,12 @@ MAC_ENV=env MACOSX_DEPLOYMENT_TARGET='$(MACVER)'
 MAC_CFLAGS=-O2 -fno-common $(WARN) $(INCDIR) $(DEFS)
 MAC_LDFLAGS=-bundle -undefined dynamic_lookup $(LIBDIR)
 
+WIN_CFLAGS=-O2 -std=gnu99 $(WARN) $(INCDIR) $(DEFS)
+WIN_LDFLAGS=-O -shared $(LIBDIR)
+
 INSTALL  = install
-CC       = cc
-LD       = $(MYENV) cc
+CC       ?= cc
+LD       = $(MYENV) $(CC)
 CFLAGS  += $(MYCFLAGS)
 LDFLAGS += $(MYLDFLAGS)
 
@@ -44,6 +52,9 @@ bsd:
 
 macosx:
 	@$(MAKE) $(CMOD) MYCFLAGS="$(MAC_CFLAGS)" MYLDFLAGS="$(MAC_LDFLAGS)" MYENV="$(MAC_ENV)" EXTRA="$(EXTRA)"
+
+windows:
+	@$(MAKE) $(CMOD) MYCFLAGS="$(WIN_CFLAGS)" MYLDFLAGS="$(WIN_LDFLAGS)" EXTRA="$(EXTRA)" CC=$(CC)
 
 luasocket:
 	@cd luasocket && $(MAKE)

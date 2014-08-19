@@ -1,8 +1,13 @@
 OBJS= \
  io.o \
  buffer.o \
- timeout.o \
- usocket.o
+ timeout.o
+
+ifeq ($(OS),Windows_NT)
+ OBJS+= wsocket.o
+else
+ OBJS+= usocket.o
+endif
 
 CC	?= cc
 CFLAGS	+= $(MYCFLAGS) -DLUASOCKET_DEBUG
@@ -24,3 +29,4 @@ buffer.o: buffer.c buffer.h io.h timeout.h
 io.o: io.c io.h timeout.h
 timeout.o: timeout.c timeout.h
 usocket.o: usocket.c socket.h io.h timeout.h usocket.h
+wsocket.o: wsocket.c socket.h io.h timeout.h wsocket.h
