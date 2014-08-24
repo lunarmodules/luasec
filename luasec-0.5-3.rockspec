@@ -1,5 +1,5 @@
 package = "LuaSec"
-version = "0.5-2"
+version = "0.5-3"
 source = {
    url = "git://github.com/brunoos/luasec.git",
    tag = "luasec-0.5"
@@ -14,14 +14,10 @@ dependencies = {
    "lua >= 5.1", "luasocket"
 }
 external_dependencies = {
-   platforms = {
-      unix = {
-         OPENSSL = {
-            header = "openssl/ssl.h",
-            library = "ssl"
-         }
-      }
-   }
+   OPENSSL = {
+      header = "openssl/ssl.h",
+      library = "ssl",
+   },
 }
 build = {
    type = "builtin",
