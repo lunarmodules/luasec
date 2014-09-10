@@ -837,8 +837,6 @@ LSEC_API int luaopen_ssl_core(lua_State *L)
   lua_setfield(L, -2, "__index");
 
   luaL_register(L, "ssl.core", funcs);
-  lua_pushnumber(L, SOCKET_INVALID);
-  lua_setfield(L, -2, "invalidfd");
 
   return 1;
 }
@@ -870,8 +868,6 @@ LSEC_API int luaopen_ssl_core(lua_State *L)
 
   lua_newtable(L);
   luaL_setfuncs(L, funcs, 0);
-  lua_pushnumber(L, SOCKET_INVALID);
-  lua_setfield(L, -2, "invalidfd");
 
   return 1;
 }
