@@ -20,6 +20,9 @@
 #include <openssl/bio.h>
 #include <openssl/bn.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <arpa/inet.h>
 
 #include <lua.h>
