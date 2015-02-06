@@ -749,13 +749,12 @@ LSEC_API int luaopen_ssl_context(lua_State *L)
   luaL_setfuncs(L, meta, 0);
 
   /* Create __index metamethods for context */
-  lua_newtable(L);
-  luaL_setfuncs(L, meta_index, 0);
+  luaL_newlib(L, meta_index);
   lua_setfield(L, -2, "__index");
 
   /* Return the module */
-  lua_newtable(L);
-  luaL_setfuncs(L, funcs, 0);
+  luaL_newlib(L, funcs);
+
   return 1;
 }
 #endif

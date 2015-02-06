@@ -868,12 +868,10 @@ LSEC_API int luaopen_ssl_core(lua_State *L)
   luaL_newmetatable(L, "SSL:Connection");
   luaL_setfuncs(L, meta, 0);
 
-  lua_newtable(L);
-  luaL_setfuncs(L, methods, 0);
+  luaL_newlib(L, methods);
   lua_setfield(L, -2, "__index");
 
-  lua_newtable(L);
-  luaL_setfuncs(L, funcs, 0);
+  luaL_newlib(L, funcs);
 
   return 1;
 }
