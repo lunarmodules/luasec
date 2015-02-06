@@ -429,7 +429,7 @@ static int set_cipher(lua_State *L)
 static int set_depth(lua_State *L)
 {
   SSL_CTX *ctx = lsec_checkcontext(L, 1);
-  SSL_CTX_set_verify_depth(ctx, luaL_checkint(L, 2));
+  SSL_CTX_set_verify_depth(ctx, (int)luaL_checkinteger(L, 2));
   lua_pushboolean(L, 1);
   return 1;
 }

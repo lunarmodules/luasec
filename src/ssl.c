@@ -330,7 +330,7 @@ static int meth_setfd(lua_State *L)
   p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
   if (ssl->state != LSEC_STATE_NEW)
     luaL_argerror(L, 1, "invalid SSL object state");
-  ssl->sock = luaL_checkint(L, 2);
+  ssl->sock = (t_socket)luaL_checkinteger(L, 2);
   socket_setnonblocking(&ssl->sock);
   SSL_set_fd(ssl->ssl, (int)ssl->sock);
   return 0;
@@ -442,7 +442,7 @@ static int meth_getpeercertificate(lua_State *L)
     return 2;
   }
   /* Default to the first cert */ 
-  n = luaL_optint(L, 2, 1);                           
+  n = (int)luaL_optinteger(L, 2, 1);                           
   /* This function is 1-based, but OpenSSL is 0-based */
   --n;
   if (n < 0) {
