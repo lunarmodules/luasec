@@ -578,7 +578,7 @@ LSEC_API int luaopen_ssl_x509(lua_State *L)
   luaL_register(L, NULL, methods);
   lua_setfield(L, -2, "__index");
 
-  luaL_register(L, "ssl.x509", funcs);
+  luaL_register(L, NULL, funcs);
 
   return 1;
 }

@@ -737,7 +737,7 @@ LSEC_API int luaopen_ssl_context(lua_State *L)
   lua_setfield(L, -2, "__index");
 
   /* Register the module */
-  luaL_register(L, "ssl.context", funcs);
+  luaL_register(L, NULL, funcs);
   return 1;
 }
 #else
