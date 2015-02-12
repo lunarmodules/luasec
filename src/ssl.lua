@@ -8,6 +8,8 @@ local core    = require("ssl.core")
 local context = require("ssl.context")
 local x509    = require("ssl.x509")
 
+local unpack  = table.unpack or unpack
+
 -- We must prevent the contexts to be collected before the connections,
 -- otherwise the C registry will be cleared.
 local registry = setmetatable({}, {__mode="k"})
