@@ -78,6 +78,7 @@ build = {
                },
                libdirs = {
                   "$(OPENSSL_LIBDIR)",
+                  "$(OPENSSL_BINDIR)",
                },
                libraries = {
                   "libeay32", "ssleay32", "ws2_32"
