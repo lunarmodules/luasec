@@ -14,10 +14,19 @@ dependencies = {
    "lua >= 5.1", "luasocket"
 }
 external_dependencies = {
-   OPENSSL = {
-      header = "openssl/ssl.h",
-      library = "ssl",
-   },
+   platforms = {
+      unix = {
+         OPENSSL = {
+            header = "openssl/ssl.h",
+            library = "ssl"
+         }
+      },
+      windows = {
+         OPENSSL = {
+            header = "openssl/ssl.h",
+         }
+      },
+   }
 }
 build = {
    type = "builtin",
@@ -69,9 +78,10 @@ build = {
                },
                libdirs = {
                   "$(OPENSSL_LIBDIR)",
+                  "$(OPENSSL_BINDIR)",
                },
                libraries = {
-                  "ssl", "crypto", "ws2_32",
+                  "libeay32", "ssleay32", "ws2_32"
                },
                incdirs = {
                   "$(OPENSSL_INCDIR)", "src/", "src/luasocket"
