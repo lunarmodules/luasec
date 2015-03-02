@@ -65,7 +65,7 @@ build = {
          modules = {
             ssl = {
                defines = {
-                  "WIN32", "NDEBUG", "_WINDOWS", "_USRDLL", "LUASEC_EXPORTS", "BUFFER_DEBUG", "LUASEC_API=__declspec(dllexport)"
+                  "WIN32", "NDEBUG", "_WINDOWS", "_USRDLL", "LSEC_EXPORTS", "BUFFER_DEBUG", "LSEC_API=__declspec(dllexport)"
                },
                libdirs = {
                   "$(OPENSSL_LIBDIR)",
