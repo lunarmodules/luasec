@@ -20,6 +20,11 @@
 #include <openssl/bio.h>
 #include <openssl/bn.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 #include <lua.h>
 #include <lauxlib.h>
 
@@ -88,8 +93,10 @@ static void push_asn1_string(lua_State* L, ASN1_STRING *string, int encode)
 {
   int len;
   unsigned char *data;
-  if (!string)
+  if (!string) {
     lua_pushnil(L);
+    return;
+  }
   switch (encode) {
   case LSEC_AI5_STRING:
     lua_pushlstring(L, (char*)ASN1_STRING_data(string),
@@ -101,6 +108,8 @@ static void push_asn1_string(lua_State* L, ASN1_STRING *string, int encode)
       lua_pushlstring(L, (char*)data, len);
       OPENSSL_free(data);
     }
+    else
+      lua_pushnil(L);
   }
 }
 
@@ -117,6 +126,31 @@ static int push_asn1_time(lua_State *L, ASN1_UTCTIME *tm)
   lua_pushlstring(L, tmp, size);
   BIO_free(out);
   return 1;
+}
+
+/**
+ * Return a human readable IP address.
+ */
+static void push_asn1_ip(lua_State *L, ASN1_STRING *string)
+{
+  unsigned char *ip = ASN1_STRING_data(string);
+  char dst[INET6_ADDRSTRLEN];
+  int typ;
+  switch(ASN1_STRING_length(string)) {
+  case 4:
+    typ = AF_INET;
+    break;
+  case 16:
+    typ = AF_INET6;
+    break;
+  default:
+    lua_pushnil(L);
+    return;
+  }
+  if(inet_ntop(typ, ip, dst, INET6_ADDRSTRLEN))
+    lua_pushstring(L, dst);
+  else
+    lua_pushnil(L);
 }
 
 /**
@@ -258,7 +292,7 @@ int meth_extensions(lua_State* L)
       case GEN_IPADD:
         lua_pushstring(L, "iPAddress");
         push_subtable(L, -2);
-        push_asn1_string(L, general_name->d.iPAddress, px->encode);
+        push_asn1_ip(L, general_name->d.iPAddress);
         lua_rawseti(L, -2, lua_rawlen(L, -2)+1);
         lua_pop(L, 1);
         break;
@@ -532,39 +566,16 @@ static luaL_Reg funcs[] = {
 
 /*--------------------------------------------------------------------------*/
 
-#if (LUA_VERSION_NUM == 501)
-
 LSEC_API int luaopen_ssl_x509(lua_State *L)
 {
   /* Register the functions and tables */
   luaL_newmetatable(L, "SSL:Certificate");
-  luaL_register(L, NULL, meta);
+  setfuncs(L, meta);
 
-  lua_newtable(L);
-  luaL_register(L, NULL, methods);
+  luaL_newlib(L, methods);
   lua_setfield(L, -2, "__index");
 
-  luaL_register(L, "ssl.x509", funcs);
+  luaL_newlib(L, funcs);
 
   return 1;
 }
-
-#else
-
-LSEC_API int luaopen_ssl_x509(lua_State *L)
-{
-  /* Register the functions and tables */
-  luaL_newmetatable(L, "SSL:Certificate");
-  luaL_setfuncs(L, meta, 0);
-
-  lua_newtable(L);
-  luaL_setfuncs(L, methods, 0);
-  lua_setfield(L, -2, "__index");
-
-  lua_newtable(L);
-  luaL_setfuncs(L, funcs, 0);
-
-  return 1;
-}
-
-#endif
