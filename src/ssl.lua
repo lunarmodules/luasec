@@ -8,13 +8,7 @@ local core    = require("ssl.core")
 local context = require("ssl.context")
 local x509    = require("ssl.x509")
 
-module("ssl", package.seeall)
-
-_VERSION   = "0.5"
-_COPYRIGHT = core.copyright()
-
--- Export
-loadcertificate = x509.load
+local unpack  = table.unpack or unpack
 
 -- We must prevent the contexts to be collected before the connections,
 -- otherwise the C registry will be cleared.
@@ -37,7 +31,7 @@ end
 --
 --
 --
-function newcontext(cfg)
+local function newcontext(cfg)
    local succ, msg, ctx
    -- Create the context
    ctx, msg = context.create(cfg.protocol)
@@ -115,7 +109,7 @@ end
 --
 --
 --
-function wrap(sock, cfg)
+local function wrap(sock, cfg)
    local ctx, msg
    if type(cfg) == "table" then
       ctx, msg = newcontext(cfg)
@@ -126,7 +120,7 @@ function wrap(sock, cfg)
    local s, msg = core.create(ctx)
    if s then
       core.setfd(s, sock:getfd())
-      sock:setfd(core.invalidfd)
+      sock:setfd(-1)
       registry[s] = ctx
       return s
    end
@@ -170,3 +164,16 @@ end
 --
 core.setmethod("info", info)
 
+--------------------------------------------------------------------------------
+-- Export module
+--
+
+local _M = {
+  _VERSION        = "0.5",
+  _COPYRIGHT      = core.copyright(),
+  loadcertificate = x509.load,
+  newcontext      = newcontext,
+  wrap            = wrap,
+}
+
+return _M

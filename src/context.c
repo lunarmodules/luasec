@@ -429,7 +429,7 @@ static int set_cipher(lua_State *L)
 static int set_depth(lua_State *L)
 {
   SSL_CTX *ctx = lsec_checkcontext(L, 1);
-  SSL_CTX_set_verify_depth(ctx, luaL_checkint(L, 2));
+  SSL_CTX_set_verify_depth(ctx, (int)luaL_checkinteger(L, 2));
   lua_pushboolean(L, 1);
   return 1;
 }
@@ -723,39 +723,19 @@ int lsec_getmode(lua_State *L, int idx)
 /**
  * Registre the module.
  */
-#if (LUA_VERSION_NUM == 501)
 LSEC_API int luaopen_ssl_context(lua_State *L)
 {
   luaL_newmetatable(L, "SSL:DH:Registry");      /* Keep all DH callbacks */
   luaL_newmetatable(L, "SSL:Verify:Registry");  /* Keep all verify flags */
   luaL_newmetatable(L, "SSL:Context");
-  luaL_register(L, NULL, meta);
+  setfuncs(L, meta);
 
   /* Create __index metamethods for context */
-  lua_newtable(L);
-  luaL_register(L, NULL, meta_index);
-  lua_setfield(L, -2, "__index");
-
-  /* Register the module */
-  luaL_register(L, "ssl.context", funcs);
-  return 1;
-}
-#else
-LSEC_API int luaopen_ssl_context(lua_State *L)
-{
-  luaL_newmetatable(L, "SSL:DH:Registry");      /* Keep all DH callbacks */
-  luaL_newmetatable(L, "SSL:Verify:Registry");  /* Keep all verify flags */
-  luaL_newmetatable(L, "SSL:Context");
-  luaL_setfuncs(L, meta, 0);
-
-  /* Create __index metamethods for context */
-  lua_newtable(L);
-  luaL_setfuncs(L, meta_index, 0);
+  luaL_newlib(L, meta_index);
   lua_setfield(L, -2, "__index");
 
   /* Return the module */
-  lua_newtable(L);
-  luaL_setfuncs(L, funcs, 0);
+  luaL_newlib(L, funcs);
+
   return 1;
 }
-#endif

@@ -19,7 +19,8 @@ conn = ssl.wrap(conn, params)
 
 -- Comment the lines to not send a name
 --conn:sni("servera.br")
-conn:sni("serveraa.br")
+--conn:sni("serveraa.br")
+conn:sni("serverb.br")
 
 assert(conn:dohandshake())
 --

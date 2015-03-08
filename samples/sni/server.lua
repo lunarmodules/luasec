@@ -39,10 +39,12 @@ local conn = server:accept()
 conn = ssl.wrap(conn, ctx01)
 
 -- Configure the name map
-conn:sni({
+local sni_map = {
   ["servera.br"]  = ctx01,
   ["serveraa.br"] = ctx02,
-})
+}
+
+conn:sni(sni_map, true)
 
 assert(conn:dohandshake())
 --
