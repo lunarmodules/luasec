@@ -9,7 +9,13 @@
 #include <string.h>
 
 #if defined(WIN32)
+#include <ws2tcpip.h>
 #include <windows.h>
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #endif
 
 #include <openssl/ssl.h>
@@ -19,11 +25,6 @@
 #include <openssl/asn1.h>
 #include <openssl/bio.h>
 #include <openssl/bn.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
 #include <lua.h>
 #include <lauxlib.h>
