@@ -6,6 +6,7 @@
  *
  *--------------------------------------------------------------------------*/
 
+#include <stdio.h>
 #include <string.h>
 
 #if defined(WIN32)
@@ -396,17 +397,82 @@ static int meth_notafter(lua_State *L)
 /**
  * Check if this certificate issued some other certificate
  */
-static int meth_issued(lua_State *L)
+static int meth_issued(lua_State* L)
 {
+  int ret, i, len;
+
+  X509_STORE_CTX* ctx = NULL;
+  X509_STORE* root = NULL;
+  STACK_OF(X509)* chain = sk_X509_new_null();
+
   X509* issuer = lsec_checkx509(L, 1);
-  X509* subject = lsec_checkx509(L, 2);
-  int ret = X509_check_issued(issuer, subject);
-  lua_pushboolean(L, ret == X509_V_OK);
-  if (ret != X509_V_OK) {
-    lua_pushstring(L, X509_verify_cert_error_string(ret));
-    return 2;
+  X509* subject;
+
+  ctx = X509_STORE_CTX_new();
+  root = X509_STORE_new();
+
+  len = lua_gettop(L);
+  /* fprintf(stderr, "len = %d\n", len); */
+
+  if (ctx == NULL || root == NULL) {
+    lua_pushnil(L);
+    lua_pushstring(L, "X509_STORE_new() or X509_STORE_CTX_new() error");
+    ret = 2;
+    goto cleanup;
   }
-  return 1;
+
+  ret = X509_STORE_add_cert(root, issuer);
+
+  if(!ret) {
+    lua_pushnil(L);
+    lua_pushstring(L, "X509_STORE_add_cert() error");
+    ret = 2;
+    goto cleanup;
+  }
+
+  for (i = 2; i < len && lua_isuserdata(L, i); i++) {
+    /* fprintf(stderr, "i = %d\n", i); */
+    /* FIXME Don't leak stuff if it's wrong */
+    subject = lsec_checkx509(L, i);
+    sk_X509_push(chain, subject);
+    issuer = subject;
+  }
+
+  subject = lsec_checkx509(L, len);
+
+  ret = X509_STORE_CTX_init(ctx, root, subject, chain);
+
+  if(!ret) {
+    lua_pushnil(L);
+    lua_pushstring(L, "X509_STORE_CTX_init() error");
+    ret = 2;
+    goto cleanup;
+  }
+
+  /* Actual verification */
+  if (X509_verify_cert(ctx) <= 0) {
+    ret = X509_STORE_CTX_get_error(ctx);
+    lua_pushnil(L);
+    lua_pushstring(L, X509_verify_cert_error_string(ret));
+    ret = 2;
+  } else {
+    lua_pushboolean(L, 1);
+    ret = 1;
+  }
+
+cleanup:
+
+  if (ctx != NULL) {
+    X509_STORE_CTX_free(ctx);
+  }
+
+  if (chain != NULL) {
+    X509_STORE_free(root);
+  }
+
+	sk_X509_free(chain);
+
+  return ret;
 }
 
 /**
