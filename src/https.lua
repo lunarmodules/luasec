@@ -82,22 +82,28 @@ local function tcp(params)
    -- Force client mode
    params.mode = "client"
    -- 'create' function for LuaSocket
-   return function ()
-      local conn = {}
-      conn.sock = try(socket.tcp())
-      local st = getmetatable(conn.sock).__index.settimeout
-      function conn:settimeout(...)
-         return st(self.sock, ...)
+   return function (reqt)
+      if (reqt.scheme or (url.parse(reqt.url or "") or {}).scheme) == "https" then
+        -- https, provide an ssl wrapped socket
+        local conn = {}
+        conn.sock = try(socket.tcp())
+        local st = getmetatable(conn.sock).__index.settimeout
+        function conn:settimeout(...)
+           return st(self.sock, ...)
+        end
+        -- Replace TCP's connection function
+        function conn:connect(host, port)
+           try(self.sock:connect(host, port))
+           self.sock = try(ssl.wrap(self.sock, params))
+           try(self.sock:dohandshake())
+           reg(self, getmetatable(self.sock))
+           return 1
+        end
+        return conn
+      else
+        -- regular http, needs just a socket...
+        return socket.tcp()
       end
-      -- Replace TCP's connection function
-      function conn:connect(host, port)
-         try(self.sock:connect(host, port))
-         self.sock = try(ssl.wrap(self.sock, params))
-         try(self.sock:dohandshake())
-         reg(self, getmetatable(self.sock))
-         return 1
-      end
-      return conn
   end
 end
 
@@ -123,8 +129,6 @@ function request(url, body)
   end
   if http.PROXY or url.proxy then
     return nil, "proxy not supported"
-  elseif url.redirect then
-    return nil, "redirect not supported"
   elseif url.create then
     return nil, "create function not permitted"
   end
