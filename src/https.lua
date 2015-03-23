@@ -13,7 +13,6 @@ local http   = require("socket.http")
 local url    = require("socket.url")
 
 local table  = require("table")
-local string = require("string")
 
 local try          = socket.try
 local type         = type
@@ -38,15 +37,21 @@ local cfg = {
 -- Auxiliar Functions
 --------------------------------------------------------------------
 
--- Insert default HTTPS port.
-local function default_https_port(u)
-   return url.build(url.parse(u, {port = PORT}))
+-- Insert default port.
+local function default_port(u)
+  u = url.parse(u)
+  if u.scheme == "https" then
+    u.port = u.port or PORT
+  else
+    u.port = u.port or http.PORT
+  end  
+  return url.build(u)
 end
 
 -- Convert an URL to a table according to Luasocket needs.
 local function urlstring_totable(url, body, result_table)
    url = {
-      url = default_https_port(url),
+      url = default_port(url),
       method = body and "POST" or "GET",
       sink = ltn12.sink.table(result_table)
    }
@@ -125,7 +130,7 @@ function request(url, body)
   if stringrequest then
     url = urlstring_totable(url, body, result_table)
   else
-    url.url = default_https_port(url.url)
+    url.url = default_port(url.url)
   end
   if http.PROXY or url.proxy then
     return nil, "proxy not supported"
