@@ -37,21 +37,10 @@ local cfg = {
 -- Auxiliar Functions
 --------------------------------------------------------------------
 
--- Insert default port.
-local function default_port(u)
-  u = url.parse(u)
-  if u.scheme == "https" then
-    u.port = u.port or PORT
-  else
-    u.port = u.port or http.PORT
-  end  
-  return url.build(u)
-end
-
 -- Convert an URL to a table according to Luasocket needs.
 local function urlstring_totable(url, body, result_table)
    url = {
-      url = default_port(url),
+      url = url,
       method = body and "POST" or "GET",
       sink = ltn12.sink.table(result_table)
    }
@@ -86,9 +75,12 @@ local function tcp(params)
    end
    -- Force client mode
    params.mode = "client"
+   -- upvalue to track https -> http redirection
+   local washttps = false
    -- 'create' function for LuaSocket
    return function (reqt)
-      if (reqt.scheme or (url.parse(reqt.url or "") or {}).scheme) == "https" then
+      local u = url.parse(reqt.url)
+      if (reqt.scheme or u.scheme) == "https" then
         -- https, provide an ssl wrapped socket
         local conn = {}
         conn.sock = try(socket.tcp())
@@ -104,12 +96,22 @@ local function tcp(params)
            reg(self, getmetatable(self.sock))
            return 1
         end
+        -- insert https default port, overriding http port inserted by LuaSocket
+        if not u.port then
+           u.port = PORT
+           reqt.url = url.build(u)
+           reqt.port = PORT 
+        end
+        washttps = true
         return conn
       else
         -- regular http, needs just a socket...
+        if washttps and params.redirect ~= "all" then
+          try(nil, "Unallowed insecure redirect https to http")
+        end
         return socket.tcp()
-      end
-  end
+      end  
+   end
 end
 
 --------------------------------------------------------------------
@@ -129,16 +131,12 @@ function request(url, body)
   local stringrequest = type(url) == "string"
   if stringrequest then
     url = urlstring_totable(url, body, result_table)
-  else
-    url.url = default_port(url.url)
   end
   if http.PROXY or url.proxy then
     return nil, "proxy not supported"
-  elseif url.create then
-    return nil, "create function not permitted"
   end
-  -- New 'create' function to establish a secure connection
-  url.create = tcp(url)
+  -- New 'create' function to establish the proper connection
+  url.create = url.create or tcp(url)
   local res, code, headers, status = http.request(url)
   if res and stringrequest then
     return table.concat(result_table), code, headers, status
