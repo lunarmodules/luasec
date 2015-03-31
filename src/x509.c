@@ -403,16 +403,25 @@ static int meth_issued(lua_State* L)
 
   X509_STORE_CTX* ctx = NULL;
   X509_STORE* root = NULL;
-  STACK_OF(X509)* chain = sk_X509_new_null();
+  STACK_OF(X509)* chain = NULL;
 
   X509* issuer = lsec_checkx509(L, 1);
-  X509* subject;
-
-  ctx = X509_STORE_CTX_new();
-  root = X509_STORE_new();
+  X509* subject = lsec_checkx509(L, 2);
+  X509* cert = NULL;
 
   len = lua_gettop(L);
-  /* fprintf(stderr, "len = %d\n", len); */
+
+  /* Check that all arguments are certificates */
+
+  for (i = 3; i <= len; i++) {
+    lsec_checkx509(L, i);
+  }
+
+  /* Before allocating things that require freeing afterwards */
+
+  chain = sk_X509_new_null();
+  ctx = X509_STORE_CTX_new();
+  root = X509_STORE_new();
 
   if (ctx == NULL || root == NULL) {
     lua_pushnil(L);
@@ -430,15 +439,10 @@ static int meth_issued(lua_State* L)
     goto cleanup;
   }
 
-  for (i = 2; i < len && lua_isuserdata(L, i); i++) {
-    /* fprintf(stderr, "i = %d\n", i); */
-    /* FIXME Don't leak stuff if it's wrong */
-    subject = lsec_checkx509(L, i);
-    sk_X509_push(chain, subject);
-    issuer = subject;
+  for (i = 3; i <= len && lua_isuserdata(L, i); i++) {
+    cert = lsec_checkx509(L, i);
+    sk_X509_push(chain, cert);
   }
-
-  subject = lsec_checkx509(L, len);
 
   ret = X509_STORE_CTX_init(ctx, root, subject, chain);
 
@@ -470,7 +474,7 @@ cleanup:
     X509_STORE_free(root);
   }
 
-	sk_X509_free(chain);
+  sk_X509_free(chain);
 
   return ret;
 }
