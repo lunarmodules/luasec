@@ -57,3 +57,18 @@ and alternative names.
 
 **NOTE**: It is crucial the hostname is checked to verify the certificate is
 not only valid, but belonging to the host connected to.
+
+### ssl.connect ###
+
+    conn, socket = ssl.connect(hostname, port, [flags])
+
+Creates a tcp socket, connects it to the specified hostname and port, wraps it
+in an ssl object, does the handshake and verifies the hostname. It makes sure
+the mode flag is set to `client`, and defaults verify to `none`, and protocol
+to `tlsv1_2`. Can fail, in which case it returns nil, followed by an error.
+
+See `ssl.wrap` and `ssl.checkhostname` for details.
+
+**WARNING**: Peer verification is off by default. It is highly recommended to
+specify either a `capath` or a `cafile` in the flags, and turn peer
+verification on.

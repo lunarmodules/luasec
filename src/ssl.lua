@@ -4,6 +4,7 @@
 --
 ------------------------------------------------------------------------------
 
+local socket  = require("socket")
 local core    = require("ssl.core")
 local context = require("ssl.context")
 local x509    = require("ssl.x509")
@@ -206,6 +207,36 @@ local function checkhostname_ssl(ssl, hostname)
 end
 
 --
+-- Connect helper
+--
+local function connect(hostname, port, flags)
+  local sock, conn, success, err
+  sock = socket.tcp()
+  success, err = sock:connect(hostname, port)
+  if not success then
+    return nil, err
+  end
+  flags = flags or {}
+  flags.mode = "client"
+  flags.verify = flags.verify or "none"
+  flags.protocol = flags.protocol or "tlsv1_2"
+  conn, err = ssl.wrap(sock, flags or {})
+  if not conn then
+    sock:close()
+    return nil, err
+  end
+  success, err = conn:dohandshake()
+  if not success then
+    return nil, err
+  end
+  if not conn:checkhostname(hostname) then
+    sock:close()
+    return nil, "hostname does not match certificate"
+  end
+  return conn, sock
+end
+
+--
 -- Set method for SSL connections.
 --
 core.setmethod("info", info)
@@ -222,6 +253,7 @@ local _M = {
   newcontext      = newcontext,
   wrap            = wrap,
   checkhostname   = checkhostname,
+  connect         = connect,
 }
 
 return _M
