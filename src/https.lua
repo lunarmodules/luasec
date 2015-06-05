@@ -68,6 +68,14 @@ local function reg(conn)
    end
 end
 
+-- Check host name
+local function checkhostname(sock, hostname)
+  if not sock:checkhostname(hostname) then
+    return nil, "hostname does not match certificate"
+  end
+  return true
+end
+
 -- Return a function which performs the SSL/TLS connection.
 local function tcp(params)
    params = params or {}
@@ -90,6 +98,7 @@ local function tcp(params)
          try(self.sock:connect(host, port))
          self.sock = try(ssl.wrap(self.sock, params))
          try(self.sock:dohandshake())
+         try(checkhostname(self.sock, host))
          reg(self, getmetatable(self.sock))
          return 1
       end
