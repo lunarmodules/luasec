@@ -47,3 +47,13 @@ Alias for `cert.load`.
 
 `ssl.wrap` wraps an existing luasocket socket into a luasec connection object.
 `cfg` is defined as for `ssl.newcontext`.
+
+### ssl.checkhostname ###
+
+    valid = ssl.checkhostname(cert, hostname)
+
+Check if the certificate is valid for the given hostname. Deals with wildcards
+and alternative names.
+
+**NOTE**: It is crucial the hostname is checked to verify the certificate is
+not only valid, but belonging to the host connected to.

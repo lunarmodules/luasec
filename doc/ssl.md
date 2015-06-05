@@ -119,3 +119,10 @@ context associated with this `conn` object.
 
 Returns luasec's current `want`, if the connection is dirty (see `conn:dirty`).
 This can either be `nothing`, `read`, `write` or `x509lookup`.
+
+### conn:checkhostname ###
+
+    valid = conn:checkhostname(hostname)
+
+Checks whether the certificate is valid for the given hostname. Helper for
+`ssl.checkhostname`, see `ssl.checkhostname` for more information.

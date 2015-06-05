@@ -160,9 +160,56 @@ local function info(ssl, field)
 end
 
 --
+-- Verify host name against a common name
+--
+local function checkhostname_single(hostname, cn)
+  if cn:match("^%*%.") then
+    -- If it's a wildcard domain name, strip the first element of the hostname
+    -- and the cn, then check neither are empty.
+    hostname = hostname:match("%.(.+)$")
+    cn = cn:match("%.(.+)$")
+    if cn == "" or hostname == "" then return false end
+  end
+  return cn == hostname
+end
+
+--
+-- Verify host name against certificate
+--
+local function checkhostname(cert, hostname)
+  local subject, ext
+  subject = cert:subject()
+  for i, v in ipairs(subject) do
+    if v.name == "commonName" then
+      if checkhostname_single(hostname, v.value) then
+        return true
+      end
+      break
+    end
+  end
+  -- If we got here, the cn doesn't match, check for the dNSName extension
+  ext = (cert:extensions() or {})["2.5.29.17"]
+  if not ext or not ext.dNSName then return false end
+  for i, v in ipairs(ext.dNSName) do
+    if checkhostname_single(hostname, v) then
+      return true
+    end
+  end
+  return false
+end
+
+--
+-- Verify host name against peer certificate
+--
+local function checkhostname_ssl(ssl, hostname)
+  return checkhostname(ssl:getpeercertificate(), hostname)
+end
+
+--
 -- Set method for SSL connections.
 --
 core.setmethod("info", info)
+core.setmethod("checkhostname", checkhostname_ssl)
 
 --------------------------------------------------------------------------------
 -- Export module
@@ -174,6 +221,7 @@ local _M = {
   loadcertificate = x509.load,
   newcontext      = newcontext,
   wrap            = wrap,
+  checkhostname   = checkhostname,
 }
 
 return _M
