@@ -220,7 +220,7 @@ local function connect(hostname, port, flags)
   flags.mode = "client"
   flags.verify = flags.verify or "none"
   flags.protocol = flags.protocol or "tlsv1_2"
-  conn, err = ssl.wrap(sock, flags or {})
+  conn, err = wrap(sock, flags or {})
   if not conn then
     sock:close()
     return nil, err
