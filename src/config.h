@@ -9,6 +9,8 @@
 
 #if defined(_WIN32)
 #define LSEC_API __declspec(dllexport) 
+#elif defined(__GNUC__)
+#define LSEC_API extern __attribute__((visibility ("default")))
 #else
 #define LSEC_API extern
 #endif
