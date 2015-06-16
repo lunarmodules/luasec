@@ -574,6 +574,24 @@ static int set_curve(lua_State *L)
   long ret;
   SSL_CTX *ctx = lsec_checkcontext(L, 1);
   const char *str = luaL_checkstring(L, 2);
+
+  SSL_CTX_set_options(ctx, SSL_OP_SINGLE_ECDH_USE);
+
+#if defined(SSL_CTRL_SET_ECDH_AUTO) || defined(SSL_CTRL_SET_CURVES_LIST)
+  if (SSL_CTX_set1_curves_list(ctx, str) != 1) {
+    lua_pushboolean(L, 0);
+    lua_pushfstring(L, "unknown elliptic curve in \"%s\"", str);
+    return 2;
+  }
+
+#ifdef SSL_CTRL_SET_ECDH_AUTO
+  SSL_CTX_set_ecdh_auto(ctx, 1);
+#endif
+
+  lua_pushboolean(L, 1);
+  return 1;
+
+#else /* !defined(SSL_CTRL_SET_CURVES_LIST) */
   EC_KEY *key = find_ec_key(str);
 
   if (!key) {
@@ -594,6 +612,7 @@ static int set_curve(lua_State *L)
   }
   lua_pushboolean(L, 1);
   return 1;
+#endif /* defined(SSL_CTRL_SET_CURVES_LIST) */
 }
 #endif
 
