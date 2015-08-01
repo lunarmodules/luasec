@@ -63,6 +63,51 @@ p_x509 lsec_checkp_x509(lua_State* L, int idx)
 
 /*---------------------------------------------------------------------------*/
 
+#if defined(LUASEC_INET_NTOP)
+/*
+ * For WinXP (SP3), set the following preprocessor macros:
+ *     LUASEC_INET_NTOP
+ *     WINVER=0x0501
+ *     _WIN32_WINNT=0x0501
+ *     NTDDI_VERSION=0x05010300
+ *
+ * For IPv6 addresses, you need to add IPv6 Protocol to your interface.
+ *
+ */
+static const char *inet_ntop(int af, const char *src, char *dst, socklen_t size)
+{
+  int addrsize;
+  struct sockaddr    *addr;
+  struct sockaddr_in  addr4;
+  struct sockaddr_in6 addr6;
+
+  switch (af) {
+  case AF_INET:
+	memset((void*)&addr4, 0, sizeof(addr4));
+	addr4.sin_family = AF_INET;
+	memcpy((void*)&addr4.sin_addr, src, sizeof(struct in_addr));
+	addr = (struct sockaddr*)&addr4;
+	addrsize = sizeof(struct sockaddr_in);
+	break;
+  case AF_INET6:
+	memset((void*)&addr6, 0, sizeof(addr6));
+	addr6.sin6_family = AF_INET6;
+	memcpy((void*)&addr6.sin6_addr, src, sizeof(struct in6_addr));
+    addr = (struct sockaddr*)&addr6;
+	addrsize = sizeof(struct sockaddr_in6);
+	break;
+  default:
+    return NULL;
+  }
+
+  if(getnameinfo(addr, addrsize, dst, size, NULL, 0, NI_NUMERICHOST) != 0)
+    return NULL;
+  return dst;
+}
+#endif
+
+/*---------------------------------------------------------------------------*/
+
 /**
  * Convert the buffer 'in' to hexadecimal.
  */
@@ -134,21 +179,21 @@ static int push_asn1_time(lua_State *L, ASN1_UTCTIME *tm)
  */
 static void push_asn1_ip(lua_State *L, ASN1_STRING *string)
 {
-  unsigned char *ip = ASN1_STRING_data(string);
+  int af;
   char dst[INET6_ADDRSTRLEN];
-  int typ;
+  unsigned char *ip = ASN1_STRING_data(string);
   switch(ASN1_STRING_length(string)) {
   case 4:
-    typ = AF_INET;
+    af = AF_INET;
     break;
   case 16:
-    typ = AF_INET6;
+    af = AF_INET6;
     break;
   default:
     lua_pushnil(L);
     return;
   }
-  if(inet_ntop(typ, ip, dst, INET6_ADDRSTRLEN))
+  if(inet_ntop(af, ip, dst, INET6_ADDRSTRLEN))
     lua_pushstring(L, dst);
   else
     lua_pushnil(L);
