@@ -268,7 +268,7 @@ static int meth_issuer(lua_State* L)
 /**
  * Retrieve the extensions from the certificate.
  */
-int meth_extensions(lua_State* L)
+static int meth_extensions(lua_State* L)
 {
   int j;
   int i = -1;

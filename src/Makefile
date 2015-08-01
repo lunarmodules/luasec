@@ -13,8 +13,8 @@ WARN=-Wall -pedantic
 BSD_CFLAGS=-O2 -fPIC $(WARN) $(INCDIR) $(DEFS)
 BSD_LDFLAGS=-O -fPIC -shared $(LIBDIR)
 
-LNX_CFLAGS=-O2 -fPIC $(WARN) $(INCDIR) $(DEFS)
-LNX_LDFLAGS=-O -fPIC -shared $(LIBDIR)
+LNX_CFLAGS=-O2 -fPIC -fvisibility=hidden $(WARN) $(INCDIR) $(DEFS)
+LNX_LDFLAGS=-O -fPIC -fvisibility=hidden -Wl,--exclude-libs,ALL -shared $(LIBDIR)
 
 MAC_ENV=env MACOSX_DEPLOYMENT_TARGET='$(MACVER)'
 MAC_CFLAGS=-O2 -fno-common $(WARN) $(INCDIR) $(DEFS)
