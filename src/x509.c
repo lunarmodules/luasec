@@ -83,19 +83,19 @@ static const char *inet_ntop(int af, const char *src, char *dst, socklen_t size)
 
   switch (af) {
   case AF_INET:
-	memset((void*)&addr4, 0, sizeof(addr4));
-	addr4.sin_family = AF_INET;
-	memcpy((void*)&addr4.sin_addr, src, sizeof(struct in_addr));
-	addr = (struct sockaddr*)&addr4;
-	addrsize = sizeof(struct sockaddr_in);
-	break;
+    memset((void*)&addr4, 0, sizeof(addr4));
+    addr4.sin_family = AF_INET;
+    memcpy((void*)&addr4.sin_addr, src, sizeof(struct in_addr));
+    addr = (struct sockaddr*)&addr4;
+    addrsize = sizeof(struct sockaddr_in);
+    break;
   case AF_INET6:
-	memset((void*)&addr6, 0, sizeof(addr6));
-	addr6.sin6_family = AF_INET6;
-	memcpy((void*)&addr6.sin6_addr, src, sizeof(struct in6_addr));
+    memset((void*)&addr6, 0, sizeof(addr6));
+    addr6.sin6_family = AF_INET6;
+    memcpy((void*)&addr6.sin6_addr, src, sizeof(struct in6_addr));
     addr = (struct sockaddr*)&addr6;
-	addrsize = sizeof(struct sockaddr_in6);
-	break;
+    addrsize = sizeof(struct sockaddr_in6);
+    break;
   default:
     return NULL;
   }
@@ -316,7 +316,7 @@ int meth_extensions(lua_State* L)
         break;
       case GEN_DNS:
         lua_pushstring(L, "dNSName");
-	push_subtable(L, -2);
+        push_subtable(L, -2);
         push_asn1_string(L, general_name->d.dNSName, px->encode);
         lua_rawseti(L, -2, lua_rawlen(L, -2) + 1);
         lua_pop(L, 1);
