@@ -1,4 +1,4 @@
-LuaSec 0.5
+LuaSec 0.6a
 ==========
 
 LuaSec depends  on OpenSSL, and  integrates with LuaSocket to  make it

@@ -1,6 +1,6 @@
 ------------------------------------------------------------------------------
--- LuaSec 0.5
--- Copyright (C) 2006-2014 Bruno Silvestre
+-- LuaSec 0.6a
+-- Copyright (C) 2006-2015 Bruno Silvestre
 --
 ------------------------------------------------------------------------------
 
@@ -169,7 +169,7 @@ core.setmethod("info", info)
 --
 
 local _M = {
-  _VERSION        = "0.5",
+  _VERSION        = "0.6a",
   _COPYRIGHT      = core.copyright(),
   loadcertificate = x509.load,
   newcontext      = newcontext,
