@@ -2,8 +2,6 @@ LuaSec 0.6a
 ==========
 Alpha version to address Lua 5.2 and 5.3 compatibility.
 
-There are issues with MinGW already.
-
 LuaSec 0.5
 ==========
 
