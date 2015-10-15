@@ -16,7 +16,7 @@ INCDIR    = -I. $(INC_PATH)
 LIBDIR    = -L./luasocket $(LIB_PATH)
 
 # For Mac OS X: set the system version
-MACOSX_VERSION=10.4
+MACOSX_VERSION=10.11
 
 #----------------------
 # Do not edit this part
