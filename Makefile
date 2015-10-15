@@ -1,4 +1,4 @@
-# Inform the location to intall the modules
+# Inform the location to install the modules
 LUAPATH  ?= /usr/share/lua/5.1
 LUACPATH ?= /usr/lib/lua/5.1
 
