@@ -29,6 +29,7 @@ typedef t_context* p_context;
 
 /* Retrieve the SSL context from the Lua stack */
 SSL_CTX *lsec_checkcontext(lua_State *L, int idx);
+SSL_CTX *lsec_testcontext(lua_State *L, int idx);
 
 /* Retrieve the mode from the context in the Lua stack */
 int lsec_getmode(lua_State *L, int idx);
