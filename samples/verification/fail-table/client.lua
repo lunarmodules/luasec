@@ -6,13 +6,13 @@ local ssl    = require("ssl")
 
 local params = {
    mode = "client",
-   protocol = "sslv3",
+   protocol = "tlsv1",
    key = "../../certs/clientBkey.pem",
    certificate = "../../certs/clientB.pem",
    cafile = "../../certs/rootB.pem",
    verify = {"peer", "fail_if_no_peer_cert"},
-   options = {"all", "no_sslv2"},
-   verifyext = {"lsec_continue"},
+   options = "all",
+   verifyext = "lsec_continue",
 }
 
 -- [[ SSL context

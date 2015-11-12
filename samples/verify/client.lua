@@ -12,7 +12,7 @@ local params = {
    cafile = "../certs/rootB.pem",
    verify = {"peer", "fail_if_no_peer_cert"},
    verifyext = {"lsec_continue", "lsec_ignore_purpose"},
-   options = {"all", "no_sslv2"},
+   options = "all",
 }
 
 local ctx = assert(ssl.newcontext(params))
