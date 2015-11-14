@@ -126,7 +126,10 @@ local function request(url, body)
   end
   -- New 'create' function to establish a secure connection
   url.create = tcp(url)
-  local res, code, headers, status = http.request(url)
+  if body then
+	  url.source = ltn12.source.string(body)
+  end
+  local res, code, headers, status = http.request(url,body)
   if res and stringrequest then
     return table.concat(result_table), code, headers, status
   end
