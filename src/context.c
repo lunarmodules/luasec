@@ -93,6 +93,9 @@ static int set_option_flag(const char *opt, unsigned long *flag)
  */
 static LSEC_SSL_METHOD* str2method(const char *method)
 {
+#if OPENSSL_VERSION_NUMBER>=0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
+#define SSLv23_method TLS_method
+#endif
   if (!strcmp(method, "sslv23"))  return SSLv23_method();
 #ifndef OPENSSL_NO_SSL3
   if (!strcmp(method, "sslv3"))   return SSLv3_method();
