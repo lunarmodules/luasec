@@ -1,4 +1,4 @@
-# Inform the location to intall the modules
+# Inform the location to install the modules
 LUAPATH		?= /usr/share/lua/5.1
 LUACPATH	?= /usr/lib/lua/5.1
 
@@ -16,7 +16,7 @@ INCDIR		 = -I. $(INC_PATH)
 LIBDIR		 = -L./luasocket $(LIB_PATH)
 
 # For Mac OS X: set the system version
-MACOSX_VERSION=10.4
+MACOSX_VERSION?=10.11
 
 #----------------------
 # Do not edit this part
