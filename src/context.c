@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.5
+ * LuaSec 0.5.1
  *
- * Copyright (C) 2014 Kim Alvefur, Paul Aurich, Tobias Markmann, 
- *                    Matthew Wild.
- * Copyright (C) 2006-2014 Bruno Silvestre.
+ * Copyright (C) 2014-2015 Kim Alvefur, Paul Aurich, Tobias Markmann, 
+ *                         Matthew Wild.
+ * Copyright (C) 2006-2015 Bruno Silvestre.
  *
  *--------------------------------------------------------------------------*/
 

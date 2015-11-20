@@ -1,4 +1,12 @@
 --------------------------------------------------------------------------------
+LuaSec 0.5.1
+------------
+- Check if SSLv3 protocol is available.
+- Fix push_asn1_string().
+- Update samples to use 'sslv23' and 'tlsv1_2'.
+- Update MACOSX_VERSION to 10.11 on Makefile.
+
+--------------------------------------------------------------------------------
 LuaSec 0.5
 ------------
 

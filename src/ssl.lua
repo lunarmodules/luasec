@@ -1,6 +1,6 @@
 ------------------------------------------------------------------------------
--- LuaSec 0.5
--- Copyright (C) 2006-2014 Bruno Silvestre
+-- LuaSec 0.5.1
+-- Copyright (C) 2006-2015 Bruno Silvestre
 --
 ------------------------------------------------------------------------------
 
@@ -10,7 +10,7 @@ local x509    = require("ssl.x509")
 
 module("ssl", package.seeall)
 
-_VERSION   = "0.5.PR"
+_VERSION   = "0.5.1"
 _COPYRIGHT = core.copyright()
 
 -- Export
