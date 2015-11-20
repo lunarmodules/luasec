@@ -406,7 +406,9 @@ static int meth_want(lua_State *L)
  */
 static int meth_compression(lua_State *L)
 {
-#if !defined(OPENSSL_NO_COMP)
+#ifdef OPENSSL_NO_COMP
+  const void *comp;
+#else
   const COMP_METHOD *comp;
 #endif
   p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
@@ -415,15 +417,11 @@ static int meth_compression(lua_State *L)
     lua_pushstring(L, "closed");
     return 2;
   }
-#if !defined(OPENSSL_NO_COMP)
   comp = SSL_get_current_compression(ssl->ssl);
   if (comp)
     lua_pushstring(L, SSL_COMP_get_name(comp));
   else
     lua_pushnil(L);
-#else
-  lua_pushnil(L);
-#endif
   return 1;
 }
 
