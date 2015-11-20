@@ -86,10 +86,12 @@ static void push_asn1_objname(lua_State* L, ASN1_OBJECT *object, int no_name)
  */
 static void push_asn1_string(lua_State* L, ASN1_STRING *string, int encode)
 {
-  size_t len;
+  int len; 
   unsigned char *data;
-  if (!string)
+  if (!string) {
     lua_pushnil(L);
+    return;
+  }
   switch (encode) {
   case LSEC_AI5_STRING:
     lua_pushlstring(L, (char*)ASN1_STRING_data(string),
@@ -101,6 +103,8 @@ static void push_asn1_string(lua_State* L, ASN1_STRING *string, int encode)
       lua_pushlstring(L, (char*)data, len);
       OPENSSL_free(data);
     }
+    else
+      lua_pushnil(L);
   }
 }
 
