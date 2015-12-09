@@ -324,6 +324,8 @@ static int create(lua_State *L)
   /* Link LuaSec context with the OpenSSL context */
   SSL_CTX_set_app_data(ctx->context, ctx);
 
+  ctx->alpn_cb_ref = LUA_NOREF;
+
   return 1;
 }
 
@@ -604,14 +606,27 @@ static int set_alpn_cb(lua_State *L)
 {
   p_context ctx = checkctx(L, 1);
 
-  if (ctx->alpn_cb_ref) {
+  if (ctx->alpn_cb_ref != LUA_NOREF) {
     luaL_unref(L, LUA_REGISTRYINDEX, ctx->alpn_cb_ref);
   }
 
-  lua_pushvalue(L, 2);
-  ctx->alpn_cb_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+  SSL_CTX_set_alpn_select_cb(ctx->context, NULL, NULL);
 
-  SSL_CTX_set_alpn_select_cb(ctx->context, alpn_cb, ctx);
+  switch (lua_type(L, 2)) {
+  case LUA_TFUNCTION:
+    lua_pushvalue(L, 2);
+
+    ctx->alpn_cb_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    SSL_CTX_set_alpn_select_cb(ctx->context, alpn_cb, ctx);
+
+    break;
+  case LUA_TNIL:
+    break;
+  default:
+    lua_pushstring(L, "invalid callback value");
+    lua_error(L);
+  }
 
   return 0;
 }
