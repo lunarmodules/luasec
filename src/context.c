@@ -612,6 +612,10 @@ static int set_alpn_cb(lua_State *L)
 {
   p_context ctx = checkctx(L, 1);
 
+  if (ctx->alpn_cb_ref) {
+    luaL_unref(L, LUA_REGISTRYINDEX, ctx->alpn_cb_ref);
+  }
+
   lua_pushvalue(L, 2);
   ctx->alpn_cb_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
@@ -668,6 +672,9 @@ static int meth_destroy(lua_State *L)
   }
   if (ctx->alpn) {
     free(ctx->alpn);
+  }
+  if (ctx->alpn_cb_ref) {
+    luaL_unref(L, LUA_REGISTRYINDEX, ctx->alpn_cb_ref);
   }
 
   return 0;
