@@ -128,6 +128,9 @@ function newcontext(cfg)
     if not succ then return nil, msg end
    end
    if cfg.alpn_cb then
+    if type(cfg.alpn_cb) ~= "function" then
+      return nil, "invalid alpn_cb parameter type"
+    end
 
     context.setalpncb(ctx, function (str)
       local protocols = {}
@@ -142,7 +145,10 @@ function newcontext(cfg)
       local ret = cfg.alpn_cb(protocols)
       return tolengthstring({ret})
     end)
-
+   elseif cfg.mode == "server" and cfg.alpn then
+    context.setalpncb(ctx, function ()
+      return tolengthstring(cfg.alpn)
+    end)
    end
 
    return ctx
