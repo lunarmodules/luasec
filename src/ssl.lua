@@ -34,6 +34,22 @@ local function optexec(func, param, ctx)
   return true
 end
 
+local function tolengthstring(table)
+    local str = ""
+
+    for k,v in ipairs(table) do
+      local len = #v
+
+      if len > 255 then
+        return nil, "invalid value: " .. v
+      end
+
+      str = str .. string.char(len) .. v
+    end
+
+    return str
+end
+
 --
 --
 --
@@ -104,6 +120,30 @@ function newcontext(cfg)
       succ, msg = optexec(ctx.setverifyext, cfg.verifyext, ctx)
       if not succ then return nil, msg end
    end
+   if cfg.alpn then
+    local str, msg = tolengthstring(cfg.alpn)
+    if not str then return nil, msg end
+
+    succ, msg = context.setalpn(ctx, str)
+    if not succ then return nil, msg end
+   end
+   if cfg.alpn_cb then
+
+    context.setalpncb(ctx, function (str)
+      local protocols = {}
+      local i = 1
+
+      while i < #str do
+        local len = str:byte(i)
+        protocols[#protocols + 1] = str:sub(i + 1, i + len)
+        i = i + len + 1
+      end
+
+      local ret = cfg.alpn_cb(protocols)
+      return tolengthstring({ret})
+    end)
+
+   end
 
    return ctx
 end
@@ -143,7 +183,7 @@ local function info(ssl, field)
     return comp
   end
   local info = {compression = comp}
-  str, info.bits, info.algbits, protocol = core.info(ssl)
+  str, info.bits, info.algbits, protocol, alpn = core.info(ssl)
   if str then
     info.cipher, info.protocol, info.key,
     info.authentication, info.encryption, info.mac =
@@ -153,6 +193,9 @@ local function info(ssl, field)
   end
   if protocol then
     info.protocol = protocol
+  end
+  if alpn then
+    info.alpn = alpn
   end
   if field then
     return info[field]

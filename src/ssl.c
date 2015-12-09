@@ -650,6 +650,17 @@ static int meth_info(lua_State *L)
   lua_pushnumber(L, bits);
   lua_pushnumber(L, algbits);
   lua_pushstring(L, SSL_get_version(ssl->ssl));
+
+  const unsigned char *data;
+  unsigned len;
+
+  SSL_get0_alpn_selected(ssl->ssl, &data, &len);
+
+  if (data && *data) {
+    lua_pushlstring(L, (const char*)data, len);
+    return 5;
+  }
+
   return 4;
 }
 

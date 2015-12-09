@@ -556,6 +556,70 @@ static int set_curve(lua_State *L)
 }
 #endif
 
+static int set_alpn(lua_State *L)
+{
+  long ret;
+  size_t len;
+  p_context ctx = checkctx(L, 1);
+  const char *str = luaL_checklstring(L, 2, &len);
+
+  ret = SSL_CTX_set_alpn_protos(ctx->context, (const unsigned char *)str, len);
+
+  if (ret) {
+    lua_pushnil(L);
+    lua_pushfstring(L, "error setting ALPN (%s)",
+      ERR_reason_error_string(ERR_get_error()));
+    return 2;
+  }
+
+  if (ctx->alpn) {
+    free(ctx->alpn);
+  }
+
+  ctx->alpn = malloc(len);
+  memcpy(ctx->alpn, str, len);
+  ctx->alpn_len = len;
+
+  lua_pushboolean(L, 1);
+
+  return 1;
+}
+
+static int alpn_cb(SSL *s, const unsigned char **out, unsigned char *outlen, const unsigned char *in, unsigned int inlen, void *arg)
+{
+  size_t len;
+  p_context ctx = (p_context)arg;
+  lua_State *L = ctx->L;
+  const char *res;
+
+  lua_rawgeti(L, LUA_REGISTRYINDEX, ctx->alpn_cb_ref);
+  lua_pushlstring(L, (const char*)in, inlen);
+
+  lua_call(L, 1, 1);
+
+  res = luaL_checklstring(L, 2, &len);
+
+  lua_pop(L, 2);
+
+  if (SSL_select_next_proto((unsigned char **)out, outlen, (const unsigned char *)res, len, in, inlen) != OPENSSL_NPN_NEGOTIATED) {
+    return SSL_TLSEXT_ERR_NOACK;
+  }
+
+  return SSL_TLSEXT_ERR_OK;
+}
+
+static int set_alpn_cb(lua_State *L)
+{
+  p_context ctx = checkctx(L, 1);
+
+  lua_pushvalue(L, 2);
+  ctx->alpn_cb_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+  SSL_CTX_set_alpn_select_cb(ctx->context, alpn_cb, ctx);
+
+  return 0;
+}
+
 /**
  * Package functions
  */
@@ -571,6 +635,8 @@ static luaL_Reg funcs[] = {
   {"setverify",    set_verify},
   {"setoptions",   set_options},
   {"setmode",      set_mode},
+  {"setalpn",      set_alpn},
+  {"setalpncb",    set_alpn_cb},
   {NULL, NULL}
 };
 
@@ -599,6 +665,9 @@ static int meth_destroy(lua_State *L)
   if (ctx->dh_param) {
     DH_free(ctx->dh_param);
     ctx->dh_param = NULL;
+  }
+  if (ctx->alpn) {
+    free(ctx->alpn);
   }
 
   return 0;
