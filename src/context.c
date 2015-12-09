@@ -572,14 +572,6 @@ static int set_alpn(lua_State *L)
     return 2;
   }
 
-  if (ctx->alpn) {
-    free(ctx->alpn);
-  }
-
-  ctx->alpn = malloc(len);
-  memcpy(ctx->alpn, str, len);
-  ctx->alpn_len = len;
-
   lua_pushboolean(L, 1);
 
   return 1;
@@ -669,9 +661,6 @@ static int meth_destroy(lua_State *L)
   if (ctx->dh_param) {
     DH_free(ctx->dh_param);
     ctx->dh_param = NULL;
-  }
-  if (ctx->alpn) {
-    free(ctx->alpn);
   }
   if (ctx->alpn_cb_ref) {
     luaL_unref(L, LUA_REGISTRYINDEX, ctx->alpn_cb_ref);

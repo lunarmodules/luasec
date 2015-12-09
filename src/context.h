@@ -24,9 +24,6 @@ typedef struct t_context_ {
   lua_State *L;
   DH *dh_param;
   int mode;
-  unsigned char *alpn;
-  size_t alpn_len;
-  int alpn_status;
   int alpn_cb_ref;
 } t_context;
 typedef t_context* p_context;
