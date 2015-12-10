@@ -606,6 +606,10 @@ static int set_curve(lua_State *L)
 #endif
 
 #if OPENSSL_VERSION_NUMBER > 0x10002001L
+/**
+ * Set the protocols a client should send for ALPN.
+ * ALPN support was added in OpenSSL 1.0.2.
+ */
 static int set_alpn(lua_State *L)
 {
   long ret;
@@ -639,19 +643,25 @@ static int alpn_cb(SSL *s, const unsigned char **out, unsigned char *outlen, con
 
   lua_call(L, 1, 1);
 
-  if (lua_isnil(L, 2)) {
+  if (!lua_isstring(L, 2)) {
     return SSL_TLSEXT_ERR_NOACK;
   }
 
   res = luaL_checklstring(L, 2, &len);
 
   if (SSL_select_next_proto((unsigned char **)out, outlen, (const unsigned char *)res, len, in, inlen) != OPENSSL_NPN_NEGOTIATED) {
+    lua_pop(L, 2);
     return SSL_TLSEXT_ERR_NOACK;
   }
+
+  lua_pop(L, 2);
 
   return SSL_TLSEXT_ERR_OK;
 }
 
+/**
+ * Set a callback a server can use to select the next protocol with ALPN.
+ */
 static int set_alpn_cb(lua_State *L)
 {
   p_context ctx = checkctx(L, 1);
