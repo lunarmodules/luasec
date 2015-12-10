@@ -358,7 +358,9 @@ static int create(lua_State *L)
   /* Link LuaSec context with the OpenSSL context */
   SSL_CTX_set_app_data(ctx->context, ctx);
 
+#if OPENSSL_VERSION_NUMBER > 0x10002001L
   ctx->alpn_cb_ref = LUA_NOREF;
+#endif
 
   return 1;
 }
@@ -747,9 +749,11 @@ static int meth_destroy(lua_State *L)
     DH_free(ctx->dh_param);
     ctx->dh_param = NULL;
   }
+#if OPENSSL_VERSION_NUMBER > 0x10002001L
   if (ctx->alpn_cb_ref) {
     luaL_unref(L, LUA_REGISTRYINDEX, ctx->alpn_cb_ref);
   }
+#endif
 
   return 0;
 }

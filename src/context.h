@@ -24,7 +24,9 @@ typedef struct t_context_ {
   lua_State *L;
   DH *dh_param;
   int mode;
+#if OPENSSL_VERSION_NUMBER > 0x10002001L
   int alpn_cb_ref;
+#endif
 } t_context;
 typedef t_context* p_context;
 
