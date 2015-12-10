@@ -118,13 +118,7 @@ local function newcontext(cfg)
       succ, msg = optexec(ctx.setverifyext, cfg.verifyext, ctx)
       if not succ then return nil, msg end
    end
-   if cfg.alpn then
-    local str, msg = tolengthstring(cfg.alpn)
-    if not str then return nil, msg end
 
-    succ, msg = context.setalpn(ctx, str)
-    if not succ then return nil, msg end
-   end
    if cfg.alpn_cb then
     if type(cfg.alpn_cb) ~= "function" then
       return nil, "invalid alpn_cb parameter type"
@@ -141,12 +135,33 @@ local function newcontext(cfg)
       end
 
       local ret = cfg.alpn_cb(protocols)
-      return tolengthstring({ret})
+
+      if not ret then
+        return nil
+      elseif type(ret) == "string" then
+        ret = { ret }
+      end
+
+      return tolengthstring(ret)
     end)
-   elseif cfg.mode == "server" and cfg.alpn then
-    context.setalpncb(ctx, function ()
-      return tolengthstring(cfg.alpn)
-    end)
+   end
+
+   if cfg.alpn then
+    if cfg.mode == "client" then
+
+      local str, msg = tolengthstring(cfg.alpn)
+      if not str then return nil, msg end
+
+      succ, msg = context.setalpn(ctx, str)
+      if not succ then return nil, msg end
+
+    elseif cfg.mode == "server" and not cfg.alpn_cb then
+
+      context.setalpncb(ctx, function ()
+        return tolengthstring(cfg.alpn)
+      end)
+
+    end
    end
 
    return ctx

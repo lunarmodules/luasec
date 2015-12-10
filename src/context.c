@@ -636,9 +636,11 @@ static int alpn_cb(SSL *s, const unsigned char **out, unsigned char *outlen, con
 
   lua_call(L, 1, 1);
 
-  res = luaL_checklstring(L, 2, &len);
+  if (lua_isnil(L, 2)) {
+    return SSL_TLSEXT_ERR_NOACK;
+  }
 
-  lua_pop(L, 2);
+  res = luaL_checklstring(L, 2, &len);
 
   if (SSL_select_next_proto((unsigned char **)out, outlen, (const unsigned char *)res, len, in, inlen) != OPENSSL_NPN_NEGOTIATED) {
     return SSL_TLSEXT_ERR_NOACK;
@@ -653,6 +655,7 @@ static int set_alpn_cb(lua_State *L)
 
   if (ctx->alpn_cb_ref != LUA_NOREF) {
     luaL_unref(L, LUA_REGISTRYINDEX, ctx->alpn_cb_ref);
+    ctx->alpn_cb_ref = LUA_NOREF;
   }
 
   SSL_CTX_set_alpn_select_cb(ctx->context, NULL, NULL);
