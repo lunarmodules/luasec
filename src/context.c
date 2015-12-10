@@ -675,7 +675,7 @@ static int set_alpn_cb(lua_State *L)
   case LUA_TNIL:
     break;
   default:
-    lua_pushnil();
+    lua_pushnil(L);
     lua_pushstring(L, "invalid callback value");
     return 2;
   }
