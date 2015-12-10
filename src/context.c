@@ -645,11 +645,9 @@ static int alpn_cb(SSL *s, const unsigned char **out, unsigned char *outlen, con
 
   res = luaL_checklstring(L, 2, &len);
 
-#if OPENSSL_VERSION_NUMBER > 0x10002001L
   if (SSL_select_next_proto((unsigned char **)out, outlen, (const unsigned char *)res, len, in, inlen) != OPENSSL_NPN_NEGOTIATED) {
     return SSL_TLSEXT_ERR_NOACK;
   }
-#endif
 
   return SSL_TLSEXT_ERR_OK;
 }
@@ -685,21 +683,6 @@ static int set_alpn_cb(lua_State *L)
   lua_pushboolean(L, 1);
   return 1;
 }
-
-#else
-
-static int set_alpn(lua_State *L) {
-  lua_pushboolean(L, 0);
-  lua_pushstring(L, "OpenSSL does not support ALPN");
-  return 2;
-}
-
-static int set_alpn_cb(lua_State *L) {
-  lua_pushboolean(L, 0);
-  lua_pushstring(L, "OpenSSL does not support ALPN");
-  return 2;
-}
-
 #endif
 
 /**
@@ -718,8 +701,10 @@ static luaL_Reg funcs[] = {
   {"setverify",    set_verify},
   {"setoptions",   set_options},
   {"setmode",      set_mode},
+#if OPENSSL_VERSION_NUMBER > 0x10002001L
   {"setalpn",      set_alpn},
   {"setalpncb",    set_alpn_cb},
+#endif
   {NULL, NULL}
 };
 
