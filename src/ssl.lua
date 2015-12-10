@@ -119,7 +119,7 @@ local function newcontext(cfg)
       if not succ then return nil, msg end
    end
 
-   if cfg.alpn_cb then
+   if context.setalpn and cfg.alpn_cb then
     if type(cfg.alpn_cb) ~= "function" then
       return nil, "invalid alpn_cb parameter type"
     end
@@ -148,7 +148,7 @@ local function newcontext(cfg)
     if not succ then return nil, msg end
    end
 
-   if cfg.alpn then
+   if context.setalpn and cfg.alpn then
     if cfg.mode == "client" then
 
       local str, msg = tolengthstring(cfg.alpn)
