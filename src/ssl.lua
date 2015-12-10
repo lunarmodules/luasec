@@ -195,7 +195,7 @@ end
 -- Extract connection information.
 --
 local function info(ssl, field)
-  local str, comp, err, protocol
+  local str, comp, err, protocol, alpn
   comp, err = core.compression(ssl)
   if err then
     return comp, err
