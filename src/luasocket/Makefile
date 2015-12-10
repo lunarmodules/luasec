@@ -6,7 +6,7 @@ OBJS= \
 
 CC	?= cc
 CFLAGS	+= $(MYCFLAGS) -DLUASOCKET_DEBUG
-AR	:= ar rcu
+AR	?= ar
 RANLIB	?= ranlib
 
 .PHONY: all clean
@@ -14,7 +14,7 @@ RANLIB	?= ranlib
 all: libluasocket.a
 
 libluasocket.a: $(OBJS)
-	$(AR) $@ $(OBJS)
+	$(AR) rcu $@ $(OBJS)
 	$(RANLIB) $@
 
 clean:

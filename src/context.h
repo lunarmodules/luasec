@@ -2,8 +2,8 @@
 #define LSEC_CONTEXT_H
 
 /*--------------------------------------------------------------------------
- * LuaSec 0.5
- * Copyright (C) 2006-2014 Bruno Silvestre
+ * LuaSec 0.6a
+ * Copyright (C) 2006-2015 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
@@ -30,6 +30,7 @@ typedef t_context* p_context;
 
 /* Retrieve the SSL context from the Lua stack */
 SSL_CTX *lsec_checkcontext(lua_State *L, int idx);
+SSL_CTX *lsec_testcontext(lua_State *L, int idx);
 
 /* Retrieve the mode from the context in the Lua stack */
 int lsec_getmode(lua_State *L, int idx);
