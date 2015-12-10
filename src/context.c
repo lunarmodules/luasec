@@ -603,6 +603,7 @@ static int set_curve(lua_State *L)
 }
 #endif
 
+#if OPENSSL_VERSION_NUMBER > 0x10002001L
 static int set_alpn(lua_State *L)
 {
   long ret;
@@ -642,9 +643,11 @@ static int alpn_cb(SSL *s, const unsigned char **out, unsigned char *outlen, con
 
   res = luaL_checklstring(L, 2, &len);
 
+#if OPENSSL_VERSION_NUMBER > 0x10002001L
   if (SSL_select_next_proto((unsigned char **)out, outlen, (const unsigned char *)res, len, in, inlen) != OPENSSL_NPN_NEGOTIATED) {
     return SSL_TLSEXT_ERR_NOACK;
   }
+#endif
 
   return SSL_TLSEXT_ERR_OK;
 }
@@ -672,12 +675,30 @@ static int set_alpn_cb(lua_State *L)
   case LUA_TNIL:
     break;
   default:
+    lua_pushnil();
     lua_pushstring(L, "invalid callback value");
-    lua_error(L);
+    return 2;
   }
 
-  return 0;
+  lua_pushboolean(L, 1);
+  return 1;
 }
+
+#else
+
+static int set_alpn(lua_State *L) {
+  lua_pushboolean(L, 0);
+  lua_pushstring(L, "OpenSSL does not support ALPN");
+  return 2;
+}
+
+static int set_alpn_cb(lua_State *L) {
+  lua_pushboolean(L, 0);
+  lua_pushstring(L, "OpenSSL does not support ALPN");
+  return 2;
+}
+
+#endif
 
 /**
  * Package functions
