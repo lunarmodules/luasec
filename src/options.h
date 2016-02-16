@@ -12,7 +12,7 @@
 /* If you need to generate these options again, see options.lua */
 
 /* 
-  OpenSSL version: OpenSSL 1.0.1e 2013-06-12
+  OpenSSL version: OpenSSL 1.0.2f
 */
 
 struct ssl_option_s {
@@ -73,11 +73,20 @@ static ssl_option_t ssl_options[] = {
 #if defined(SSL_OP_NO_COMPRESSION)
   {"no_compression", SSL_OP_NO_COMPRESSION},
 #endif
+#if defined(SSL_OP_NO_DTLSv1)
+  {"no_dtlsv1", SSL_OP_NO_DTLSv1},
+#endif
+#if defined(SSL_OP_NO_DTLSv1_2)
+  {"no_dtlsv1_2", SSL_OP_NO_DTLSv1_2},
+#endif
 #if defined(SSL_OP_NO_QUERY_MTU)
   {"no_query_mtu", SSL_OP_NO_QUERY_MTU},
 #endif
 #if defined(SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION)
   {"no_session_resumption_on_renegotiation", SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION},
+#endif
+#if defined(SSL_OP_NO_SSL_MASK)
+  {"no_ssl_mask", SSL_OP_NO_SSL_MASK},
 #endif
 #if defined(SSL_OP_NO_SSLv2)
   {"no_sslv2", SSL_OP_NO_SSLv2},
@@ -103,6 +112,9 @@ static ssl_option_t ssl_options[] = {
 #if defined(SSL_OP_PKCS1_CHECK_2)
   {"pkcs1_check_2", SSL_OP_PKCS1_CHECK_2},
 #endif
+#if defined(SSL_OP_SAFARI_ECDHE_ECDSA_BUG)
+  {"safari_ecdhe_ecdsa_bug", SSL_OP_SAFARI_ECDHE_ECDSA_BUG},
+#endif
 #if defined(SSL_OP_SINGLE_DH_USE)
   {"single_dh_use", SSL_OP_SINGLE_DH_USE},
 #endif
@@ -114,6 +126,9 @@ static ssl_option_t ssl_options[] = {
 #endif
 #if defined(SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG)
   {"sslref2_reuse_cert_type_bug", SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG},
+#endif
+#if defined(SSL_OP_TLSEXT_PADDING)
+  {"tlsext_padding", SSL_OP_TLSEXT_PADDING},
 #endif
 #if defined(SSL_OP_TLS_BLOCK_PADDING_BUG)
   {"tls_block_padding_bug", SSL_OP_TLS_BLOCK_PADDING_BUG},
