@@ -25,8 +25,8 @@ local _M = {
 
 -- TLS configuration
 local cfg = {
-  protocol = "tlsv1",
-  options  = "all",
+  protocol = "any",
+  options  = {"all", "no_sslv2", "no_sslv3"},
   verify   = "none",
 }
 
