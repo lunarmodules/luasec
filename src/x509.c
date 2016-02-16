@@ -6,6 +6,7 @@
  *
  *--------------------------------------------------------------------------*/
 
+#include <stdio.h>
 #include <string.h>
 
 #if defined(WIN32)
@@ -520,6 +521,91 @@ static int meth_notafter(lua_State *L)
 }
 
 /**
+ * Check if this certificate issued some other certificate
+ */
+static int meth_issued(lua_State* L)
+{
+  int ret, i, len;
+
+  X509_STORE_CTX* ctx = NULL;
+  X509_STORE* root = NULL;
+  STACK_OF(X509)* chain = NULL;
+
+  X509* issuer = lsec_checkx509(L, 1);
+  X509* subject = lsec_checkx509(L, 2);
+  X509* cert = NULL;
+
+  len = lua_gettop(L);
+
+  /* Check that all arguments are certificates */
+
+  for (i = 3; i <= len; i++) {
+    lsec_checkx509(L, i);
+  }
+
+  /* Before allocating things that require freeing afterwards */
+
+  chain = sk_X509_new_null();
+  ctx = X509_STORE_CTX_new();
+  root = X509_STORE_new();
+
+  if (ctx == NULL || root == NULL) {
+    lua_pushnil(L);
+    lua_pushstring(L, "X509_STORE_new() or X509_STORE_CTX_new() error");
+    ret = 2;
+    goto cleanup;
+  }
+
+  ret = X509_STORE_add_cert(root, issuer);
+
+  if(!ret) {
+    lua_pushnil(L);
+    lua_pushstring(L, "X509_STORE_add_cert() error");
+    ret = 2;
+    goto cleanup;
+  }
+
+  for (i = 3; i <= len && lua_isuserdata(L, i); i++) {
+    cert = lsec_checkx509(L, i);
+    sk_X509_push(chain, cert);
+  }
+
+  ret = X509_STORE_CTX_init(ctx, root, subject, chain);
+
+  if(!ret) {
+    lua_pushnil(L);
+    lua_pushstring(L, "X509_STORE_CTX_init() error");
+    ret = 2;
+    goto cleanup;
+  }
+
+  /* Actual verification */
+  if (X509_verify_cert(ctx) <= 0) {
+    ret = X509_STORE_CTX_get_error(ctx);
+    lua_pushnil(L);
+    lua_pushstring(L, X509_verify_cert_error_string(ret));
+    ret = 2;
+  } else {
+    lua_pushboolean(L, 1);
+    ret = 1;
+  }
+
+cleanup:
+
+  if (ctx != NULL) {
+    X509_STORE_CTX_free(ctx);
+  }
+
+  if (chain != NULL) {
+    X509_STORE_free(root);
+  }
+
+  sk_X509_free(chain);
+
+  return ret;
+}
+
+/**
  * Collect X509 objects.
  */
 static int meth_destroy(lua_State* L)
@@ -585,6 +671,7 @@ static luaL_Reg methods[] = {
   {"issuer",     meth_issuer},
   {"notbefore",  meth_notbefore},
   {"notafter",   meth_notafter},
+  {"issued",     meth_issued},
   {"pem",        meth_pem},
   {"pubkey",     meth_pubkey},
   {"serial",     meth_serial},
