@@ -1,4 +1,4 @@
-LuaSec 0.6a
+LuaSec 0.6
 ==========
 LuaSec depends  on OpenSSL, and  integrates with LuaSocket to  make it
 easy to add secure connections to any Lua applications or scripts.
@@ -29,4 +29,8 @@ This version includes:
 * Some bug fixes
 
 
-=> Thanks to everyone who collaborate with LuaSec <=
+********************************************************************************
+
+PS: 10th anniversary! Thanks to everyone who collaborate with LuaSec.
+
+********************************************************************************

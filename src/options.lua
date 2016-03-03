@@ -21,8 +21,8 @@ local function generate(options, version)
 #define LSEC_OPTIONS_H
 
 /*--------------------------------------------------------------------------
- * LuaSec 0.6a
- * Copyright (C) 2006-2015 Bruno Silvestre
+ * LuaSec 0.6
+ * Copyright (C) 2006-2016 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 

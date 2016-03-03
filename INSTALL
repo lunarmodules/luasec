@@ -1,9 +1,9 @@
-LuaSec 0.6a
+LuaSec 0.6
 ------------
 
 * OpenSSL options:
 
-    By default, LuaSec 0.6a includes options for OpenSSL 1.0.1e.
+    By default, LuaSec 0.6 includes options for OpenSSL 1.0.2f.
 
     If you need to generate the options for a different version of OpenSSL:
 
