@@ -191,19 +191,19 @@ static int ssl_recv(void *ctx, char *data, size_t count, size_t *got,
 {
   int err;
   p_ssl ssl = (p_ssl)ctx;
+  *got = 0;
   if (ssl->state != LSEC_STATE_CONNECTED)
     return IO_CLOSED;
-  *got = 0;
   for ( ; ; ) {
     ERR_clear_error();
     err = SSL_read(ssl->ssl, data, (int)count);
     ssl->error = SSL_get_error(ssl->ssl, err);
     switch (ssl->error) {
     case SSL_ERROR_NONE:
-      *got = err;
+      *got = 0;
       return IO_DONE;
     case SSL_ERROR_ZERO_RETURN:
-      *got = err;
+      *got = 0;
       return IO_CLOSED;
     case SSL_ERROR_WANT_READ:
       err = socket_waitfd(&ssl->sock, WAITFD_R, tm);
