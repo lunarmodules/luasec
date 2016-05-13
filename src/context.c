@@ -577,7 +577,7 @@ static int set_curve(lua_State *L)
 
   SSL_CTX_set_options(ctx, SSL_OP_SINGLE_ECDH_USE);
 
-#if defined(SSL_CTRL_SET_ECDH_AUTO) || defined(SSL_CTRL_SET_CURVES_LIST)
+#if defined(SSL_CTRL_SET_ECDH_AUTO) || defined(SSL_CTRL_SET_CURVES_LIST) || defined(SSL_CTX_set1_curves_list)
   if (SSL_CTX_set1_curves_list(ctx, str) != 1) {
     lua_pushboolean(L, 0);
     lua_pushfstring(L, "unknown elliptic curve in \"%s\"", str);
