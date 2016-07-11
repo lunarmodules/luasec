@@ -221,7 +221,7 @@ static int push_subtable(lua_State* L, int idx)
 }
 
 /**
- * Retrive the general names from the object.
+ * Retrieve the general names from the object.
  */
 static int push_x509_name(lua_State* L, X509_NAME *name, int encode)
 {
@@ -249,7 +249,7 @@ static int push_x509_name(lua_State* L, X509_NAME *name, int encode)
 /*---------------------------------------------------------------------------*/
 
 /**
- * Retrive the Subject from the certificate.
+ * Retrieve the Subject from the certificate.
  */
 static int meth_subject(lua_State* L)
 {
@@ -258,7 +258,7 @@ static int meth_subject(lua_State* L)
 }
 
 /**
- * Retrive the Issuer from the certificate.
+ * Retrieve the Issuer from the certificate.
  */
 static int meth_issuer(lua_State* L)
 {
