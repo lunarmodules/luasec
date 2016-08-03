@@ -200,10 +200,9 @@ static int ssl_recv(void *ctx, char *data, size_t count, size_t *got,
     ssl->error = SSL_get_error(ssl->ssl, err);
     switch (ssl->error) {
     case SSL_ERROR_NONE:
-      *got = 0;
+      *got = err;
       return IO_DONE;
     case SSL_ERROR_ZERO_RETURN:
-      *got = 0;
       return IO_CLOSED;
     case SSL_ERROR_WANT_READ:
       err = socket_waitfd(&ssl->sock, WAITFD_R, tm);
