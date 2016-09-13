@@ -415,7 +415,7 @@ static int meth_pubkey(lua_State* L)
     bytes = BIO_get_mem_data(bio, &data);
     if (bytes > 0) {
       lua_pushlstring(L, data, bytes);
-      switch(EVP_PKEY_type(pkey->type)) {
+      switch(EVP_PKEY_base_id(pkey)) {
         case EVP_PKEY_RSA:
           lua_pushstring(L, "RSA");
           break;
