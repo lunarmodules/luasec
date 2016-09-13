@@ -32,6 +32,17 @@
 
 #include "x509.h"
 
+
+/*
+ * ASN1_STRING_data is deprecated in OpenSSL 1.1.0
+ */
+#if OPENSSL_VERSION_NUMBER>=0x1010000fL && !defined(LIBRESSL_VERSION_NUMBER)
+#define LSEC_ASN1_STRING_data(x) ASN1_STRING_get0_data(x)
+#else
+#define LSEC_ASN1_STRING_data(x) ASN1_STRING_data(x)
+#endif
+
+
 static const char* hex_tab = "0123456789abcdef";
 
 /**
@@ -146,7 +157,7 @@ static void push_asn1_string(lua_State* L, ASN1_STRING *string, int encode)
   }
   switch (encode) {
   case LSEC_AI5_STRING:
-    lua_pushlstring(L, (char*)ASN1_STRING_data(string),
+    lua_pushlstring(L, (char*)LSEC_ASN1_STRING_data(string),
                        ASN1_STRING_length(string));
     break;
   case LSEC_UTF8_STRING:
@@ -182,7 +193,7 @@ static void push_asn1_ip(lua_State *L, ASN1_STRING *string)
 {
   int af;
   char dst[INET6_ADDRSTRLEN];
-  unsigned char *ip = ASN1_STRING_data(string);
+  unsigned char *ip = (unsigned char*)LSEC_ASN1_STRING_data(string);
   switch(ASN1_STRING_length(string)) {
   case 4:
     af = AF_INET;
