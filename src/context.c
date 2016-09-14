@@ -35,10 +35,6 @@ typedef const SSL_METHOD LSEC_SSL_METHOD;
 typedef       SSL_METHOD LSEC_SSL_METHOD;
 #endif
 
-#if OPENSSL_VERSION_NUMBER>=0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
-#define SSLv23_method() TLS_method()
-#endif
-
 /*-- Compat - Lua 5.1 --------------------------------------------------------*/
 
 #if (LUA_VERSION_NUM == 501)

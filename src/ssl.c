@@ -31,6 +31,13 @@
 #include "context.h"
 #include "ssl.h"
 
+
+#if defined(LIBRESSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER<0x10100000L
+#define SSL_is_server(s) (s->server)
+#define X509_up_ref(c)   CRYPTO_add(&c->references, 1, CRYPTO_LOCK_X509)
+#endif
+
+
 /**
  * Underline socket error.
  */
@@ -460,7 +467,7 @@ static int meth_getpeercertificate(lua_State *L)
   /* In a server-context, the stack doesn't contain the peer cert,
    * so adjust accordingly.
    */
-  if (ssl->ssl->server)
+  if (SSL_is_server(ssl->ssl))
     --n;
   certs = SSL_get_peer_cert_chain(ssl->ssl);
   if (n >= sk_X509_num(certs)) {
@@ -470,7 +477,7 @@ static int meth_getpeercertificate(lua_State *L)
   cert = sk_X509_value(certs, n);
   /* Increment the reference counting of the object. */
   /* See SSL_get_peer_certificate() source code.     */
-  CRYPTO_add(&cert->references, 1, CRYPTO_LOCK_X509);
+  X509_up_ref(cert);
   lsec_pushx509(L, cert);
   return 1;
 }
@@ -492,7 +499,7 @@ static int meth_getpeerchain(lua_State *L)
     return 2;
   }
   lua_newtable(L);
-  if (ssl->ssl->server) {
+  if (SSL_is_server(ssl->ssl)) {
     lsec_pushx509(L, SSL_get_peer_certificate(ssl->ssl));
     lua_rawseti(L, -2, idx++);
   }
@@ -502,7 +509,7 @@ static int meth_getpeerchain(lua_State *L)
     cert = sk_X509_value(certs, i);
     /* Increment the reference counting of the object. */
     /* See SSL_get_peer_certificate() source code.     */
-    CRYPTO_add(&cert->references, 1, CRYPTO_LOCK_X509);
+    X509_up_ref(cert);
     lsec_pushx509(L, cert);
     lua_rawseti(L, -2, idx++);
   }
