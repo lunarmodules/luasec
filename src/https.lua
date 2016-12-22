@@ -89,6 +89,7 @@ local function tcp(params)
       function conn:connect(host, port)
          try(self.sock:connect(host, port))
          self.sock = try(ssl.wrap(self.sock, params))
+         self.sock:sni(host)
          try(self.sock:dohandshake())
          reg(self, getmetatable(self.sock))
          return 1
