@@ -17,7 +17,7 @@ Directories:
  Elliptic curve cipher.
 
 * info
- Informations about the connection.
+ Information about the connection.
 
 * key
  Test encrypted private key.

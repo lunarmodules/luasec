@@ -135,7 +135,7 @@ int buffer_meth_receive(lua_State *L, p_buffer buf) {
     }
     /* check if there was an error */
     if (err != IO_DONE) {
-        /* we can't push anyting in the stack before pushing the
+        /* we can't push anything in the stack before pushing the
          * contents of the buffer. this is the reason for the complication */
         luaL_pushresult(&b);
         lua_pushstring(L, buf->io->error(buf->io->ctx, err)); 
