@@ -120,7 +120,7 @@ local function wrap(sock, cfg)
    local s, msg = core.create(ctx)
    if s then
       core.setfd(s, sock:getfd())
-      sock:setfd(-1)
+      sock:setfd(core.SOCKET_INVALID)
       registry[s] = ctx
       return s
    end
