@@ -854,3 +854,16 @@ LSEC_API int luaopen_ssl_core(lua_State *L)
 
   return 1;
 }
+
+//------------------------------------------------------------------------------
+
+#if defined(_MSC_VER)
+
+/* Empty implementation to allow building with LuaRocks and MS compilers */
+LSEC_API int luaopen_ssl(lua_State *L) {
+  lua_pushstring(L, "you should not call this function");
+  lua_error(L);
+  return 0;
+}
+
+#endif

@@ -93,21 +93,6 @@ build = {
                   "src/luasocket/timeout.c", "src/luasocket/wsocket.c"
                }
             }
-         },
-         patches = {
-            ["luarocks_vs_compiler.patch"] = [[
---- a/src/ssl.c.orig
-+++ b/src/ssl.c
-@@ -844,3 +844,8 @@ LSEC_API int luaopen_ssl_core(lua_State *L)
-
-   return 1;
- }
-+
-+#if defined(_MSC_VER)
-+/* Empty implementation to allow building with LuaRocks and MS compilers */
-+LSEC_API int luaopen_ssl(lua_State *L) { return 0; }
-+#endif
-]]
          }
       }
    }
