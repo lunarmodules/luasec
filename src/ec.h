@@ -30,7 +30,9 @@ static t_ec curves[] = {
   {"secp224r1", NID_secp224r1},
   {"secp256k1", NID_secp256k1},
   {"secp384r1", NID_secp384r1},
+  {"P-384", NID_secp384r1},
   {"secp521r1", NID_secp521r1},
+  {"P-521", NID_secp521r1},
   {"sect113r1", NID_sect113r1},
   {"sect113r2", NID_sect113r2},
   {"sect131r1", NID_sect131r1},
@@ -57,6 +59,14 @@ static t_ec curves[] = {
   {"prime239v2", NID_X9_62_prime239v2},
   {"prime239v3", NID_X9_62_prime239v3},
   {"prime256v1", NID_X9_62_prime256v1},
+  {"P-256", NID_X9_62_prime256v1},
+  /* RFC 8031 */
+#ifdef NID_X25519
+  {"X25519", NID_X25519},
+#endif
+#ifdef NID_X448
+  {"X448", NID_X448},
+#endif
   /* End */
   {NULL,        0U}
 };
