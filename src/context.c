@@ -102,6 +102,9 @@ static LSEC_SSL_METHOD* str2method(const char *method)
   if (!strcmp(method, "tlsv1_1")) return TLSv1_1_method();
   if (!strcmp(method, "tlsv1_2")) return TLSv1_2_method();
 #endif
+#ifdef TLS1_3_VERSION
+  if (!strcmp(method, "tlsv1_3")) return TLS_method();
+#endif
   return NULL;
 }
 
@@ -348,6 +351,15 @@ static int create(lua_State *L)
   ctx->L = L;
   luaL_getmetatable(L, "SSL:Context");
   lua_setmetatable(L, -2);
+
+#ifdef TLS1_3_VERSION
+  if (!strcmp(str_method, "any") || !strcmp(str_method, "tlsv1") || !strcmp(str_method, "tlsv1_3")) {
+    SSL_CTX_set_max_proto_version(ctx->context, TLS1_3_VERSION);
+  }
+  if (!strcmp(str_method, "tlsv1_3")) {
+    SSL_CTX_set_min_proto_version(ctx->context, TLS1_3_VERSION);
+  }
+#endif
 
   /* No session support */
   SSL_CTX_set_session_cache_mode(ctx->context, SSL_SESS_CACHE_OFF);
