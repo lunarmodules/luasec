@@ -21,8 +21,8 @@ MAC_CFLAGS=-O2 -fno-common $(WARN) $(INCDIR) $(DEFS)
 MAC_LDFLAGS=-bundle -undefined dynamic_lookup $(LIBDIR)
 
 INSTALL  = install
-CC       = cc
-LD       = $(MYENV) cc
+CC      ?= cc
+LD      ?= $(MYENV) cc
 CFLAGS  += $(MYCFLAGS)
 LDFLAGS += $(MYLDFLAGS)
 

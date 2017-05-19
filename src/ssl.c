@@ -412,7 +412,9 @@ static int meth_want(lua_State *L)
  */
 static int meth_compression(lua_State *L)
 {
-#if !defined(OPENSSL_NO_COMP)
+#ifdef OPENSSL_NO_COMP
+  const void *comp;
+#else
   const COMP_METHOD *comp;
 #endif
   p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
@@ -421,15 +423,11 @@ static int meth_compression(lua_State *L)
     lua_pushstring(L, "closed");
     return 2;
   }
-#if !defined(OPENSSL_NO_COMP)
   comp = SSL_get_current_compression(ssl->ssl);
   if (comp)
     lua_pushstring(L, SSL_COMP_get_name(comp));
   else
     lua_pushnil(L);
-#else
-  lua_pushnil(L);
-#endif
   return 1;
 }
 
@@ -848,5 +846,22 @@ LSEC_API int luaopen_ssl_core(lua_State *L)
 
   luaL_newlib(L, funcs);
 
+  lua_pushstring(L, "SOCKET_INVALID");
+  lua_pushnumber(L, SOCKET_INVALID);
+  lua_rawset(L, -3);
+
   return 1;
 }
+
+//------------------------------------------------------------------------------
+
+#if defined(_MSC_VER)
+
+/* Empty implementation to allow building with LuaRocks and MS compilers */
+LSEC_API int luaopen_ssl(lua_State *L) {
+  lua_pushstring(L, "you should not call this function");
+  lua_error(L);
+  return 0;
+}
+
+#endif
