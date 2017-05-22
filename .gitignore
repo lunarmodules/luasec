@@ -1,3 +1,4 @@
 /src/*.o
 /src/luasocket/*.o
 /*.dll
+/samples/certs/

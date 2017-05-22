@@ -1,18 +1,22 @@
-https = require "ssl.https"
+local https = require("ssl.https")
 
-function show_html(url)
+local function doreq(url)
+  local reqt = {
+      url = url,
+      --redirect = "all",     --> allows https-> http redirect
+      target = {},
+  }
+  reqt.sink = ltn12.sink.table(reqt.target)
 
-  local response, code, headers, status = https.request(url)
-
-  if code == 200 then
-    print ("Response :", response)
-    print ("HTTP Code :", code)
-    print ("Headers :", headers)
-    print ("Status :", status)
-    return nil 
+  local result, code, headers, status = https.request(reqt)
+  print("Fetching:",url,"==>",code, status)
+  if headers then
+    print("HEADERS")
+    for k,v in pairs(headers) do print("",k,v) end
   end
-
-  -- print(response)
+  return result, code, headers, status
 end
 
-show_html("https://rnikhil275.github.io")
+--local result, code, headers, status = doreq("http://goo.gl/UBCUc5")   -- http --> https redirect
+-- local result, code, headers, status = doreq("https://goo.gl/UBCUc5")  -- https --> https redirect
+local result, code, headers, status = doreq("https://goo.gl/tBfqNu")  -- https --> http security test case
