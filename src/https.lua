@@ -3,7 +3,7 @@
 
 
 local socket = require("socket")
-local url = require("socket.url")
+local url = require("ssl.url")
 local ltn12 = require("ltn12")
 local mime = require("mime")
 local string = require("string")
@@ -17,7 +17,6 @@ local try    = socket.try
 local _M = {
   _VERSION   = "0.6",
   _COPYRIGHT = "LuaSec 0.6 - Copyright (C) 2009-2017 PUC-Rio",
-  PORT       = 443,
 }
 
 -- local cfg = {
