@@ -41,7 +41,8 @@ build = {
             },
             lua = {
                "src/ssl.lua", ['ssl.https'] = "src/https.lua",
-               "src/url.lua", ['ssl.url'] = "src/url.lua"
+               "src/url.lua", ['ssl.url'] = "src/url.lua",
+               "src/headers.lua", ['ssl.headers'] = "src/headers.lua"
             }
          },
          modules = {
