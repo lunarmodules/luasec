@@ -40,7 +40,9 @@ build = {
                "ssl.so"
             },
             lua = {
-               "src/ssl.lua", ['ssl.https'] = "src/https.lua"
+               "src/ssl.lua", ['ssl.https'] = "src/https.lua",
+               "src/http2/url.lua", ['http2.url'] = "src/http2/url.lua",
+               "src/http2/headers.lua", ['http2.headers'] = "src/http2/headers.lua"
             }
          },
          modules = {
