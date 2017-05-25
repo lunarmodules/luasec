@@ -3,11 +3,11 @@
 
 
 local socket = require("socket")
-local url = require("ssl.url")
+local url = require("http2.url")
 local ltn12 = require("ltn12")
 local mime = require("mime")
 local string = require("string")
-local headers = require("ssl.headers")
+local headers = require("http2.headers")
 local ssl = require("ssl")
 local table = require("table")
 local base = _G
