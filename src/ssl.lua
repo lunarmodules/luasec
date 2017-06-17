@@ -28,6 +28,22 @@ local function optexec(func, param, ctx)
   return true
 end
 
+local function tolengthstring(table)
+    local str = ""
+
+    for k,v in ipairs(table) do
+      local len = #v
+
+      if len > 255 then
+        return nil, "invalid value: " .. v
+      end
+
+      str = str .. string.char(len) .. v
+    end
+
+    return str
+end
+
 --
 --
 --
@@ -103,6 +119,54 @@ local function newcontext(cfg)
       if not succ then return nil, msg end
    end
 
+   if context.setalpn and cfg.alpn_cb then
+    if type(cfg.alpn_cb) ~= "function" then
+      return nil, "invalid alpn_cb parameter type"
+    end
+
+    succ, msg = context.setalpncb(ctx, function (str)
+      local protocols = {}
+      local i = 1
+
+      while i < #str do
+        local len = str:byte(i)
+        protocols[#protocols + 1] = str:sub(i + 1, i + len)
+        i = i + len + 1
+      end
+
+      local ret = cfg.alpn_cb(protocols)
+
+      if not ret then
+        return nil
+      elseif type(ret) == "string" then
+        ret = { ret }
+      end
+
+      return tolengthstring(ret)
+    end)
+
+    if not succ then return nil, msg end
+   end
+
+   if context.setalpn and cfg.alpn then
+    if cfg.mode == "client" then
+
+      local str, msg = tolengthstring(cfg.alpn)
+      if not str then return nil, msg end
+
+      succ, msg = context.setalpn(ctx, str)
+      if not succ then return nil, msg end
+
+    elseif cfg.mode == "server" and not cfg.alpn_cb then
+
+      succ, msg = context.setalpncb(ctx, function ()
+        return tolengthstring(cfg.alpn)
+      end)
+
+      if not succ then return nil, msg end
+    end
+   end
+
    return ctx
 end
 
@@ -131,7 +195,7 @@ end
 -- Extract connection information.
 --
 local function info(ssl, field)
-  local str, comp, err, protocol
+  local str, comp, err, protocol, alpn
   comp, err = core.compression(ssl)
   if err then
     return comp, err
@@ -141,7 +205,7 @@ local function info(ssl, field)
     return comp
   end
   local info = {compression = comp}
-  str, info.bits, info.algbits, protocol = core.info(ssl)
+  str, info.bits, info.algbits, protocol, alpn = core.info(ssl)
   if str then
     info.cipher, info.protocol, info.key,
     info.authentication, info.encryption, info.mac =
@@ -151,6 +215,9 @@ local function info(ssl, field)
   end
   if protocol then
     info.protocol = protocol
+  end
+  if alpn then
+    info.alpn = alpn
   end
   if field then
     return info[field]

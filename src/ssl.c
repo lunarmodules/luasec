@@ -656,6 +656,11 @@ static int meth_info(lua_State *L)
   char buf[256] = {0};
   const SSL_CIPHER *cipher;
   p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
+#if OPENSSL_VERSION_NUMBER > 0x10002001L
+  const unsigned char *data;
+  unsigned len;
+#endif
+
   cipher = SSL_get_current_cipher(ssl->ssl);
   if (!cipher)
     return 0;
@@ -665,6 +670,16 @@ static int meth_info(lua_State *L)
   lua_pushnumber(L, bits);
   lua_pushnumber(L, algbits);
   lua_pushstring(L, SSL_get_version(ssl->ssl));
+
+#if OPENSSL_VERSION_NUMBER > 0x10002001L
+  SSL_get0_alpn_selected(ssl->ssl, &data, &len);
+
+  if (data && *data) {
+    lua_pushlstring(L, (const char*)data, len);
+    return 5;
+  }
+#endif
+
   return 4;
 }
 

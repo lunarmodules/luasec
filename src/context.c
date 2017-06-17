@@ -342,6 +342,10 @@ static int create(lua_State *L)
   /* Link LuaSec context with the OpenSSL context */
   SSL_CTX_set_app_data(ctx->context, ctx);
 
+#if OPENSSL_VERSION_NUMBER > 0x10002001L
+  ctx->alpn_cb_ref = LUA_NOREF;
+#endif
+
   return 1;
 }
 
@@ -604,6 +608,96 @@ static int set_curve(lua_State *L)
 }
 #endif
 
+#if OPENSSL_VERSION_NUMBER > 0x10002001L
+/**
+ * Set the protocols a client should send for ALPN.
+ * ALPN support was added in OpenSSL 1.0.2.
+ */
+static int set_alpn(lua_State *L)
+{
+  long ret;
+  size_t len;
+  p_context ctx = checkctx(L, 1);
+  const char *str = luaL_checklstring(L, 2, &len);
+
+  ret = SSL_CTX_set_alpn_protos(ctx->context, (const unsigned char *)str, len);
+
+  if (ret) {
+    lua_pushnil(L);
+    lua_pushfstring(L, "error setting ALPN (%s)",
+      ERR_reason_error_string(ERR_get_error()));
+    return 2;
+  }
+
+  lua_pushboolean(L, 1);
+
+  return 1;
+}
+
+static int alpn_cb(SSL *s, const unsigned char **out, unsigned char *outlen, const unsigned char *in, unsigned int inlen, void *arg)
+{
+  size_t len;
+  p_context ctx = (p_context)arg;
+  lua_State *L = ctx->L;
+  const char *res;
+
+  lua_rawgeti(L, LUA_REGISTRYINDEX, ctx->alpn_cb_ref);
+  lua_pushlstring(L, (const char*)in, inlen);
+
+  lua_call(L, 1, 1);
+
+  if (!lua_isstring(L, -1)) {
+    return SSL_TLSEXT_ERR_NOACK;
+  }
+
+  res = luaL_checklstring(L, -1, &len);
+
+  if (SSL_select_next_proto((unsigned char **)out, outlen, (const unsigned char *)res, len, in, inlen) != OPENSSL_NPN_NEGOTIATED) {
+    lua_pop(L, 1);
+    return SSL_TLSEXT_ERR_NOACK;
+  }
+
+  lua_pop(L, 1);
+
+  return SSL_TLSEXT_ERR_OK;
+}
+
+/**
+ * Set a callback a server can use to select the next protocol with ALPN.
+ */
+static int set_alpn_cb(lua_State *L)
+{
+  p_context ctx = checkctx(L, 1);
+
+  if (ctx->alpn_cb_ref != LUA_NOREF) {
+    luaL_unref(L, LUA_REGISTRYINDEX, ctx->alpn_cb_ref);
+    ctx->alpn_cb_ref = LUA_NOREF;
+  }
+
+  SSL_CTX_set_alpn_select_cb(ctx->context, NULL, NULL);
+
+  switch (lua_type(L, 2)) {
+  case LUA_TFUNCTION:
+    lua_pushvalue(L, 2);
+
+    ctx->alpn_cb_ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    SSL_CTX_set_alpn_select_cb(ctx->context, alpn_cb, ctx);
+
+    break;
+  case LUA_TNIL:
+    break;
+  default:
+    lua_pushnil(L);
+    lua_pushstring(L, "invalid callback value");
+    return 2;
+  }
+
+  lua_pushboolean(L, 1);
+  return 1;
+}
+#endif
+
 /**
  * Package functions
  */
@@ -620,6 +714,10 @@ static luaL_Reg funcs[] = {
   {"setverify",    set_verify},
   {"setoptions",   set_options},
   {"setmode",      set_mode},
+#if OPENSSL_VERSION_NUMBER > 0x10002001L
+  {"setalpn",      set_alpn},
+  {"setalpncb",    set_alpn_cb},
+#endif
   {NULL, NULL}
 };
 
@@ -649,6 +747,11 @@ static int meth_destroy(lua_State *L)
     DH_free(ctx->dh_param);
     ctx->dh_param = NULL;
   }
+#if OPENSSL_VERSION_NUMBER > 0x10002001L
+  if (ctx->alpn_cb_ref) {
+    luaL_unref(L, LUA_REGISTRYINDEX, ctx->alpn_cb_ref);
+  }
+#endif
 
   return 0;
 }
