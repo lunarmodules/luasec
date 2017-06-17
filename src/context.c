@@ -300,18 +300,6 @@ static int verify_cb(int preverify_ok, X509_STORE_CTX *x509_ctx)
   return (verify & LSEC_VERIFY_CONTINUE ? 1 : preverify_ok);
 }
 
-#ifndef OPENSSL_NO_ECDH
-static EC_KEY *find_ec_key(const char *str)
-{
-  p_ec ptr;
-  for (ptr = curves; ptr->name; ptr++) {
-    if (!strcmp(str, ptr->name))
-      return EC_KEY_new_by_curve_name(ptr->nid);
-  }
-  return NULL;
-}
-#endif
-
 /*------------------------------ Lua Functions -------------------------------*/
 
 /**
@@ -592,7 +580,7 @@ static int set_curve(lua_State *L)
   return 1;
 
 #else /* !defined(SSL_CTRL_SET_CURVES_LIST) */
-  EC_KEY *key = find_ec_key(str);
+  EC_KEY *key = lsec_find_ec_key(L, str);
 
   if (!key) {
     lua_pushboolean(L, 0);
@@ -788,6 +776,8 @@ LSEC_API int luaopen_ssl_context(lua_State *L)
   /* Create __index metamethods for context */
   luaL_newlib(L, meta_index);
   lua_setfield(L, -2, "__index");
+
+  lsec_load_curves(L);
 
   /* Return the module */
   luaL_newlib(L, funcs);

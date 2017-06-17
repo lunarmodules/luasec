@@ -4,8 +4,8 @@
  *
  *--------------------------------------------------------------------------*/
 
-#ifndef LSEC_CONFIG_H
-#define LSEC_CONFIG_H
+#ifndef LSEC_COMPAT_H
+#define LSEC_COMPAT_H
 
 #if defined(_WIN32)
 #define LSEC_API __declspec(dllexport) 

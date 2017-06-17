@@ -10,7 +10,7 @@
 #include <lua.h>
 #include <openssl/ssl.h>
 
-#include "config.h"
+#include "compat.h"
 
 #define LSEC_MODE_INVALID 0
 #define LSEC_MODE_SERVER  1
