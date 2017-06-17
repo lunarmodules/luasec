@@ -5,6 +5,7 @@ OBJS= \
  x509.o    \
  context.o \
  ssl.o     \
+ config.o  \
  ec.o
 
 LIBS=-lssl -lcrypto -lluasocket
@@ -56,7 +57,8 @@ clean:
 	cd luasocket && $(MAKE) clean
 	rm -f $(OBJS) $(CMOD)
 
+ec.o: ec.c ec.h
 x509.o: x509.c x509.h compat.h
 context.o: context.c context.h ec.h compat.h
 ssl.o: ssl.c ssl.h context.h x509.h compat.h
-ec.o: ec.c ec.h
+config.o: config.c ec.h options.h compat.h

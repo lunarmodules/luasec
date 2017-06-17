@@ -47,11 +47,33 @@ void lsec_load_curves(lua_State *L)
   lua_rawset(L,  LUA_REGISTRYINDEX);
 }
 
+void lsec_get_curves(lua_State *L)
+{
+  lua_newtable(L);
+
+  lua_pushstring(L, "SSL:EC:CURVES");
+  lua_rawget(L, LUA_REGISTRYINDEX);
+
+  lua_pushnil(L);
+  while (lua_next(L, -2) != 0) {
+    lua_pop(L, 1);
+    lua_pushvalue(L, -1);
+    lua_pushboolean(L, 1);
+    lua_rawset(L, -5);
+  }
+  lua_pop(L, 1);
+}
+
 #else
 
 void lsec_load_curves(lua_State *L)
 {
   // do nothing
+}
+
+void lsec_get_curves(lua_State *L)
+{
+  lua_newtable(L);
 }
 
 #endif

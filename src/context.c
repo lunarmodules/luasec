@@ -24,7 +24,7 @@
 #include "context.h"
 #include "options.h"
 
-#ifndef OPENSSL_NO_ECDH
+#ifndef OPENSSL_NO_EC
 #include <openssl/ec.h>
 #include "ec.h"
 #endif
@@ -549,11 +549,11 @@ static int set_dhparam(lua_State *L)
 /**
  * Set elliptic curve.
  */
-#ifdef OPENSSL_NO_ECDH
+#ifdef OPENSSL_NO_EC
 static int set_curve(lua_State *L)
 {
   lua_pushboolean(L, 0);
-  lua_pushstring(L, "OpenSSL does not support ECDH");
+  lua_pushstring(L, "OpenSSL does not support EC");
   return 2;
 }
 #else
