@@ -16,7 +16,9 @@
 #if (LUA_VERSION_NUM == 501)
 #define setfuncs(L, R)    luaL_register(L, NULL, R)
 #define lua_rawlen(L, i)  lua_objlen(L, i)
+#ifndef luaL_newlib
 #define luaL_newlib(L, R) do { lua_newtable(L); luaL_register(L, NULL, R); } while(0)
+#endif
 #else
 #define setfuncs(L, R) luaL_setfuncs(L, R, 0)
 #endif
