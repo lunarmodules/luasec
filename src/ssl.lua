@@ -7,6 +7,7 @@
 local core    = require("ssl.core")
 local context = require("ssl.context")
 local x509    = require("ssl.x509")
+local config  = require("ssl.config")
 
 local unpack  = table.unpack or unpack
 
@@ -92,11 +93,19 @@ local function newcontext(cfg)
       end
       context.setdhparam(ctx, cfg.dhparam)
    end
-   -- Set elliptic curve
-   if cfg.curve then
-      succ, msg = context.setcurve(ctx, cfg.curve)
-      if not succ then return nil, msg end
+   
+   -- Set elliptic curves
+   if (not config.algorithms.ec) and (cfg.curve or cfg.curveslist) then
+     return false, "elliptic curves not supported"
    end
+   if config.capabilities.curves_list and cfg.curveslist then
+     succ, msg = context.setcurveslist(ctx, cfg.curveslist)
+     if not succ then return nil, msg end
+   elseif cfg.curve then
+     succ, msg = context.setcurve(ctx, cfg.curve)
+     if not succ then return nil, msg end
+   end
+
    -- Set extra verification options
    if cfg.verifyext and ctx.setverifyext then
       succ, msg = optexec(ctx.setverifyext, cfg.verifyext, ctx)

@@ -546,17 +546,10 @@ static int set_dhparam(lua_State *L)
   return 0;
 }
 
+#if !defined(OPENSSL_NO_EC)
 /**
  * Set elliptic curve.
  */
-#ifdef OPENSSL_NO_EC
-static int set_curve(lua_State *L)
-{
-  lua_pushboolean(L, 0);
-  lua_pushstring(L, "OpenSSL does not support EC");
-  return 2;
-}
-#else
 static int set_curve(lua_State *L)
 {
   long ret;
@@ -565,26 +558,11 @@ static int set_curve(lua_State *L)
 
   SSL_CTX_set_options(ctx, SSL_OP_SINGLE_ECDH_USE);
 
-#if defined(SSL_CTRL_SET_ECDH_AUTO) || defined(SSL_CTRL_SET_CURVES_LIST) || defined(SSL_CTX_set1_curves_list)
-  if (SSL_CTX_set1_curves_list(ctx, str) != 1) {
-    lua_pushboolean(L, 0);
-    lua_pushfstring(L, "unknown elliptic curve in \"%s\"", str);
-    return 2;
-  }
-
-#ifdef SSL_CTRL_SET_ECDH_AUTO
-  SSL_CTX_set_ecdh_auto(ctx, 1);
-#endif
-
-  lua_pushboolean(L, 1);
-  return 1;
-
-#else /* !defined(SSL_CTRL_SET_CURVES_LIST) */
   EC_KEY *key = lsec_find_ec_key(L, str);
 
   if (!key) {
     lua_pushboolean(L, 0);
-    lua_pushfstring(L, "elliptic curve %s not supported", str);
+    lua_pushfstring(L, "elliptic curve '%s' not supported", str);
     return 2;
   }
 
@@ -598,9 +576,35 @@ static int set_curve(lua_State *L)
       ERR_reason_error_string(ERR_get_error()));
     return 2;
   }
+
   lua_pushboolean(L, 1);
   return 1;
-#endif /* defined(SSL_CTRL_SET_CURVES_LIST) */
+}
+#endif
+
+#if !defined(OPENSSL_NO_EC) && (defined(SSL_CTRL_SET_CURVES_LIST) || defined(SSL_CTX_set1_curves_list) || defined(SSL_CTRL_SET_ECDH_AUTO))
+/**
+ * Set elliptic curves list.
+ */
+static int set_curves_list(lua_State *L)
+{
+  SSL_CTX *ctx = lsec_checkcontext(L, 1);
+  const char *str = luaL_checkstring(L, 2);
+
+  SSL_CTX_set_options(ctx, SSL_OP_SINGLE_ECDH_USE);
+
+  if (SSL_CTX_set1_curves_list(ctx, str) != 1) {
+    lua_pushboolean(L, 0);
+    lua_pushfstring(L, "unknown elliptic curve in \"%s\"", str);
+    return 2;
+  }
+
+#ifdef SSL_CTRL_SET_ECDH_AUTO
+  SSL_CTX_set_ecdh_auto(ctx, 1);
+#endif
+
+  lua_pushboolean(L, 1);
+  return 1;
 }
 #endif
 
@@ -616,10 +620,18 @@ static luaL_Reg funcs[] = {
   {"setcipher",    set_cipher},
   {"setdepth",     set_depth},
   {"setdhparam",   set_dhparam},
-  {"setcurve",     set_curve},
   {"setverify",    set_verify},
   {"setoptions",   set_options},
   {"setmode",      set_mode},
+
+#if !defined(OPENSSL_NO_EC)
+  {"setcurve",     set_curve},
+#endif
+
+#if !defined(OPENSSL_NO_EC) && (defined(SSL_CTRL_SET_CURVES_LIST) || defined(SSL_CTX_set1_curves_list) || defined(SSL_CTRL_SET_ECDH_AUTO))
+  {"setcurveslist", set_curves_list},
+#endif
+
   {NULL, NULL}
 };
 
