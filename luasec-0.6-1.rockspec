@@ -1,7 +1,7 @@
 package = "LuaSec"
 version = "0.6-1"
 source = {
-   url = "git://github.com/brunoos/luasec.git",
+   url = "https://github.com/brunoos/luasec.git",
    tag = "luasec-0.6"
 }
 description = {
@@ -55,7 +55,7 @@ build = {
                   "ssl", "crypto"
                },
                sources = {
-                  "src/x509.c", "src/context.c", "src/ssl.c", 
+                  "src/x509.c", "src/context.c", "src/ssl.c",
                   "src/luasocket/buffer.c", "src/luasocket/io.c",
                   "src/luasocket/timeout.c", "src/luasocket/usocket.c"
                }
@@ -88,7 +88,7 @@ build = {
                   "$(OPENSSL_INCDIR)", "src/", "src/luasocket"
                },
                sources = {
-                  "src/x509.c", "src/context.c", "src/ssl.c", 
+                  "src/x509.c", "src/context.c", "src/ssl.c",
                   "src/luasocket/buffer.c", "src/luasocket/io.c",
                   "src/luasocket/timeout.c", "src/luasocket/wsocket.c"
                }
