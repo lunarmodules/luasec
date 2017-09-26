@@ -40,6 +40,37 @@ void lsec_load_curves(lua_State *L)
         lua_pushnumber(L, curves[i].nid);
         lua_rawset(L, -3);
       }
+      switch (curves[i].nid) {
+      case NID_X9_62_prime256v1:
+        lua_pushstring(L, "P-256");
+        lua_pushnumber(L, curves[i].nid);
+        lua_rawset(L, -3);
+        break;
+      case NID_secp384r1:
+        lua_pushstring(L, "P-384");
+        lua_pushnumber(L, curves[i].nid);
+        lua_rawset(L, -3);
+        break;
+      case NID_secp521r1:
+        lua_pushstring(L, "P-521");
+        lua_pushnumber(L, curves[i].nid);
+        lua_rawset(L, -3);
+        break;
+#ifdef NID_X25519
+     case NID_X25519:
+        lua_pushstring(L, "X25519");
+        lua_pushnumber(L, curves[i].nid);
+        lua_rawset(L, -3);
+        break;
+#endif
+#ifdef NID_X448
+     case NID_X448:
+        lua_pushstring(L, "X448");
+        lua_pushnumber(L, curves[i].nid);
+        lua_rawset(L, -3);
+        break;
+#endif
+      }
     }
     free(curves);
   }
