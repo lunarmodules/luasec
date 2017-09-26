@@ -57,7 +57,8 @@ build = {
                sources = {
                   "src/x509.c", "src/context.c", "src/ssl.c", 
                   "src/luasocket/buffer.c", "src/luasocket/io.c",
-                  "src/luasocket/timeout.c", "src/luasocket/usocket.c"
+                  "src/luasocket/timeout.c", "src/luasocket/usocket.c",
+                  "src/ec.c", "src/config.c"
                }
             }
          }
@@ -90,7 +91,8 @@ build = {
                sources = {
                   "src/x509.c", "src/context.c", "src/ssl.c", 
                   "src/luasocket/buffer.c", "src/luasocket/io.c",
-                  "src/luasocket/timeout.c", "src/luasocket/wsocket.c"
+                  "src/luasocket/timeout.c", "src/luasocket/wsocket.c",
+                  "src/ec.c", "src/config.c"
                }
             }
          }
