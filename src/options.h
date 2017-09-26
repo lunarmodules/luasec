@@ -2,8 +2,9 @@
 #define LSEC_OPTIONS_H
 
 /*--------------------------------------------------------------------------
- * LuaSec 0.6
- * Copyright (C) 2006-2016 Bruno Silvestre
+ * LuaSec 0.7alpha
+ *
+ * Copyright (C) 2006-2017 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
@@ -12,7 +13,7 @@
 /* If you need to generate these options again, see options.lua */
 
 /* 
-  OpenSSL version: OpenSSL 1.0.2f
+  OpenSSL version: OpenSSL 1.1.0f
 */
 
 struct ssl_option_s {
@@ -72,6 +73,9 @@ static ssl_option_t ssl_options[] = {
 #endif
 #if defined(SSL_OP_NO_COMPRESSION)
   {"no_compression", SSL_OP_NO_COMPRESSION},
+#endif
+#if defined(SSL_OP_NO_DTLS_MASK)
+  {"no_dtls_mask", SSL_OP_NO_DTLS_MASK},
 #endif
 #if defined(SSL_OP_NO_DTLSv1)
   {"no_dtlsv1", SSL_OP_NO_DTLSv1},

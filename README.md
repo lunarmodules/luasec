@@ -1,36 +1,14 @@
-LuaSec 0.6
-==========
+LuaSec 0.7alpha
+===============
 LuaSec depends  on OpenSSL, and  integrates with LuaSocket to  make it
 easy to add secure connections to any Lua applications or scripts.
 
 Documentation: https://github.com/brunoos/luasec/wiki
 
-This version includes:
+This version:
 
-* Lua 5.2 and 5.3 compatibility
+ * Add compatibility with OpenSSL 1.1.0
 
-* Context module:
-  - Add ctx:checkkey()
+ * Add 'ssl.config' module
 
-* SSL module:
-  - Add conn:sni() and conn:getsniname()
-
-* Context options:
-  - Add "any" protocol ("sslv23" is deprecated)
-
-* HTTPS module:
-  - Using "any" protocol without SSLv2/SSLv3, by default
-
-* X509 module:
-  - Human readable IP address
-  - Add cert:issued()
-  - Add cert:pubkey()
-
-* Some bug fixes
-
-
-********************************************************************************
-
-PS: 10th anniversary! Thanks to everyone who collaborate with LuaSec.
-
-********************************************************************************
+ * TBD
