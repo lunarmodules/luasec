@@ -36,6 +36,12 @@
     <ClCompile Include="src\luasocket\timeout.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\config.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ec.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\x509.h">
@@ -69,6 +75,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\luasocket\timeout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\compat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

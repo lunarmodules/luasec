@@ -83,7 +83,7 @@ build = {
                   "$(OPENSSL_BINDIR)",
                },
                libraries = {
-                  "libeay32", "ssleay32", "ws2_32"
+                  "libssl32MD", "libcrypto32MD", "ws2_32"
                },
                incdirs = {
                   "$(OPENSSL_INCDIR)", "src/", "src/luasocket"
