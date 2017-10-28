@@ -261,7 +261,13 @@ static int meth_create(lua_State *L)
   SSL_CTX *ctx;
 
   lua_settop(L, 1);
+
   ssl = (p_ssl)lua_newuserdata(L, sizeof(t_ssl));
+  if (!ssl) {
+    lua_pushnil(L);
+    lua_pushstring(L, "error creating SSL object");
+    return 2;
+  }
 
   if ((ctx = lsec_testcontext(L, 1))) {
     mode = lsec_getmode(L, 1);
@@ -290,7 +296,7 @@ static int meth_create(lua_State *L)
     SSL_up_ref(ssl->ssl);
     mode = SSL_is_server(ssl->ssl) ? LSEC_MODE_SERVER : LSEC_MODE_CLIENT;
   } else {
-    return luaL_argerror(L, 1, "expected SSL_CTX* or SSL*");
+    return luaL_argerror(L, 1, "invalid context");
   }
   ssl->state = LSEC_STATE_NEW;
   SSL_set_fd(ssl->ssl, (int)SOCKET_INVALID);
