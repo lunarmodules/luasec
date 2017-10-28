@@ -34,6 +34,7 @@
 
 #if defined(LIBRESSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER<0x10100000L
 #define SSL_is_server(s) (s->server)
+#define SSL_up_ref(ssl)  CRYPTO_add(&(ssl)->references, 1, CRYPTO_LOCK_SSL)
 #define X509_up_ref(c)   CRYPTO_add(&c->references, 1, CRYPTO_LOCK_X509)
 #endif
 
@@ -236,32 +237,60 @@ static int ssl_recv(void *ctx, char *data, size_t count, size_t *got,
   return IO_UNKNOWN;
 }
 
+static SSL_CTX* luaossl_testcontext(lua_State *L, int arg) {
+  SSL_CTX **ctx = luaL_testudata(L, arg, "SSL_CTX*");
+  if (ctx)
+    return *ctx;
+  return NULL;
+}
+
+static SSL* luaossl_testssl(lua_State *L, int arg) {
+  SSL **ssl = luaL_testudata(L, arg, "SSL*");
+  if (ssl)
+    return *ssl;
+  return NULL;
+}
+
 /**
  * Create a new TLS/SSL object and mark it as new.
  */
 static int meth_create(lua_State *L)
 {
   p_ssl ssl;
-  int mode = lsec_getmode(L, 1);
-  SSL_CTX *ctx = lsec_checkcontext(L, 1);
+  int mode;
+  SSL_CTX *ctx;
 
-  if (mode == LSEC_MODE_INVALID) {
-    lua_pushnil(L);
-    lua_pushstring(L, "invalid mode");
-    return 2;
-  }
+  lua_settop(L, 1);
   ssl = (p_ssl)lua_newuserdata(L, sizeof(t_ssl));
-  if (!ssl) {
-    lua_pushnil(L);
-    lua_pushstring(L, "error creating SSL object");
-    return 2;
-  }
-  ssl->ssl = SSL_new(ctx);
-  if (!ssl->ssl) {
-    lua_pushnil(L);
-    lua_pushfstring(L, "error creating SSL object (%s)",
-      ERR_reason_error_string(ERR_get_error()));
-    return 2;
+
+  if ((ctx = lsec_testcontext(L, 1))) {
+    mode = lsec_getmode(L, 1);
+    if (mode == LSEC_MODE_INVALID) {
+      lua_pushnil(L);
+      lua_pushstring(L, "invalid mode");
+      return 2;
+    }
+    ssl->ssl = SSL_new(ctx);
+    if (!ssl->ssl) {
+      lua_pushnil(L);
+      lua_pushfstring(L, "error creating SSL object (%s)",
+        ERR_reason_error_string(ERR_get_error()));
+      return 2;
+    }
+  } else if ((ctx = luaossl_testcontext(L, 1))) {
+    ssl->ssl = SSL_new(ctx);
+    if (!ssl->ssl) {
+      lua_pushnil(L);
+      lua_pushfstring(L, "error creating SSL object (%s)",
+        ERR_reason_error_string(ERR_get_error()));
+      return 2;
+    }
+    mode = SSL_is_server(ssl->ssl) ? LSEC_MODE_SERVER : LSEC_MODE_CLIENT;
+  } else if ((ssl->ssl = luaossl_testssl(L, 1))) {
+    SSL_up_ref(ssl->ssl);
+    mode = SSL_is_server(ssl->ssl) ? LSEC_MODE_SERVER : LSEC_MODE_CLIENT;
+  } else {
+    return luaL_argerror(L, 1, "expected SSL_CTX* or SSL*");
   }
   ssl->state = LSEC_STATE_NEW;
   SSL_set_fd(ssl->ssl, (int)SOCKET_INVALID);
