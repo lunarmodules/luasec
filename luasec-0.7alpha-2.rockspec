@@ -1,5 +1,5 @@
 package = "LuaSec"
-version = "0.7alpha-1"
+version = "0.7alpha-2"
 source = {
    url = "https://github.com/brunoos/luasec/archive/luasec-0.7alpha.tar.gz",
    dir = "luasec-luasec-0.7alpha"
@@ -45,6 +45,9 @@ build = {
          },
          modules = {
             ssl = {
+               defines = {
+                  "WITH_LUASOCKET", "LUASOCKET_DEBUG",
+               },
                incdirs = {
                   "$(OPENSSL_INCDIR)", "src/", "src/luasocket",
                },
@@ -76,6 +79,7 @@ build = {
             ssl = {
                defines = {
                   "WIN32", "NDEBUG", "_WINDOWS", "_USRDLL", "LSEC_EXPORTS", "BUFFER_DEBUG", "LSEC_API=__declspec(dllexport)",
+                  "WITH_LUASOCKET", "LUASOCKET_DEBUG",
                   "LUASEC_INET_NTOP", "WINVER=0x0501", "_WIN32_WINNT=0x0501", "NTDDI_VERSION=0x05010300"
                },
                libdirs = {
