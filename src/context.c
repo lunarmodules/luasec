@@ -686,6 +686,17 @@ static int set_alpn_cb(lua_State *L)
 }
 
 
+/*
+ * DANE
+ */
+static int set_dane(lua_State *L)
+{
+  SSL_CTX *ctx = lsec_checkcontext(L, 1);
+  int ret = SSL_CTX_dane_enable(ctx);
+  lua_pushboolean(L, ret);
+  return 1;
+}
+
 /**
  * Package functions
  */
@@ -708,6 +719,8 @@ static luaL_Reg funcs[] = {
   {"setcurve",      set_curve},
   {"setcurveslist", set_curves_list},
 #endif
+
+  {"setdane",      set_dane},
 
   {NULL, NULL}
 };

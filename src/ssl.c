@@ -826,6 +826,31 @@ static int meth_copyright(lua_State *L)
   return 1;
 }
 
+static int meth_dane(lua_State *L)
+{
+  p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
+  int ret = SSL_dane_enable(ssl->ssl, luaL_checkstring(L, 2));
+  lua_pushboolean(L, ret);
+  return 1;
+}
+
+static int meth_tlsa(lua_State *L)
+{
+  p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
+  uint8_t usage = luaL_checkinteger(L, 2);
+  uint8_t selector = luaL_checkinteger(L, 3);
+  uint8_t mtype = luaL_checkinteger(L, 4);
+  size_t len;
+  const char *data = luaL_checklstring(L, 5, &len);
+
+  ERR_clear_error();
+  int ret = SSL_dane_tlsa_add(ssl->ssl, usage, selector, mtype, data, len);
+  lua_pushboolean(L, ret);
+
+  return 1;
+}
+
+
 /*---------------------------------------------------------------------------*/
 
 /**
@@ -850,6 +875,8 @@ static luaL_Reg methods[] = {
   {"settimeout",          meth_settimeout},
   {"sni",                 meth_sni},
   {"want",                meth_want},
+  {"setdane",             meth_dane},
+  {"settlsa",             meth_tlsa},
   {NULL,                  NULL}
 };
 

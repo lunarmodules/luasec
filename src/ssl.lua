@@ -188,6 +188,10 @@ local function newcontext(cfg)
       if not succ then return nil, msg end
    end
 
+   if cfg.dane then
+      context.setdane(ctx)
+   end
+
    return ctx
 end
 
