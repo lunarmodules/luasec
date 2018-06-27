@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------
--- LuaSec 0.7alpha
--- Copyright (C) 2009-2017 PUC-Rio
+-- LuaSec 0.7
+-- Copyright (C) 2009-2018 PUC-Rio
 --
 -- Author: Pablo Musa
 -- Author: Tomas Guisasola
@@ -19,7 +19,7 @@ local try    = socket.try
 --
 local _M = {
   _VERSION   = "0.7",
-  _COPYRIGHT = "LuaSec 0.7alpha - Copyright (C) 2009-2017 PUC-Rio",
+  _COPYRIGHT = "LuaSec 0.7 - Copyright (C) 2009-2018 PUC-Rio",
   PORT       = 443,
 }
 

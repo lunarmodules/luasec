@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.7alpha
+ * LuaSec 0.7
  *
- * Copyright (C) 2014-2017 Kim Alvefur, Paul Aurich, Tobias Markmann, 
+ * Copyright (C) 2014-2018 Kim Alvefur, Paul Aurich, Tobias Markmann, 
  *                         Matthew Wild.
- * Copyright (C) 2006-2017 Bruno Silvestre.
+ * Copyright (C) 2006-2018 Bruno Silvestre.
  *
  *--------------------------------------------------------------------------*/
 
@@ -796,7 +796,7 @@ static int meth_getsniname(lua_State *L)
 
 static int meth_copyright(lua_State *L)
 {
-  lua_pushstring(L, "LuaSec 0.7alpha - Copyright (C) 2006-2017 Bruno Silvestre, UFG"
+  lua_pushstring(L, "LuaSec 0.7 - Copyright (C) 2006-2018 Bruno Silvestre, UFG"
 #if defined(WITH_LUASOCKET)
                     "\nLuaSocket 3.0-RC1 - Copyright (C) 2004-2013 Diego Nehab"
 #endif

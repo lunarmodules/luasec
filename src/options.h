@@ -2,9 +2,9 @@
 #define LSEC_OPTIONS_H
 
 /*--------------------------------------------------------------------------
- * LuaSec 0.7alpha
+ * LuaSec 0.7
  *
- * Copyright (C) 2006-2017 Bruno Silvestre
+ * Copyright (C) 2006-2018 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
@@ -13,7 +13,7 @@
 /* If you need to generate these options again, see options.lua */
 
 /* 
-  OpenSSL version: OpenSSL 1.1.0f
+  OpenSSL version: OpenSSL 1.1.0h
 */
 
 struct ssl_option_s {
@@ -83,8 +83,14 @@ static ssl_option_t ssl_options[] = {
 #if defined(SSL_OP_NO_DTLSv1_2)
   {"no_dtlsv1_2", SSL_OP_NO_DTLSv1_2},
 #endif
+#if defined(SSL_OP_NO_ENCRYPT_THEN_MAC)
+  {"no_encrypt_then_mac", SSL_OP_NO_ENCRYPT_THEN_MAC},
+#endif
 #if defined(SSL_OP_NO_QUERY_MTU)
   {"no_query_mtu", SSL_OP_NO_QUERY_MTU},
+#endif
+#if defined(SSL_OP_NO_RENEGOTIATION)
+  {"no_renegotiation", SSL_OP_NO_RENEGOTIATION},
 #endif
 #if defined(SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION)
   {"no_session_resumption_on_renegotiation", SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION},
