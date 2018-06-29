@@ -11,7 +11,7 @@
 #include <string.h>
 
 #if defined(WIN32)
-#include <Winsock2.h>
+#include <winsock2.h>
 #endif
 
 #include <openssl/ssl.h>
