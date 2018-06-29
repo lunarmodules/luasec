@@ -32,11 +32,6 @@ LSEC_API int luaopen_ssl_config(lua_State *L)
   lua_pushstring(L, "protocols");
   lua_newtable(L);
 
-#ifndef OPENSSL_NO_SSL3
-  lua_pushstring(L, "sslv3");
-  lua_pushboolean(L, 1);
-  lua_rawset(L, -3);
-#endif
   lua_pushstring(L, "tlsv1");
   lua_pushboolean(L, 1);
   lua_rawset(L, -3);
