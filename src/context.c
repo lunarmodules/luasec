@@ -29,12 +29,6 @@
 #include "ec.h"
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x1000000fL)
-typedef const SSL_METHOD LSEC_SSL_METHOD;
-#else
-typedef       SSL_METHOD LSEC_SSL_METHOD;
-#endif
-
 /*--------------------------- Auxiliary Functions ----------------------------*/
 
 /**
@@ -68,7 +62,7 @@ static int set_option_flag(const char *opt, unsigned long *flag)
 /**
  * Find the protocol.
  */
-static LSEC_SSL_METHOD* str2method(const char *method)
+static const SSL_METHOD* str2method(const char *method)
 {
   if (!strcmp(method, "any"))     return SSLv23_method();
   if (!strcmp(method, "sslv23"))  return SSLv23_method();  // deprecated
@@ -287,7 +281,7 @@ static int create(lua_State *L)
 {
   p_context ctx;
   const char *str_method;
-  LSEC_SSL_METHOD *method;
+  const SSL_METHOD *method;
 
   str_method = luaL_checkstring(L, 1);
   method = str2method(str_method);
