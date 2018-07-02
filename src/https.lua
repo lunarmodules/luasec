@@ -21,6 +21,7 @@ local _M = {
   _VERSION   = "0.7",
   _COPYRIGHT = "LuaSec 0.7 - Copyright (C) 2009-2018 PUC-Rio",
   PORT       = 443,
+  TIMEOUT    = 60
 }
 
 -- TLS configuration
@@ -83,13 +84,14 @@ local function tcp(params)
       conn.sock = try(socket.tcp())
       local st = getmetatable(conn.sock).__index.settimeout
       function conn:settimeout(...)
-         return st(self.sock, ...)
+         return st(self.sock, _M.TIMEOUT)
       end
       -- Replace TCP's connection function
       function conn:connect(host, port)
          try(self.sock:connect(host, port))
          self.sock = try(ssl.wrap(self.sock, params))
          self.sock:sni(host)
+         self.sock:settimeout(_M.TIMEOUT)
          try(self.sock:dohandshake())
          reg(self, getmetatable(self.sock))
          return 1
