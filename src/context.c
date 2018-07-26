@@ -66,9 +66,9 @@ static int set_option_flag(const char *opt, unsigned long *flag)
  */
 static const SSL_METHOD* str2method(const char *method, int *vmin, int *vmax)
 {
-  if (!strcmp(method, "any") || !strcmp(method, "sslv23")) {
-    *vmin = TLS1_VERSION;
-    *vmax = TLS1_2_VERSION;
+  if (!strcmp(method, "any") || !strcmp(method, "sslv23")) { // 'sslv23' is deprecated
+    *vmin = 0;
+    *vmax = 0;
     return TLS_method();
   }
   else if (!strcmp(method, "tlsv1")) {
