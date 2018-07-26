@@ -6,12 +6,13 @@ local ssl    = require("ssl")
 
 local params = {
    mode = "client",
-   protocol = "tlsv1_2",
+   protocol = "any",
    key = "../certs/clientAkey.pem",
    certificate = "../certs/clientA.pem",
    cafile = "../certs/rootA.pem",
    verify = {"peer", "fail_if_no_peer_cert"},
    options = "all",
+   ciphers = "EDH+AESGCM"
 }
 
 local peer = socket.tcp()

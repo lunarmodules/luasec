@@ -38,6 +38,7 @@ local params = {
    verify = {"peer", "fail_if_no_peer_cert"},
    options = "all",
    dhparam = dhparam_cb,
+   ciphers = "EDH+AESGCM"
 }
 
 
