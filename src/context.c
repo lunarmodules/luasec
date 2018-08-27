@@ -610,6 +610,91 @@ static int set_curves_list(lua_State *L)
 #endif
 
 /**
+ * Set the protocols a client should send for ALPN.
+ */
+static int set_alpn(lua_State *L)
+{
+  long ret;
+  size_t len;
+  p_context ctx = checkctx(L, 1);
+  const char *str = luaL_checklstring(L, 2, &len);
+
+  ret = SSL_CTX_set_alpn_protos(ctx->context, (const unsigned char*)str, len);
+  if (ret) {
+    lua_pushboolean(L, 0);
+    lua_pushfstring(L, "error setting ALPN (%s)", ERR_reason_error_string(ERR_get_error()));
+    return 2;
+  }
+  lua_pushboolean(L, 1);
+  return 1;
+}
+
+/**
+ * This standard callback calls the server's callback in Lua sapce.
+ * The server has to return a list in wire-format strings.
+ * This function uses a helper function to match server and client lists.
+ */
+static int alpn_cb(SSL *s, const unsigned char **out, unsigned char *outlen,
+                   const unsigned char *in, unsigned int inlen, void *arg)
+{
+  int ret;
+  size_t server_len;
+  const char *server;
+  p_context ctx = (p_context)arg;
+  lua_State *L = ctx->L;
+
+  luaL_getmetatable(L, "SSL:ALPN:Registry");
+  lua_pushlightuserdata(L, (void*)ctx->context);
+  lua_gettable(L, -2);
+
+  lua_pushlstring(L, (const char*)in, inlen);
+
+  lua_call(L, 1, 1);
+
+  if (!lua_isstring(L, -1)) {
+    lua_pop(L, 2);
+    return SSL_TLSEXT_ERR_NOACK;
+  }
+
+  // Protocol list from server in wire-format string
+  server = luaL_checklstring(L, -1, &server_len);
+  ret  = SSL_select_next_proto((unsigned char**)out, outlen, (const unsigned char*)server,
+                               server_len, in, inlen);
+  if (ret != OPENSSL_NPN_NEGOTIATED) {
+    lua_pop(L, 2);
+    return SSL_TLSEXT_ERR_NOACK;
+  } 
+
+  // Copy the result because lua_pop() can collect the pointer
+  ctx->alpn = malloc(*outlen);
+  memcpy(ctx->alpn, (void*)*out, *outlen);
+  *out = (const unsigned char*)ctx->alpn;
+
+  lua_pop(L, 2);
+
+  return SSL_TLSEXT_ERR_OK;
+}
+
+/**
+ * Set a callback a server can use to select the next protocol with ALPN.
+ */
+static int set_alpn_cb(lua_State *L)
+{
+  p_context ctx = checkctx(L, 1);
+
+  luaL_getmetatable(L, "SSL:ALPN:Registry");
+  lua_pushlightuserdata(L, (void*)ctx->context);
+  lua_pushvalue(L, 2);
+  lua_settable(L, -3);
+
+  SSL_CTX_set_alpn_select_cb(ctx->context, alpn_cb, ctx);
+
+  lua_pushboolean(L, 1);
+  return 1;
+}
+
+
+/**
  * Package functions
  */
 static luaL_Reg funcs[] = {
@@ -618,6 +703,8 @@ static luaL_Reg funcs[] = {
   {"loadcert",     load_cert},
   {"loadkey",      load_key},
   {"checkkey",     check_key},
+  {"setalpn",      set_alpn},
+  {"setalpncb",    set_alpn_cb},
   {"setcipher",    set_cipher},
   {"setdepth",     set_depth},
   {"setdhparam",   set_dhparam},
@@ -651,6 +738,10 @@ static int meth_destroy(lua_State *L)
     lua_pushnil(L);
     lua_settable(L, -3);
     luaL_getmetatable(L, "SSL:Verify:Registry");
+    lua_pushlightuserdata(L, (void*)ctx->context);
+    lua_pushnil(L);
+    lua_settable(L, -3);
+    luaL_getmetatable(L, "SSL:ALPN:Registry");
     lua_pushlightuserdata(L, (void*)ctx->context);
     lua_pushnil(L);
     lua_settable(L, -3);
@@ -795,8 +886,9 @@ void *lsec_testudata (lua_State *L, int ud, const char *tname) {
  */
 LSEC_API int luaopen_ssl_context(lua_State *L)
 {
-  luaL_newmetatable(L, "SSL:DH:Registry");      /* Keep all DH callbacks */
-  luaL_newmetatable(L, "SSL:Verify:Registry");  /* Keep all verify flags */
+  luaL_newmetatable(L, "SSL:DH:Registry");      /* Keep all DH callbacks   */
+  luaL_newmetatable(L, "SSL:ALPN:Registry");    /* Keep all ALPN callbacks */
+  luaL_newmetatable(L, "SSL:Verify:Registry");  /* Keep all verify flags   */
   luaL_newmetatable(L, "SSL:Context");
   setfuncs(L, meta);
 

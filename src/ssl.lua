@@ -31,6 +31,39 @@ local function optexec(func, param, ctx)
 end
 
 --
+-- Convert an array of strings to wire-format
+--
+local function array2wireformat(array)
+   local str = ""
+   for k, v in ipairs(array) do
+      if type(v) ~= "string" then return nil end
+      local len = #v
+      if len == 0 then
+        return nil, "invalid ALPN name (empty string)"
+      elseif len > 255 then
+        return nil, "invalid ALPN name (length > 255)"
+      end
+      str = str .. string.char(len) .. v
+   end
+   if str == "" then return nil, "invalid ALPN list (empty)" end
+   return str
+end
+
+--
+-- Convert wire-string format to array
+--
+local function wireformat2array(str)
+   local i = 1
+   local array = {}
+   while i < #str do
+      local len = str:byte(i)
+      array[#array + 1] = str:sub(i + 1, i + len)
+      i = i + len + 1
+   end
+   return array
+end
+
+--
 --
 --
 local function newcontext(cfg)
@@ -110,6 +143,48 @@ local function newcontext(cfg)
    -- Set extra verification options
    if cfg.verifyext and ctx.setverifyext then
       succ, msg = optexec(ctx.setverifyext, cfg.verifyext, ctx)
+      if not succ then return nil, msg end
+   end
+
+   -- ALPN
+   if cfg.mode == "server" and cfg.alpn then
+      if type(cfg.alpn) == "function" then
+         local alpncb = cfg.alpn
+         -- This callback function has to return one value only
+         succ, msg = context.setalpncb(ctx, function(str)
+            local protocols = alpncb(wireformat2array(str))
+            if type(protocols) == "string" then
+               protocols = { protocols }
+            elseif type(protocols) ~= "table" then
+               return nil
+            end
+            return (array2wireformat(protocols))    -- use "()" to drop error message
+         end)
+         if not succ then return nil, msg end
+      elseif type(cfg.alpn) == "table" then
+         local protocols = cfg.alpn
+         -- check if array is valid before use it
+         succ, msg = array2wireformat(protocols)
+         if not succ then return nil, msg end
+         -- This callback function has to return one value only
+         succ, msg = context.setalpncb(ctx, function()
+            return (array2wireformat(protocols))    -- use "()" to drop error message
+         end)
+         if not succ then return nil, msg end
+      else
+         return nil, "invalid ALPN parameter"
+      end
+   elseif cfg.mode == "client" and cfg.alpn then
+      local alpn
+      if type(cfg.alpn) == "string" then
+         alpn, msg = array2wireformat({ cfg.alpn })
+      elseif type(cfg.alpn) == "table" then
+         alpn, msg = array2wireformat(cfg.alpn)
+      else
+         return nil, "invalid ALPN parameter"
+      end
+      if not alpn then return nil, msg end
+      succ, msg = context.setalpn(ctx, alpn)
       if not succ then return nil, msg end
    end
 

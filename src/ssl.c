@@ -389,6 +389,10 @@ static int meth_handshake(lua_State *L)
     DH_free(ctx->dh_param);
     ctx->dh_param = NULL;
   }
+  if (ctx->alpn) {
+    free(ctx->alpn);
+    ctx->alpn = NULL;
+  }
   if (err == IO_DONE) {
     lua_pushboolean(L, 1);
     return 1;
@@ -799,6 +803,19 @@ static int meth_getsniname(lua_State *L)
   return 1;
 }
 
+static int meth_getalpn(lua_State *L)
+{
+  unsigned len;
+  const unsigned char *data;
+  p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
+  SSL_get0_alpn_selected(ssl->ssl, &data, &len);
+  if (data == NULL && len == 0)
+    lua_pushnil(L);
+  else
+    lua_pushlstring(L, (const char*)data, len);
+  return 1;
+}
+
 static int meth_copyright(lua_State *L)
 {
   lua_pushstring(L, "LuaSec 0.7 - Copyright (C) 2006-2018 Bruno Silvestre, UFG"
@@ -816,6 +833,7 @@ static int meth_copyright(lua_State *L)
  */
 static luaL_Reg methods[] = {
   {"close",               meth_close},
+  {"getalpn",             meth_getalpn},
   {"getfd",               meth_getfd},
   {"getfinished",         meth_getfinished},
   {"getpeercertificate",  meth_getpeercertificate},
