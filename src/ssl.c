@@ -385,6 +385,7 @@ static int meth_handshake(lua_State *L)
   p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
   int err = handshake(ssl);
   p_context ctx = (p_context)SSL_CTX_get_app_data(SSL_get_SSL_CTX(ssl->ssl));
+  ctx->L = L;
   if (ctx->dh_param) {
     DH_free(ctx->dh_param);
     ctx->dh_param = NULL;
