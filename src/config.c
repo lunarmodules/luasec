@@ -35,14 +35,13 @@ LSEC_API int luaopen_ssl_config(lua_State *L)
   lua_pushstring(L, "tlsv1");
   lua_pushboolean(L, 1);
   lua_rawset(L, -3);
-#if (OPENSSL_VERSION_NUMBER >= 0x1000100fL)
   lua_pushstring(L, "tlsv1_1");
   lua_pushboolean(L, 1);
   lua_rawset(L, -3);
   lua_pushstring(L, "tlsv1_2");
   lua_pushboolean(L, 1);
   lua_rawset(L, -3);
-#endif
+
   lua_rawset(L, -3);
 
   // Algorithms
