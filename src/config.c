@@ -71,16 +71,12 @@ LSEC_API int luaopen_ssl_config(lua_State *L)
   lua_rawset(L, -3);
 
 #ifndef OPENSSL_NO_EC
-#if defined(SSL_CTRL_SET_ECDH_AUTO) || defined(SSL_CTRL_SET_CURVES_LIST) || defined(SSL_CTX_set1_curves_list)
   lua_pushstring(L, "curves_list");
   lua_pushboolean(L, 1);
   lua_rawset(L, -3);
-#ifdef SSL_CTRL_SET_ECDH_AUTO
   lua_pushstring(L, "ecdh_auto");
   lua_pushboolean(L, 1);
   lua_rawset(L, -3);
-#endif
-#endif
 #endif
   lua_rawset(L, -3);
 

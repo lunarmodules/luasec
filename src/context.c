@@ -571,9 +571,7 @@ static int set_curve(lua_State *L)
   lua_pushboolean(L, 1);
   return 1;
 }
-#endif
 
-#if !defined(OPENSSL_NO_EC) && (defined(SSL_CTRL_SET_CURVES_LIST) || defined(SSL_CTX_set1_curves_list) || defined(SSL_CTRL_SET_ECDH_AUTO))
 /**
  * Set elliptic curves list.
  */
@@ -590,9 +588,7 @@ static int set_curves_list(lua_State *L)
     return 2;
   }
 
-#ifdef SSL_CTRL_SET_ECDH_AUTO
   SSL_CTX_set_ecdh_auto(ctx, 1);
-#endif
 
   lua_pushboolean(L, 1);
   return 1;
@@ -703,10 +699,7 @@ static luaL_Reg funcs[] = {
   {"setmode",      set_mode},
 
 #if !defined(OPENSSL_NO_EC)
-  {"setcurve",     set_curve},
-#endif
-
-#if !defined(OPENSSL_NO_EC) && (defined(SSL_CTRL_SET_CURVES_LIST) || defined(SSL_CTX_set1_curves_list) || defined(SSL_CTRL_SET_ECDH_AUTO))
+  {"setcurve",      set_curve},
   {"setcurveslist", set_curves_list},
 #endif
 
