@@ -588,7 +588,7 @@ static int set_curves_list(lua_State *L)
     return 2;
   }
 
-  SSL_CTX_set_ecdh_auto(ctx, 1);
+  (void)SSL_CTX_set_ecdh_auto(ctx, 1);
 
   lua_pushboolean(L, 1);
   return 1;
