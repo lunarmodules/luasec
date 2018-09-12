@@ -2,7 +2,7 @@
 
 #include "ec.h"
 
-#ifndef OPENSSL_NO_ECDH
+#ifndef OPENSSL_NO_EC
 
 EC_KEY *lsec_find_ec_key(lua_State *L, const char *str)
 {
