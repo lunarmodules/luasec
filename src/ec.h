@@ -10,7 +10,7 @@
 
 #include <lua.h>
 
-#ifndef OPENSSL_NO_ECDH
+#ifndef OPENSSL_NO_EC
 #include <openssl/ec.h>
 
 EC_KEY *lsec_find_ec_key(lua_State *L, const char *str);
