@@ -102,7 +102,13 @@ static const SSL_METHOD* str2method(const char *method, int *vmin, int *vmax)
     *vmax = TLS1_2_VERSION;
     return TLS_method();
   }
-
+#if defined(TLS1_3_VERSION)
+  else if (!strcmp(method, "tlsv1_3")) {
+    *vmin = TLS1_3_VERSION;
+    *vmax = TLS1_3_VERSION;
+    return TLS_method();
+  }
+#endif
   return NULL;
 }
 #endif

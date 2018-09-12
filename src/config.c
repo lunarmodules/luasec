@@ -41,6 +41,11 @@ LSEC_API int luaopen_ssl_config(lua_State *L)
   lua_pushstring(L, "tlsv1_2");
   lua_pushboolean(L, 1);
   lua_rawset(L, -3);
+#if defined(TLS1_3_VERSION)
+  lua_pushstring(L, "tlsv1_3");
+  lua_pushboolean(L, 1);
+  lua_rawset(L, -3);
+#endif
 
   lua_rawset(L, -3);
 

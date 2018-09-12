@@ -13,7 +13,7 @@
 /* If you need to generate these options again, see options.lua */
 
 /* 
-  OpenSSL version: OpenSSL 1.1.0h
+  OpenSSL version: OpenSSL 1.1.1
 */
 
 struct ssl_option_s {
@@ -25,6 +25,9 @@ typedef struct ssl_option_s ssl_option_t;
 static ssl_option_t ssl_options[] = {
 #if defined(SSL_OP_ALL)
   {"all", SSL_OP_ALL},
+#endif
+#if defined(SSL_OP_ALLOW_NO_DHE_KEX)
+  {"allow_no_dhe_kex", SSL_OP_ALLOW_NO_DHE_KEX},
 #endif
 #if defined(SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION)
   {"allow_unsafe_legacy_renegotiation", SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION},
@@ -43,6 +46,9 @@ static ssl_option_t ssl_options[] = {
 #endif
 #if defined(SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS)
   {"dont_insert_empty_fragments", SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS},
+#endif
+#if defined(SSL_OP_ENABLE_MIDDLEBOX_COMPAT)
+  {"enable_middlebox_compat", SSL_OP_ENABLE_MIDDLEBOX_COMPAT},
 #endif
 #if defined(SSL_OP_EPHEMERAL_RSA)
   {"ephemeral_rsa", SSL_OP_EPHEMERAL_RSA},
@@ -70,6 +76,9 @@ static ssl_option_t ssl_options[] = {
 #endif
 #if defined(SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG)
   {"netscape_reuse_cipher_change_bug", SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG},
+#endif
+#if defined(SSL_OP_NO_ANTI_REPLAY)
+  {"no_anti_replay", SSL_OP_NO_ANTI_REPLAY},
 #endif
 #if defined(SSL_OP_NO_COMPRESSION)
   {"no_compression", SSL_OP_NO_COMPRESSION},
@@ -116,11 +125,17 @@ static ssl_option_t ssl_options[] = {
 #if defined(SSL_OP_NO_TLSv1_2)
   {"no_tlsv1_2", SSL_OP_NO_TLSv1_2},
 #endif
+#if defined(SSL_OP_NO_TLSv1_3)
+  {"no_tlsv1_3", SSL_OP_NO_TLSv1_3},
+#endif
 #if defined(SSL_OP_PKCS1_CHECK_1)
   {"pkcs1_check_1", SSL_OP_PKCS1_CHECK_1},
 #endif
 #if defined(SSL_OP_PKCS1_CHECK_2)
   {"pkcs1_check_2", SSL_OP_PKCS1_CHECK_2},
+#endif
+#if defined(SSL_OP_PRIORITIZE_CHACHA)
+  {"prioritize_chacha", SSL_OP_PRIORITIZE_CHACHA},
 #endif
 #if defined(SSL_OP_SAFARI_ECDHE_ECDSA_BUG)
   {"safari_ecdhe_ecdsa_bug", SSL_OP_SAFARI_ECDHE_ECDSA_BUG},
