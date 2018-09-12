@@ -59,7 +59,23 @@ static int set_option_flag(const char *opt, unsigned long *flag)
   return 0;
 }
 
-#if (OPENSSL_VERSION_NUMBER >= 0x1010000fL)
+#if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL) || (OPENSSL_VERSION_NUMBER < 0x1010000fL)
+/**
+ * Find the protocol.
+ */
+static const SSL_METHOD* str2method(const char *method, int *vmin, int *vmax)
+{
+  (void)vmin;
+  (void)vmax;
+  if (!strcmp(method, "any"))     return SSLv23_method();
+  if (!strcmp(method, "sslv23"))  return SSLv23_method();  // deprecated
+  if (!strcmp(method, "tlsv1"))   return TLSv1_method();
+  if (!strcmp(method, "tlsv1_1")) return TLSv1_1_method();
+  if (!strcmp(method, "tlsv1_2")) return TLSv1_2_method();
+  return NULL;
+}
+
+#else
 
 /**
  * Find the protocol.
@@ -89,26 +105,6 @@ static const SSL_METHOD* str2method(const char *method, int *vmin, int *vmax)
 
   return NULL;
 }
-
-#else
-
-/**
- * Find the protocol.
- */
-static const SSL_METHOD* str2method(const char *method, int *vmin, int *vmax)
-{
-  (void)vmin;
-  (void)vmax;
-  if (!strcmp(method, "any"))     return SSLv23_method();
-  if (!strcmp(method, "sslv23"))  return SSLv23_method();  // deprecated
-  if (!strcmp(method, "tlsv1"))   return TLSv1_method();
-#if (OPENSSL_VERSION_NUMBER >= 0x1000100fL)
-  if (!strcmp(method, "tlsv1_1")) return TLSv1_1_method();
-  if (!strcmp(method, "tlsv1_2")) return TLSv1_2_method();
-#endif
-  return NULL;
-}
-
 #endif
 
 /**
@@ -329,7 +325,7 @@ static int create(lua_State *L)
       ERR_reason_error_string(ERR_get_error()));
     return 2;
   }
-#if (OPENSSL_VERSION_NUMBER >= 0x1010000fL)
+#if ! ((defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL) || (OPENSSL_VERSION_NUMBER < 0x1010000fL))
   SSL_CTX_set_min_proto_version(ctx->context, vmin);
   SSL_CTX_set_max_proto_version(ctx->context, vmax);
 #endif
