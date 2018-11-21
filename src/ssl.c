@@ -880,6 +880,7 @@ static luaL_Reg funcs[] = {
  */
 LSEC_API int luaopen_ssl_core(lua_State *L)
 {
+#if OPENSSL_VERSION_NUMBER<0x10100000L
   /* Initialize SSL */
   if (!SSL_library_init()) {
     lua_pushstring(L, "unable to initialize SSL library");
@@ -887,6 +888,7 @@ LSEC_API int luaopen_ssl_core(lua_State *L)
   }
   OpenSSL_add_all_algorithms();
   SSL_load_error_strings();
+#endif
 
 #if defined(WITH_LUASOCKET)
   /* Initialize internal library */
