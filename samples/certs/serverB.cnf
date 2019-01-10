@@ -195,7 +195,7 @@ authorityKeyIdentifier=keyid,issuer
 
 # This stuff is for subjectAltName and issuerAltname.
 # Import the email address.
-# subjectAltName=email:copy
+subjectAltName=DNS:fnord.bar.example
 # An alternative to produce certificates that aren't
 # deprecated according to PKIX.
 # subjectAltName=email:move
