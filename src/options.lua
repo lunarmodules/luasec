@@ -1,7 +1,7 @@
 local function usage()
   print("Usage:")
   print("* Generate options of your system:")
-  print("  lua options.lua -g /path/to/ssl.h [verion] > options.h")
+  print("  lua options.lua -g /path/to/ssl.h [version] > options.h")
   print("* Examples:")
   print("  lua options.lua -g /usr/include/openssl/ssl.h > options.h\n")
   print("  lua options.lua -g /usr/include/openssl/ssl.h \"OpenSSL 1.0.1 14\" > options.h\n")
@@ -21,8 +21,9 @@ local function generate(options, version)
 #define LSEC_OPTIONS_H
 
 /*--------------------------------------------------------------------------
- * LuaSec 0.5
- * Copyright (C) 2006-2014 Bruno Silvestre
+ * LuaSec 0.7
+ *
+ * Copyright (C) 2006-2018 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 

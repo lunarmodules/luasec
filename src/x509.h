@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.5
+ * LuaSec 0.7
  *
- * Copyright (C) 2014 Kim Alvefur, Paul Aurich, Tobias Markmann
- *                    Matthew Wild, Bruno Silvestre.
+ * Copyright (C) 2014-2018 Kim Alvefur, Paul Aurich, Tobias Markmann
+ *                         Matthew Wild, Bruno Silvestre.
  *
  *--------------------------------------------------------------------------*/
 
@@ -12,7 +12,7 @@
 #include <openssl/x509v3.h>
 #include <lua.h>
 
-#include "config.h"
+#include "compat.h"
 
 /* We do not support UniversalString nor BMPString as ASN.1 String types */
 enum { LSEC_AI5_STRING, LSEC_UTF8_STRING };

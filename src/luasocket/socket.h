@@ -32,7 +32,7 @@
 typedef struct sockaddr SA;
 
 /*=========================================================================*\
-* Functions bellow implement a comfortable platform independent 
+* Functions below implement a comfortable platform independent 
 * interface to sockets
 \*=========================================================================*/
 int socket_open(void);

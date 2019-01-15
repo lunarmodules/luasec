@@ -1,12 +1,14 @@
 ------------------------------------------------------------------------------
--- LuaSec 0.5
--- Copyright (C) 2006-2014 Bruno Silvestre
+-- LuaSec 0.7
+--
+-- Copyright (C) 2006-2018 Bruno Silvestre
 --
 ------------------------------------------------------------------------------
 
 local core    = require("ssl.core")
 local context = require("ssl.context")
 local x509    = require("ssl.x509")
+local config  = require("ssl.config")
 
 local unpack  = table.unpack or unpack
 
@@ -26,6 +28,39 @@ local function optexec(func, param, ctx)
     end
   end
   return true
+end
+
+--
+-- Convert an array of strings to wire-format
+--
+local function array2wireformat(array)
+   local str = ""
+   for k, v in ipairs(array) do
+      if type(v) ~= "string" then return nil end
+      local len = #v
+      if len == 0 then
+        return nil, "invalid ALPN name (empty string)"
+      elseif len > 255 then
+        return nil, "invalid ALPN name (length > 255)"
+      end
+      str = str .. string.char(len) .. v
+   end
+   if str == "" then return nil, "invalid ALPN list (empty)" end
+   return str
+end
+
+--
+-- Convert wire-string format to array
+--
+local function wireformat2array(str)
+   local i = 1
+   local array = {}
+   while i < #str do
+      local len = str:byte(i)
+      array[#array + 1] = str:sub(i + 1, i + len)
+      i = i + len + 1
+   end
+   return array
 end
 
 --
@@ -92,14 +127,64 @@ local function newcontext(cfg)
       end
       context.setdhparam(ctx, cfg.dhparam)
    end
-   -- Set elliptic curve
-   if cfg.curve then
-      succ, msg = context.setcurve(ctx, cfg.curve)
-      if not succ then return nil, msg end
+   
+   -- Set elliptic curves
+   if (not config.algorithms.ec) and (cfg.curve or cfg.curveslist) then
+     return false, "elliptic curves not supported"
    end
+   if config.capabilities.curves_list and cfg.curveslist then
+     succ, msg = context.setcurveslist(ctx, cfg.curveslist)
+     if not succ then return nil, msg end
+   elseif cfg.curve then
+     succ, msg = context.setcurve(ctx, cfg.curve)
+     if not succ then return nil, msg end
+   end
+
    -- Set extra verification options
    if cfg.verifyext and ctx.setverifyext then
       succ, msg = optexec(ctx.setverifyext, cfg.verifyext, ctx)
+      if not succ then return nil, msg end
+   end
+
+   -- ALPN
+   if cfg.mode == "server" and cfg.alpn then
+      if type(cfg.alpn) == "function" then
+         local alpncb = cfg.alpn
+         -- This callback function has to return one value only
+         succ, msg = context.setalpncb(ctx, function(str)
+            local protocols = alpncb(wireformat2array(str))
+            if type(protocols) == "string" then
+               protocols = { protocols }
+            elseif type(protocols) ~= "table" then
+               return nil
+            end
+            return (array2wireformat(protocols))    -- use "()" to drop error message
+         end)
+         if not succ then return nil, msg end
+      elseif type(cfg.alpn) == "table" then
+         local protocols = cfg.alpn
+         -- check if array is valid before use it
+         succ, msg = array2wireformat(protocols)
+         if not succ then return nil, msg end
+         -- This callback function has to return one value only
+         succ, msg = context.setalpncb(ctx, function()
+            return (array2wireformat(protocols))    -- use "()" to drop error message
+         end)
+         if not succ then return nil, msg end
+      else
+         return nil, "invalid ALPN parameter"
+      end
+   elseif cfg.mode == "client" and cfg.alpn then
+      local alpn
+      if type(cfg.alpn) == "string" then
+         alpn, msg = array2wireformat({ cfg.alpn })
+      elseif type(cfg.alpn) == "table" then
+         alpn, msg = array2wireformat(cfg.alpn)
+      else
+         return nil, "invalid ALPN parameter"
+      end
+      if not alpn then return nil, msg end
+      succ, msg = context.setalpn(ctx, alpn)
       if not succ then return nil, msg end
    end
 
@@ -120,7 +205,7 @@ local function wrap(sock, cfg)
    local s, msg = core.create(ctx)
    if s then
       core.setfd(s, sock:getfd())
-      sock:setfd(-1)
+      sock:setfd(core.SOCKET_INVALID)
       registry[s] = ctx
       return s
    end
@@ -169,7 +254,7 @@ core.setmethod("info", info)
 --
 
 local _M = {
-  _VERSION        = "0.5",
+  _VERSION        = "0.7",
   _COPYRIGHT      = core.copyright(),
   loadcertificate = x509.load,
   newcontext      = newcontext,

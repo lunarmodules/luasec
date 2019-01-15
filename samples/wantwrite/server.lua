@@ -8,12 +8,12 @@ print("Use Ctrl+S and Ctrl+Q to suspend and resume the server.")
 
 local params = {
    mode = "server",
-   protocol = "sslv3",
+   protocol = "any",
    key = "../certs/serverAkey.pem",
    certificate = "../certs/serverA.pem",
    cafile = "../certs/rootA.pem",
    verify = {"peer", "fail_if_no_peer_cert"},
-   options = {"all", "no_sslv2"},
+   options = "all",
 }
 
 

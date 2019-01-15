@@ -1,15 +1,22 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.5
+ * LuaSec 0.7
  *
- * Copyright (C) 2014 Kim Alvefur, Paul Aurich, Tobias Markmann
- *                    Matthew Wild, Bruno Silvestre.
+ * Copyright (C) 2014-2018 Kim Alvefur, Paul Aurich, Tobias Markmann
+ *                         Matthew Wild, Bruno Silvestre.
  *
  *--------------------------------------------------------------------------*/
 
+#include <stdio.h>
 #include <string.h>
 
 #if defined(WIN32)
+#include <ws2tcpip.h>
 #include <windows.h>
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #endif
 
 #include <openssl/ssl.h>
@@ -20,15 +27,21 @@
 #include <openssl/bio.h>
 #include <openssl/bn.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
 #include <lua.h>
 #include <lauxlib.h>
 
 #include "x509.h"
+
+
+/*
+ * ASN1_STRING_data is deprecated in OpenSSL 1.1.0
+ */
+#if OPENSSL_VERSION_NUMBER>=0x1010000fL && !defined(LIBRESSL_VERSION_NUMBER)
+#define LSEC_ASN1_STRING_data(x) ASN1_STRING_get0_data(x)
+#else
+#define LSEC_ASN1_STRING_data(x) ASN1_STRING_data(x)
+#endif
+
 
 static const char* hex_tab = "0123456789abcdef";
 
@@ -59,6 +72,51 @@ p_x509 lsec_checkp_x509(lua_State* L, int idx)
 {
   return (p_x509)luaL_checkudata(L, idx, "SSL:Certificate");
 }
+
+/*---------------------------------------------------------------------------*/
+
+#if defined(LUASEC_INET_NTOP)
+/*
+ * For WinXP (SP3), set the following preprocessor macros:
+ *     LUASEC_INET_NTOP
+ *     WINVER=0x0501
+ *     _WIN32_WINNT=0x0501
+ *     NTDDI_VERSION=0x05010300
+ *
+ * For IPv6 addresses, you need to add IPv6 Protocol to your interface.
+ *
+ */
+static const char *inet_ntop(int af, const char *src, char *dst, socklen_t size)
+{
+  int addrsize;
+  struct sockaddr    *addr;
+  struct sockaddr_in  addr4;
+  struct sockaddr_in6 addr6;
+
+  switch (af) {
+  case AF_INET:
+    memset((void*)&addr4, 0, sizeof(addr4));
+    addr4.sin_family = AF_INET;
+    memcpy((void*)&addr4.sin_addr, src, sizeof(struct in_addr));
+    addr = (struct sockaddr*)&addr4;
+    addrsize = sizeof(struct sockaddr_in);
+    break;
+  case AF_INET6:
+    memset((void*)&addr6, 0, sizeof(addr6));
+    addr6.sin6_family = AF_INET6;
+    memcpy((void*)&addr6.sin6_addr, src, sizeof(struct in6_addr));
+    addr = (struct sockaddr*)&addr6;
+    addrsize = sizeof(struct sockaddr_in6);
+    break;
+  default:
+    return NULL;
+  }
+
+  if(getnameinfo(addr, addrsize, dst, size, NULL, 0, NI_NUMERICHOST) != 0)
+    return NULL;
+  return dst;
+}
+#endif
 
 /*---------------------------------------------------------------------------*/
 
@@ -99,7 +157,7 @@ static void push_asn1_string(lua_State* L, ASN1_STRING *string, int encode)
   }
   switch (encode) {
   case LSEC_AI5_STRING:
-    lua_pushlstring(L, (char*)ASN1_STRING_data(string),
+    lua_pushlstring(L, (char*)LSEC_ASN1_STRING_data(string),
                        ASN1_STRING_length(string));
     break;
   case LSEC_UTF8_STRING:
@@ -133,21 +191,21 @@ static int push_asn1_time(lua_State *L, ASN1_UTCTIME *tm)
  */
 static void push_asn1_ip(lua_State *L, ASN1_STRING *string)
 {
-  unsigned char *ip = ASN1_STRING_data(string);
+  int af;
   char dst[INET6_ADDRSTRLEN];
-  int typ;
+  unsigned char *ip = (unsigned char*)LSEC_ASN1_STRING_data(string);
   switch(ASN1_STRING_length(string)) {
   case 4:
-    typ = AF_INET;
+    af = AF_INET;
     break;
   case 16:
-    typ = AF_INET6;
+    af = AF_INET6;
     break;
   default:
     lua_pushnil(L);
     return;
   }
-  if(inet_ntop(typ, ip, dst, INET6_ADDRSTRLEN))
+  if(inet_ntop(af, ip, dst, INET6_ADDRSTRLEN))
     lua_pushstring(L, dst);
   else
     lua_pushnil(L);
@@ -174,7 +232,7 @@ static int push_subtable(lua_State* L, int idx)
 }
 
 /**
- * Retrive the general names from the object.
+ * Retrieve the general names from the object.
  */
 static int push_x509_name(lua_State* L, X509_NAME *name, int encode)
 {
@@ -202,7 +260,7 @@ static int push_x509_name(lua_State* L, X509_NAME *name, int encode)
 /*---------------------------------------------------------------------------*/
 
 /**
- * Retrive the Subject from the certificate.
+ * Retrieve the Subject from the certificate.
  */
 static int meth_subject(lua_State* L)
 {
@@ -211,7 +269,7 @@ static int meth_subject(lua_State* L)
 }
 
 /**
- * Retrive the Issuer from the certificate.
+ * Retrieve the Issuer from the certificate.
  */
 static int meth_issuer(lua_State* L)
 {
@@ -246,11 +304,11 @@ int meth_extensions(lua_State* L)
       break;
 
     /* Push ret[oid] */
-    push_asn1_objname(L, extension->object, 1);
+    push_asn1_objname(L, X509_EXTENSION_get_object(extension), 1);
     push_subtable(L, -2);
 
     /* Set ret[oid].name = name */
-    push_asn1_objname(L, extension->object, 0);
+    push_asn1_objname(L, X509_EXTENSION_get_object(extension), 0);
     lua_setfield(L, -2, "name");
 
     n_general_names = sk_GENERAL_NAME_num(values);
@@ -270,7 +328,7 @@ int meth_extensions(lua_State* L)
         break;
       case GEN_DNS:
         lua_pushstring(L, "dNSName");
-	push_subtable(L, -2);
+        push_subtable(L, -2);
         push_asn1_string(L, general_name->d.dNSName, px->encode);
         lua_rawseti(L, -2, lua_rawlen(L, -2) + 1);
         lua_pop(L, 1);
@@ -314,6 +372,7 @@ int meth_extensions(lua_State* L)
         break;
       }
     }
+    sk_GENERAL_NAME_free(values);
     lua_pop(L, 1); /* ret[oid] */
     i++;           /* Next extension */
   }
@@ -357,7 +416,7 @@ static int meth_pubkey(lua_State* L)
     bytes = BIO_get_mem_data(bio, &data);
     if (bytes > 0) {
       lua_pushlstring(L, data, bytes);
-      switch(EVP_PKEY_type(pkey->type)) {
+      switch(EVP_PKEY_base_id(pkey)) {
         case EVP_PKEY_RSA:
           lua_pushstring(L, "RSA");
           break;
@@ -474,6 +533,91 @@ static int meth_notafter(lua_State *L)
 }
 
 /**
+ * Check if this certificate issued some other certificate
+ */
+static int meth_issued(lua_State* L)
+{
+  int ret, i, len;
+
+  X509_STORE_CTX* ctx = NULL;
+  X509_STORE* root = NULL;
+  STACK_OF(X509)* chain = NULL;
+
+  X509* issuer = lsec_checkx509(L, 1);
+  X509* subject = lsec_checkx509(L, 2);
+  X509* cert = NULL;
+
+  len = lua_gettop(L);
+
+  /* Check that all arguments are certificates */
+
+  for (i = 3; i <= len; i++) {
+    lsec_checkx509(L, i);
+  }
+
+  /* Before allocating things that require freeing afterwards */
+
+  chain = sk_X509_new_null();
+  ctx = X509_STORE_CTX_new();
+  root = X509_STORE_new();
+
+  if (ctx == NULL || root == NULL) {
+    lua_pushnil(L);
+    lua_pushstring(L, "X509_STORE_new() or X509_STORE_CTX_new() error");
+    ret = 2;
+    goto cleanup;
+  }
+
+  ret = X509_STORE_add_cert(root, issuer);
+
+  if(!ret) {
+    lua_pushnil(L);
+    lua_pushstring(L, "X509_STORE_add_cert() error");
+    ret = 2;
+    goto cleanup;
+  }
+
+  for (i = 3; i <= len && lua_isuserdata(L, i); i++) {
+    cert = lsec_checkx509(L, i);
+    sk_X509_push(chain, cert);
+  }
+
+  ret = X509_STORE_CTX_init(ctx, root, subject, chain);
+
+  if(!ret) {
+    lua_pushnil(L);
+    lua_pushstring(L, "X509_STORE_CTX_init() error");
+    ret = 2;
+    goto cleanup;
+  }
+
+  /* Actual verification */
+  if (X509_verify_cert(ctx) <= 0) {
+    ret = X509_STORE_CTX_get_error(ctx);
+    lua_pushnil(L);
+    lua_pushstring(L, X509_verify_cert_error_string(ret));
+    ret = 2;
+  } else {
+    lua_pushboolean(L, 1);
+    ret = 1;
+  }
+
+cleanup:
+
+  if (ctx != NULL) {
+    X509_STORE_CTX_free(ctx);
+  }
+
+  if (chain != NULL) {
+    X509_STORE_free(root);
+  }
+
+  sk_X509_free(chain);
+
+  return ret;
+}
+
+/**
  * Collect X509 objects.
  */
 static int meth_destroy(lua_State* L)
@@ -539,6 +683,7 @@ static luaL_Reg methods[] = {
   {"issuer",     meth_issuer},
   {"notbefore",  meth_notbefore},
   {"notafter",   meth_notafter},
+  {"issued",     meth_issued},
   {"pem",        meth_pem},
   {"pubkey",     meth_pubkey},
   {"serial",     meth_serial},
