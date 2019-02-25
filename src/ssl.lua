@@ -74,35 +74,37 @@ local function newcontext(cfg)
    -- Mode
    succ, msg = context.setmode(ctx, cfg.mode)
    if not succ then return nil, msg end
-   -- Wrap singular certificate, key, etc in tables if necessary
+   if not cfg.certificates then
+      cfg.certificates = {}
+   end
+   local singularcertificate = {}
+   local singularexists = false
    for _, prop in pairs({ "key", "certificate", "password" }) do
-      if not cfg[prop .. "s"] then
-         if cfg[prop] then
-            cfg[prop .. "s"] = { cfg[prop] }
-         else
-            cfg[prop .. "s"] = {}
-         end
+      if cfg[prop] then
+         singularexists = true
+         singularcertificate[prop] = cfg[prop]
       end
    end
-   for i, certificate in pairs(cfg.certificates) do
-      local password = cfg.passwords[i]
-      local key = cfg.keys[i]
+   if singularexists then
+      table.insert(crt.certificates, singularcertificate)
+   end
+   for _, certificate in pairs(cfg.certificates) do
       -- Load the key
-      if key then
-         if password and
-            type(password) ~= "function" and
-            type(password) ~= "string"
+      if certificate.key then
+         if certificate.password and
+            type(certificate.password) ~= "function" and
+            type(certificate.password) ~= "string"
          then
             return nil, "invalid password type"
          end
-         succ, msg = context.loadkey(ctx, key, password)
+         succ, msg = context.loadkey(ctx, certificate.key, certificate.password)
          if not succ then return nil, msg end
       end
       -- Load the certificate(s)
-      if certificate then
-        succ, msg = context.loadcert(ctx, certificate)
+      if certificate.certificate then
+        succ, msg = context.loadcert(ctx, certificate.certificate)
         if not succ then return nil, msg end
-        if key and context.checkkey then
+        if certificate.key and context.checkkey then
           succ = context.checkkey(ctx)
           if not succ then return nil, "private key does not match public key" end
         end
