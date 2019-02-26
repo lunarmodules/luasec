@@ -74,21 +74,13 @@ local function newcontext(cfg)
    -- Mode
    succ, msg = context.setmode(ctx, cfg.mode)
    if not succ then return nil, msg end
-   if not cfg.certificates then
-      cfg.certificates = {}
+   local certificates = cfg.certificates
+   if not certificates then
+      certificates = {
+         { certificate = cfg.certificate, key = cfg.key, password = cfg.password }
+      }
    end
-   local singularcertificate = {}
-   local singularexists = false
-   for _, prop in pairs({ "key", "certificate", "password" }) do
-      if cfg[prop] then
-         singularexists = true
-         singularcertificate[prop] = cfg[prop]
-      end
-   end
-   if singularexists then
-      table.insert(crt.certificates, singularcertificate)
-   end
-   for _, certificate in pairs(cfg.certificates) do
+   for _, certificate in ipairs(certificates) do
       -- Load the key
       if certificate.key then
          if certificate.password and
