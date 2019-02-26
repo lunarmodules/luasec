@@ -5,27 +5,22 @@ local socket = require("socket")
 local ssl    = require("ssl")
 
 local params = {
-   mode = "server",
-   protocol = "any",
-   certificates = {
-      {
-         key = "../certs/serverAkey.pem",
-         certificate = "../certs/serverA.pem"
-      },
-      {
-         key = "../certs/serverBkey.pem",
-         certificate = "../certs/serverB.pem"
-      }
+   mode         = "server",
+   protocol     = "any",
+   certificates = { 
+      -- Comment line below and 'client-rsa' stop working
+      { certificate = "certs/serverRSA.pem",   key = "certs/serverRSAkey.pem"   },
+      -- Comment line below and 'client-ecdsa' stop working
+      { certificate = "certs/serverECDSA.pem", key = "certs/serverECDSAkey.pem" }
    },
-   cafile = "../certs/rootA.pem",
-   verify = {"peer", "fail_if_no_peer_cert"},
-   options = "all",
-   --
-   curve = "secp384r1",
+   verify  = "none",
+   options = "all"
 }
 
-------------------------------------------------------------------------------
+
+-- [[ SSL context
 local ctx = assert(ssl.newcontext(params))
+--]]
 
 local server = socket.tcp()
 server:setoption('reuseaddr', true)
@@ -34,15 +29,10 @@ server:listen()
 
 local peer = server:accept()
 
+-- [[ SSL wrapper
 peer = assert( ssl.wrap(peer, ctx) )
 assert( peer:dohandshake() )
+--]]
 
-print("--- INFO ---")
-local info = peer:info()
-for k, v in pairs(info) do
-  print(k, v)
-end
-print("---")
-
+peer:send("oneshot test\n")
 peer:close()
-server:close()
