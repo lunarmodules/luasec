@@ -74,25 +74,41 @@ local function newcontext(cfg)
    -- Mode
    succ, msg = context.setmode(ctx, cfg.mode)
    if not succ then return nil, msg end
-   -- Load the key
-   if cfg.key then
-      if cfg.password and
-         type(cfg.password) ~= "function" and
-         type(cfg.password) ~= "string"
-      then
-         return nil, "invalid password type"
-      end
-      succ, msg = context.loadkey(ctx, cfg.key, cfg.password)
-      if not succ then return nil, msg end
+   if not cfg.certificates then
+      cfg.certificates = {}
    end
-   -- Load the certificate
-   if cfg.certificate then
-     succ, msg = context.loadcert(ctx, cfg.certificate)
-     if not succ then return nil, msg end
-     if cfg.key and context.checkkey then
-       succ = context.checkkey(ctx)
-       if not succ then return nil, "private key does not match public key" end
-     end
+   local singularcertificate = {}
+   local singularexists = false
+   for _, prop in pairs({ "key", "certificate", "password" }) do
+      if cfg[prop] then
+         singularexists = true
+         singularcertificate[prop] = cfg[prop]
+      end
+   end
+   if singularexists then
+      table.insert(crt.certificates, singularcertificate)
+   end
+   for _, certificate in pairs(cfg.certificates) do
+      -- Load the key
+      if certificate.key then
+         if certificate.password and
+            type(certificate.password) ~= "function" and
+            type(certificate.password) ~= "string"
+         then
+            return nil, "invalid password type"
+         end
+         succ, msg = context.loadkey(ctx, certificate.key, certificate.password)
+         if not succ then return nil, msg end
+      end
+      -- Load the certificate(s)
+      if certificate.certificate then
+        succ, msg = context.loadcert(ctx, certificate.certificate)
+        if not succ then return nil, msg end
+        if certificate.key and context.checkkey then
+          succ = context.checkkey(ctx)
+          if not succ then return nil, "private key does not match public key" end
+        end
+      end
    end
    -- Load the CA certificates
    if cfg.cafile or cfg.capath then
