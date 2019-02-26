@@ -118,7 +118,7 @@ x509_extensions	= v3_ca	# The extensions to add to the self signed cert
 # so use this option with caution!
 string_mask = nombstr
 
-req_extensions = req_ext # The extensions to add to a certificate request
+# req_extensions = v3_ext # The extensions to add to a certificate request
 
 [ req_distinguished_name ]
 countryName			= Country Name (2 letter code)
