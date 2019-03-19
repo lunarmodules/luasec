@@ -141,5 +141,6 @@ end
 --
 
 _M.request = request
+_M.tcp = tcp
 
 return _M
