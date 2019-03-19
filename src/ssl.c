@@ -876,6 +876,39 @@ static luaL_Reg funcs[] = {
 };
 
 /**
+ * Cleanup module
+ *
+ * https://wiki.openssl.org/index.php/Library_Initialization#Cleanup
+ * https://stackoverflow.com/questions/29845527/how-to-properly-uninitialize-openssl
+ * https://github.com/zhaozg/lua-openssl/blob/master/src/openssl.c
+ */
+static int luaclose_ssl_core(lua_State *L)
+{
+#if !defined(LIBRESSL_VERSION_NUMBER)
+  FIPS_mode_set(0);
+#endif
+  //ENGINE_cleanup();
+#if OPENSSL_VERSION_NUMBER >= 0x10002000L
+  SSL_COMP_free_compression_methods();
+#endif
+  CONF_modules_free();
+  CONF_modules_unload(1);
+  COMP_zlib_cleanup();
+  ERR_free_strings();
+  EVP_cleanup();
+  //CRYPTO_set_locking_callback(NULL);
+  //CRYPTO_set_id_callback(NULL);
+  CRYPTO_cleanup_all_ex_data();
+#if OPENSSL_VERSION_NUMBER < 0x10000000L
+  ERR_remove_state(0);
+#elif OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+  ERR_remove_thread_state(NULL);
+#endif
+
+  return 0;
+}
+
+/**
  * Initialize modules.
  */
 LSEC_API int luaopen_ssl_core(lua_State *L)
@@ -903,6 +936,14 @@ LSEC_API int luaopen_ssl_core(lua_State *L)
   lua_setfield(L, -2, "__index");
 
   luaL_newlib(L, funcs);
+
+  /* Cleanup hook */
+  lua_newuserdata(L, sizeof(int));
+  lua_newtable(L);
+  lua_pushcfunction(L, luaclose_ssl_core);
+  lua_setfield(L, -2, "__gc");
+  lua_setmetatable(L, -2);
+  lua_setfield(L, -2, "__guard");
 
   lua_pushstring(L, "SOCKET_INVALID");
   lua_pushnumber(L, SOCKET_INVALID);
