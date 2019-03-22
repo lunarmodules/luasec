@@ -436,10 +436,27 @@ static int set_cipher(lua_State *L)
   const char *list = luaL_checkstring(L, 2);
   if (SSL_CTX_set_cipher_list(ctx, list) != 1) {
     lua_pushboolean(L, 0);
-    lua_pushfstring(L, "error setting cipher list (%s)",
-      ERR_reason_error_string(ERR_get_error()));
+    lua_pushfstring(L, "error setting cipher list (%s)", ERR_reason_error_string(ERR_get_error()));
     return 2;
   }
+  lua_pushboolean(L, 1);
+  return 1;
+}
+
+/**
+ * Set the cipher suites.
+ */
+static int set_ciphersuites(lua_State *L)
+{
+#if defined(TLS1_3_VERSION)
+  SSL_CTX *ctx = lsec_checkcontext(L, 1);
+  const char *list = luaL_checkstring(L, 2);
+  if (SSL_CTX_set_ciphersuites(ctx, list) != 1) {
+    lua_pushboolean(L, 0);
+    lua_pushfstring(L, "error setting cipher list (%s)", ERR_reason_error_string(ERR_get_error()));
+    return 2;
+  }
+#endif
   lua_pushboolean(L, 1);
   return 1;
 }
@@ -690,19 +707,20 @@ static int set_alpn_cb(lua_State *L)
  * Package functions
  */
 static luaL_Reg funcs[] = {
-  {"create",       create},
-  {"locations",    load_locations},
-  {"loadcert",     load_cert},
-  {"loadkey",      load_key},
-  {"checkkey",     check_key},
-  {"setalpn",      set_alpn},
-  {"setalpncb",    set_alpn_cb},
-  {"setcipher",    set_cipher},
-  {"setdepth",     set_depth},
-  {"setdhparam",   set_dhparam},
-  {"setverify",    set_verify},
-  {"setoptions",   set_options},
-  {"setmode",      set_mode},
+  {"create",          create},
+  {"locations",       load_locations},
+  {"loadcert",        load_cert},
+  {"loadkey",         load_key},
+  {"checkkey",        check_key},
+  {"setalpn",         set_alpn},
+  {"setalpncb",       set_alpn_cb},
+  {"setcipher",       set_cipher},
+  {"setciphersuites", set_ciphersuites},
+  {"setdepth",        set_depth},
+  {"setdhparam",      set_dhparam},
+  {"setverify",       set_verify},
+  {"setoptions",      set_options},
+  {"setmode",         set_mode},
 
 #if !defined(OPENSSL_NO_EC)
   {"setcurve",      set_curve},

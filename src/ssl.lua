@@ -112,7 +112,12 @@ local function newcontext(cfg)
       succ, msg = context.setcipher(ctx, cfg.ciphers)
       if not succ then return nil, msg end
    end
-   -- Set the verification options
+   -- Set SSL cipher suites
+   if cfg.ciphersuites then
+      succ, msg = context.setciphersuites(ctx, cfg.ciphersuites)
+      if not succ then return nil, msg end
+   end
+    -- Set the verification options
    succ, msg = optexec(context.setverify, cfg.verify, ctx)
    if not succ then return nil, msg end
    -- Set SSL options
