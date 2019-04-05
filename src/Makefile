@@ -24,7 +24,7 @@ MAC_LDFLAGS=-bundle -undefined dynamic_lookup $(LIBDIR)
 
 INSTALL  = install
 CC      ?= cc
-LD      ?= $(MYENV) cc
+CCLD      ?= $(MYENV) $(CC)
 CFLAGS  += $(MYCFLAGS)
 LDFLAGS += $(MYLDFLAGS)
 
@@ -51,7 +51,7 @@ luasocket:
 	@cd luasocket && $(MAKE)
 
 $(CMOD): $(EXTRA) $(OBJS)
-	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+	$(CCLD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 clean:
 	cd luasocket && $(MAKE) clean
