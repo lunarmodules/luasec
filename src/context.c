@@ -567,12 +567,13 @@ static int set_dhparam(lua_State *L)
 static int set_curve(lua_State *L)
 {
   long ret;
+  EC_KEY *key = NULL;
   SSL_CTX *ctx = lsec_checkcontext(L, 1);
   const char *str = luaL_checkstring(L, 2);
 
   SSL_CTX_set_options(ctx, SSL_OP_SINGLE_ECDH_USE);
 
-  EC_KEY *key = lsec_find_ec_key(L, str);
+  key = lsec_find_ec_key(L, str);
 
   if (!key) {
     lua_pushboolean(L, 0);
