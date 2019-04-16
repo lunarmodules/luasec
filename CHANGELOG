@@ -1,4 +1,18 @@
 --------------------------------------------------------------------------------
+LuaSec 0.8
+---------------
+This version includes:
+
+* Add support to ALPN
+* Add support to TLS 1.3
+* Add support to multiple certificates
+* Add timeout to https module (https.TIMEOUT)
+* Drop support to SSL 3.0
+* Drop support to TLS 1.0 from https module
+* Fix invalid reference to Lua state
+* Fix memory leak when get certficate extensions
+
+--------------------------------------------------------------------------------
 LuaSec 0.7
 ---------------
 LuaSec depends  on OpenSSL, and  integrates with LuaSocket to  make it

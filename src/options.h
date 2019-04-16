@@ -2,9 +2,9 @@
 #define LSEC_OPTIONS_H
 
 /*--------------------------------------------------------------------------
- * LuaSec 0.7
+ * LuaSec 0.8
  *
- * Copyright (C) 2006-2018 Bruno Silvestre
+ * Copyright (C) 2006-2019 Bruno Silvestre
  *
  *--------------------------------------------------------------------------*/
 
@@ -13,7 +13,7 @@
 /* If you need to generate these options again, see options.lua */
 
 /* 
-  OpenSSL version: OpenSSL 1.1.1
+  OpenSSL version: OpenSSL 1.1.1b
 */
 
 struct ssl_option_s {
