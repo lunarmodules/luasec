@@ -11,6 +11,7 @@
 
 #if defined(WIN32)
 #include <ws2tcpip.h>
+#include <wspiapi.h>
 #include <windows.h>
 #else
 #include <sys/types.h>
