@@ -21,6 +21,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 
+#include "compat.h"
 #include "context.h"
 #include "options.h"
 
@@ -703,7 +704,7 @@ static int set_alpn_cb(lua_State *L)
   return 1;
 }
 
-#if (OPENSSL_VERSION_NUMBER >= 0x1010000fL)
+#if defined(LSEC_ENABLE_DANE)
 /*
  * DANE
  */
@@ -739,7 +740,7 @@ static luaL_Reg funcs[] = {
   {"setcurve",        set_curve},
   {"setcurveslist",   set_curves_list},
 #endif
-#if (OPENSSL_VERSION_NUMBER >= 0x1010000fL)
+#if defined(LSEC_ENABLE_DANE)
   {"setdane",         set_dane},
 #endif
   {NULL, NULL}

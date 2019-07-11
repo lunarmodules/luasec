@@ -74,7 +74,7 @@ LSEC_API int luaopen_ssl_config(lua_State *L)
   lua_pushboolean(L, 1);
   lua_rawset(L, -3);
 
-#if (OPENSSL_VERSION_NUMBER >= 0x1010000fL)
+#if defined(LSEC_ENABLE_DANE)
   // DANE
   lua_pushstring(L, "dane");
   lua_pushboolean(L, 1);

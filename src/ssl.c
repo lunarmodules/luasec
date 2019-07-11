@@ -826,7 +826,7 @@ static int meth_copyright(lua_State *L)
   return 1;
 }
 
-#if (OPENSSL_VERSION_NUMBER >= 0x1010000fL)
+#if defined(LSEC_ENABLE_DANE)
 static int meth_dane(lua_State *L)
 {
   int ret;
@@ -878,7 +878,7 @@ static luaL_Reg methods[] = {
   {"settimeout",          meth_settimeout},
   {"sni",                 meth_sni},
   {"want",                meth_want},
-#if (OPENSSL_VERSION_NUMBER >= 0x1010000fL)
+#if defined(LSEC_ENABLE_DANE)
   {"setdane",             meth_dane},
   {"settlsa",             meth_tlsa},
 #endif

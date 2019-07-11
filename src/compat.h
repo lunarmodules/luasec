@@ -8,6 +8,8 @@
 #ifndef LSEC_COMPAT_H
 #define LSEC_COMPAT_H
 
+#include <openssl/ssl.h>
+
 #if defined(_WIN32)
 #define LSEC_API __declspec(dllexport) 
 #else
@@ -26,6 +28,10 @@
 
 #else
 #define setfuncs(L, R) luaL_setfuncs(L, R, 0)
+#endif
+
+#if (!defined(LIBRESSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x1010000fL))
+#define LSEC_ENABLE_DANE
 #endif
 
 #endif
