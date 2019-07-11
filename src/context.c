@@ -709,9 +709,10 @@ static int set_alpn_cb(lua_State *L)
  */
 static int set_dane(lua_State *L)
 {
+  int ret;
   SSL_CTX *ctx = lsec_checkcontext(L, 1);
-  int ret = SSL_CTX_dane_enable(ctx);
-  lua_pushboolean(L, ret);
+  ret = SSL_CTX_dane_enable(ctx);
+  lua_pushboolean(L, (ret > 0));
   return 1;
 }
 #endif
