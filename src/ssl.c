@@ -826,6 +826,7 @@ static int meth_copyright(lua_State *L)
   return 1;
 }
 
+#if (OPENSSL_VERSION_NUMBER >= 0x1010000fL)
 static int meth_dane(lua_State *L)
 {
   p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
@@ -849,7 +850,7 @@ static int meth_tlsa(lua_State *L)
 
   return 1;
 }
-
+#endif
 
 /*---------------------------------------------------------------------------*/
 
@@ -875,8 +876,10 @@ static luaL_Reg methods[] = {
   {"settimeout",          meth_settimeout},
   {"sni",                 meth_sni},
   {"want",                meth_want},
+#if (OPENSSL_VERSION_NUMBER >= 0x1010000fL)
   {"setdane",             meth_dane},
   {"settlsa",             meth_tlsa},
+#endif
   {NULL,                  NULL}
 };
 

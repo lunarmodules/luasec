@@ -703,7 +703,7 @@ static int set_alpn_cb(lua_State *L)
   return 1;
 }
 
-
+#if (OPENSSL_VERSION_NUMBER >= 0x1010000fL)
 /*
  * DANE
  */
@@ -714,6 +714,7 @@ static int set_dane(lua_State *L)
   lua_pushboolean(L, ret);
   return 1;
 }
+#endif
 
 /**
  * Package functions
@@ -733,14 +734,13 @@ static luaL_Reg funcs[] = {
   {"setverify",       set_verify},
   {"setoptions",      set_options},
   {"setmode",         set_mode},
-
 #if !defined(OPENSSL_NO_EC)
-  {"setcurve",      set_curve},
-  {"setcurveslist", set_curves_list},
+  {"setcurve",        set_curve},
+  {"setcurveslist",   set_curves_list},
 #endif
-
-  {"setdane",      set_dane},
-
+#if (OPENSSL_VERSION_NUMBER >= 0x1010000fL)
+  {"setdane",         set_dane},
+#endif
   {NULL, NULL}
 };
 

@@ -74,6 +74,13 @@ LSEC_API int luaopen_ssl_config(lua_State *L)
   lua_pushboolean(L, 1);
   lua_rawset(L, -3);
 
+#if (OPENSSL_VERSION_NUMBER >= 0x1010000fL)
+  // DANE
+  lua_pushstring(L, "dane");
+  lua_pushboolean(L, 1);
+  lua_rawset(L, -3);
+#endif
+
 #ifndef OPENSSL_NO_EC
   lua_pushstring(L, "curves_list");
   lua_pushboolean(L, 1);
