@@ -1,4 +1,11 @@
 --------------------------------------------------------------------------------
+LuaSec 0.8.1
+---------------
+This version includes:
+
+* Fix another memory leak when get certficate extensions
+
+--------------------------------------------------------------------------------
 LuaSec 0.8
 ---------------
 This version includes:
