@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.7
+ * LuaSec 0.7.1
  *
- * Copyright (C) 2014-2018 Kim Alvefur, Paul Aurich, Tobias Markmann
+ * Copyright (C) 2014-2019 Kim Alvefur, Paul Aurich, Tobias Markmann
  *                         Matthew Wild, Bruno Silvestre.
  *
  *--------------------------------------------------------------------------*/
