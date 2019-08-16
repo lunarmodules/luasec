@@ -371,7 +371,9 @@ int meth_extensions(lua_State* L)
         /* not supported */
         break;
       }
+      GENERAL_NAME_free(general_name);
     }
+    sk_GENERAL_NAME_free(values);
     lua_pop(L, 1); /* ret[oid] */
     i++;           /* Next extension */
   }
