@@ -50,8 +50,8 @@ static p_context testctx(lua_State *L, int idx)
  */
 static int set_option_flag(const char *opt, unsigned long *flag)
 {
-  ssl_option_t *p;
-  for (p = ssl_options; p->name; p++) {
+  lsec_ssl_option_t *p;
+  for (p = lsec_get_ssl_options(); p->name; p++) {
     if (!strcmp(opt, p->name)) {
       *flag |= p->code;
       return 1;

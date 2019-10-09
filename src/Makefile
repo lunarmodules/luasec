@@ -2,6 +2,7 @@ CMOD=ssl.so
 LMOD=ssl.lua
 
 OBJS= \
+ options.o \
  x509.o    \
  context.o \
  ssl.o     \
@@ -57,8 +58,9 @@ clean:
 	cd luasocket && $(MAKE) clean
 	rm -f $(OBJS) $(CMOD)
 
+options.o: options.h options.c
 ec.o: ec.c ec.h
 x509.o: x509.c x509.h compat.h
-context.o: context.c context.h ec.h compat.h
+context.o: context.c context.h ec.h compat.h options.h
 ssl.o: ssl.c ssl.h context.h x509.h compat.h
 config.o: config.c ec.h options.h compat.h
