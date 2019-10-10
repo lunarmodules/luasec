@@ -1,10 +1,10 @@
 local function usage()
   print("Usage:")
   print("* Generate options of your system:")
-  print("  lua options.lua -g /path/to/ssl.h [version] > options.h")
+  print("  lua options.lua -g /path/to/ssl.h [version] > options.c")
   print("* Examples:")
-  print("  lua options.lua -g /usr/include/openssl/ssl.h > options.h\n")
-  print("  lua options.lua -g /usr/include/openssl/ssl.h \"OpenSSL 1.0.1 14\" > options.h\n")
+  print("  lua options.lua -g /usr/include/openssl/ssl.h > options.c\n")
+  print("  lua options.lua -g /usr/include/openssl/ssl.h \"OpenSSL 1.0.1 14\" > options.c\n")
 
   print("* List options of your system:")
   print("  lua options.lua -l /path/to/ssl.h\n")
@@ -17,9 +17,6 @@ end
 
 local function generate(options, version)
   print([[
-#ifndef LSEC_OPTIONS_H
-#define LSEC_OPTIONS_H
-
 /*--------------------------------------------------------------------------
  * LuaSec 0.8.1
  *
@@ -29,22 +26,19 @@ local function generate(options, version)
 
 #include <openssl/ssl.h>
 
+#include "options.h"
+
 /* If you need to generate these options again, see options.lua */
+
 ]])
+
   printf([[
 /* 
   OpenSSL version: %s
 */
 ]], version)
-  print([[
-struct ssl_option_s {
-  const char *name;
-  unsigned long code;
-};
-typedef struct ssl_option_s ssl_option_t;
-]])
 
-  print([[static ssl_option_t ssl_options[] = {]])
+  print([[static lsec_ssl_option_t ssl_options[] = {]])
 
   for k, option in ipairs(options) do
     local name = string.lower(string.sub(option, 8))
@@ -56,7 +50,9 @@ typedef struct ssl_option_s ssl_option_t;
   print([[
 };
 
-#endif
+LSEC_API lsec_ssl_option_t* lsec_get_ssl_options() {
+  return ssl_options;
+}
 ]])
 end
 

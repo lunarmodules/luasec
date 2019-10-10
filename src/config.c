@@ -14,14 +14,14 @@
  */
 LSEC_API int luaopen_ssl_config(lua_State *L)
 {
-  ssl_option_t *opt;
+  lsec_ssl_option_t *opt;
 
   lua_newtable(L);
 
   // Options
   lua_pushstring(L, "options");
   lua_newtable(L);
-  for (opt = ssl_options; opt->name; opt++) {
+  for (opt = lsec_get_ssl_options(); opt->name; opt++) {
     lua_pushstring(L, opt->name);
     lua_pushboolean(L, 1);
     lua_rawset(L, -3);

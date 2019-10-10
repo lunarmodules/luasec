@@ -107,6 +107,7 @@
     <ClCompile Include="src\luasocket\io.c" />
     <ClCompile Include="src\luasocket\timeout.c" />
     <ClCompile Include="src\luasocket\wsocket.c" />
+    <ClCompile Include="src\options.c" />
     <ClCompile Include="src\ssl.c" />
     <ClCompile Include="src\x509.c" />
   </ItemGroup>
