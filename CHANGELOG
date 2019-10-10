@@ -1,4 +1,18 @@
 --------------------------------------------------------------------------------
+LuaSec 0.7.2
+---------------
+This version includes:
+
+* Fix unexported 'ssl.config' table
+
+--------------------------------------------------------------------------------
+LuaSec 0.7.1
+---------------
+This version includes:
+
+* Fix general_name leak in cert:extensions()
+
+--------------------------------------------------------------------------------
 LuaSec 0.7
 ---------------
 LuaSec depends  on OpenSSL, and  integrates with LuaSocket to  make it

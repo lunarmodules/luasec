@@ -2,7 +2,7 @@
 #define LSEC_CONTEXT_H
 
 /*--------------------------------------------------------------------------
- * LuaSec 0.7.1
+ * LuaSec 0.7.2
  *
  * Copyright (C) 2006-2019 Bruno Silvestre
  *
