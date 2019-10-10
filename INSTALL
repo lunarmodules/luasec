@@ -8,7 +8,7 @@ LuaSec 0.7.1
     If you need to generate the options for a different version of OpenSSL:
 
       $ cd src
-      $ lua options.lua -g /usr/include/openssl/ssl.h > options.h
+      $ lua options.lua -g /usr/include/openssl/ssl.h > options.c
 
 --------------------------------------------------------------------------------
 

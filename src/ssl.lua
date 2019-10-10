@@ -181,6 +181,7 @@ core.setmethod("info", info)
 local _M = {
   _VERSION        = "0.7.1",
   _COPYRIGHT      = core.copyright(),
+  config          = config,
   loadcertificate = x509.load,
   newcontext      = newcontext,
   wrap            = wrap,

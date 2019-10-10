@@ -58,7 +58,7 @@ build = {
                   "ssl", "crypto"
                },
                sources = {
-                  "src/config.c", "src/ec.c", 
+                  "src/options.c", "src/config.c", "src/ec.c", 
                   "src/x509.c", "src/context.c", "src/ssl.c", 
                   "src/luasocket/buffer.c", "src/luasocket/io.c",
                   "src/luasocket/timeout.c", "src/luasocket/usocket.c"
@@ -93,7 +93,7 @@ build = {
                   "$(OPENSSL_INCDIR)", "src/", "src/luasocket"
                },
                sources = {
-                  "src/config.c", "src/ec.c", 
+                  "src/options.c", "src/config.c", "src/ec.c", 
                   "src/x509.c", "src/context.c", "src/ssl.c", 
                   "src/luasocket/buffer.c", "src/luasocket/io.c",
                   "src/luasocket/timeout.c", "src/luasocket/wsocket.c"
