@@ -42,6 +42,10 @@
 #define LSEC_ASN1_STRING_data(x) ASN1_STRING_data(x)
 #endif
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#define X509_get0_notBefore X509_get_notBefore
+#define X509_get0_notAfter X509_get_notAfter
+#endif
 
 static const char* hex_tab = "0123456789abcdef";
 
@@ -174,7 +178,7 @@ static void push_asn1_string(lua_State* L, ASN1_STRING *string, int encode)
 /**
  * Return a human readable time.
  */
-static int push_asn1_time(lua_State *L, ASN1_UTCTIME *tm)
+static int push_asn1_time(lua_State *L, const ASN1_UTCTIME *tm)
 {
   char *tmp;
   long size;
@@ -492,8 +496,8 @@ static int meth_valid_at(lua_State* L)
 {
   X509* cert = lsec_checkx509(L, 1);
   time_t time = luaL_checkinteger(L, 2);
-  lua_pushboolean(L, (X509_cmp_time(X509_get_notAfter(cert), &time)     >= 0
-                      && X509_cmp_time(X509_get_notBefore(cert), &time) <= 0));
+  lua_pushboolean(L, (X509_cmp_time(X509_get0_notAfter(cert), &time)     >= 0
+                      && X509_cmp_time(X509_get0_notBefore(cert), &time) <= 0));
   return 1;
 }
 
@@ -521,7 +525,7 @@ static int meth_serial(lua_State *L)
 static int meth_notbefore(lua_State *L)
 {
   X509* cert = lsec_checkx509(L, 1);
-  return push_asn1_time(L, X509_get_notBefore(cert));
+  return push_asn1_time(L, X509_get0_notBefore(cert));
 }
 
 /**
@@ -530,7 +534,7 @@ static int meth_notbefore(lua_State *L)
 static int meth_notafter(lua_State *L)
 {
   X509* cert = lsec_checkx509(L, 1);
-  return push_asn1_time(L, X509_get_notAfter(cert));
+  return push_asn1_time(L, X509_get0_notAfter(cert));
 }
 
 /**
