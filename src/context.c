@@ -61,7 +61,7 @@ static int set_option_flag(const char *opt, unsigned long *flag)
   return 0;
 }
 
-#if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL) || (OPENSSL_VERSION_NUMBER < 0x1010000fL)
+#ifndef LSEC_API_OPENSSL_1_1_0
 /**
  * Find the protocol.
  */
@@ -333,7 +333,7 @@ static int create(lua_State *L)
       ERR_reason_error_string(ERR_get_error()));
     return 2;
   }
-#if ! ((defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL) || (OPENSSL_VERSION_NUMBER < 0x1010000fL))
+#ifdef LSEC_API_OPENSSL_1_1_0
   SSL_CTX_set_min_proto_version(ctx->context, vmin);
   SSL_CTX_set_max_proto_version(ctx->context, vmax);
 #endif
