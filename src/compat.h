@@ -10,11 +10,15 @@
 
 #include <openssl/ssl.h>
 
+//------------------------------------------------------------------------------
+
 #if defined(_WIN32)
 #define LSEC_API __declspec(dllexport) 
 #else
 #define LSEC_API extern
 #endif
+
+//------------------------------------------------------------------------------
 
 #if (LUA_VERSION_NUM == 501)
 
@@ -30,8 +34,18 @@
 #define setfuncs(L, R) luaL_setfuncs(L, R, 0)
 #endif
 
+//------------------------------------------------------------------------------
+
 #if (!defined(LIBRESSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x1010000fL))
 #define LSEC_ENABLE_DANE
 #endif
+
+//------------------------------------------------------------------------------
+
+#if !((defined(LIBRESSL_VERSION_NUMBER) && (LIBRESSL_VERSION_NUMBER < 0x2070000fL)) || (OPENSSL_VERSION_NUMBER < 0x1010000fL))
+#define LSEC_API_OPENSSL_1_1_0
+#endif
+
+//------------------------------------------------------------------------------
 
 #endif

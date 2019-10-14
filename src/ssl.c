@@ -18,6 +18,7 @@
 #include <openssl/x509v3.h>
 #include <openssl/x509_vfy.h>
 #include <openssl/err.h>
+#include <openssl/dh.h>
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -32,7 +33,7 @@
 #include "ssl.h"
 
 
-#if (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x2070000fL) || (OPENSSL_VERSION_NUMBER < 0x1010000fL)
+#ifndef LSEC_API_OPENSSL_1_1_0
 #define SSL_is_server(s) (s->server)
 #define SSL_up_ref(ssl)  CRYPTO_add(&(ssl)->references, 1, CRYPTO_LOCK_SSL)
 #define X509_up_ref(c)   CRYPTO_add(&c->references, 1, CRYPTO_LOCK_X509)
@@ -912,7 +913,7 @@ static luaL_Reg funcs[] = {
  */
 LSEC_API int luaopen_ssl_core(lua_State *L)
 {
-#if OPENSSL_VERSION_NUMBER<0x10100000L
+#ifndef LSEC_API_OPENSSL_1_1_0
   /* Initialize SSL */
   if (!SSL_library_init()) {
     lua_pushstring(L, "unable to initialize SSL library");

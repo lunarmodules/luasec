@@ -614,7 +614,9 @@ static int set_curves_list(lua_State *L)
     return 2;
   }
 
+#if defined(LIBRESSL_VERSION_NUMBER) || !defined(LSEC_API_OPENSSL_1_1_0)
   (void)SSL_CTX_set_ecdh_auto(ctx, 1);
+#endif
 
   lua_pushboolean(L, 1);
   return 1;
