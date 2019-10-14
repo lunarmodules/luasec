@@ -842,9 +842,9 @@ static int meth_tlsa(lua_State *L)
   int ret;
   size_t len;
   p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
-  uint8_t usage = luaL_checkinteger(L, 2);
-  uint8_t selector = luaL_checkinteger(L, 3);
-  uint8_t mtype = luaL_checkinteger(L, 4);
+  uint8_t usage = (uint8_t)luaL_checkinteger(L, 2);
+  uint8_t selector = (uint8_t)luaL_checkinteger(L, 3);
+  uint8_t mtype = (uint8_t)luaL_checkinteger(L, 4);
   unsigned char *data = (unsigned char*)luaL_checklstring(L, 5, &len);
 
   ERR_clear_error();
