@@ -890,6 +890,7 @@ static luaL_Reg methods[] = {
  * SSL metamethods.
  */
 static luaL_Reg meta[] = {
+  {"__close",    meth_destroy},
   {"__gc",       meth_destroy},
   {"__tostring", meth_tostring},
   {NULL, NULL}

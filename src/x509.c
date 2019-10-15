@@ -618,7 +618,11 @@ cleanup:
  */
 static int meth_destroy(lua_State* L)
 {
-  X509_free(lsec_checkx509(L, 1));
+  p_x509 px = lsec_checkp_x509(L, 1);
+  if (px->cert) {
+    X509_free(px->cert);
+    px->cert = NULL;
+  }
   return 0;
 }
 
@@ -692,6 +696,7 @@ static luaL_Reg methods[] = {
  * X509 metamethods.
  */
 static luaL_Reg meta[] = {
+  {"__close",    meth_destroy},
   {"__gc",       meth_destroy},
   {"__tostring", meth_tostring},
   {NULL, NULL}
