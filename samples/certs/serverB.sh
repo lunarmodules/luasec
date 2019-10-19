@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 openssl req -newkey rsa:2048 -keyout serverBkey.pem -out serverBreq.pem \
    -config ./serverB.cnf -nodes -days 365 -batch

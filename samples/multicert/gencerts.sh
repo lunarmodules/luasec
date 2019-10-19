@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 mkdir -p certs
 

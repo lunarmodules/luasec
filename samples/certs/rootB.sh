@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 openssl req -newkey rsa:2048 -sha256 -keyout rootBkey.pem -out rootBreq.pem -nodes -config ./rootB.cnf -days 365 -batch
 
