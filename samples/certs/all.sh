@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env sh
 ./rootA.sh
 ./rootB.sh
 ./clientA.sh
