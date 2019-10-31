@@ -12,7 +12,7 @@ This version includes:
 * Fix unexported 'ssl.config' table
 * Replace $(LD) with $(CCLD) variable
 * Remove multiple definitions of 'ssl_options' variable
-* Use tag to git format: v0.9
+* Use tag in git format: v0.9
 
 --------------------------------------------------------------------------------
 LuaSec 0.8.2
