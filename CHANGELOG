@@ -1,4 +1,34 @@
 --------------------------------------------------------------------------------
+LuaSec 0.9
+---------------
+This version includes:
+
+
+* Add DNS-based Authentication of Named Entities (DANE) support
+* Add __close() metamethod
+* Fix deprecation warnings with OpenSSL 1.1
+* Fix special case listing of TLS 1.3 EC curves
+* Fix general_name leak in cert:extensions()
+* Fix unexported 'ssl.config' table
+* Replace $(LD) with $(CCLD) variable
+* Remove multiple definitions of 'ssl_options' variable
+* Use tag to git format: v0.9
+
+--------------------------------------------------------------------------------
+LuaSec 0.8.2
+---------------
+This version includes:
+
+* Fix unexported 'ssl.config' table (backported)
+
+--------------------------------------------------------------------------------
+LuaSec 0.8.1
+---------------
+This version includes:
+
+* Fix general_name leak in cert:extensions() (backported)
+
+--------------------------------------------------------------------------------
 LuaSec 0.8
 ---------------
 This version includes:
@@ -11,6 +41,20 @@ This version includes:
 * Drop support to TLS 1.0 from https module
 * Fix invalid reference to Lua state
 * Fix memory leak when get certficate extensions
+
+--------------------------------------------------------------------------------
+LuaSec 0.7.2
+---------------
+This version includes:
+
+* Fix unexported 'ssl.config' table (backported)
+
+--------------------------------------------------------------------------------
+LuaSec 0.7.1
+---------------
+This version includes:
+
+* Fix general_name leak in cert:extensions() (backported)
 
 --------------------------------------------------------------------------------
 LuaSec 0.7

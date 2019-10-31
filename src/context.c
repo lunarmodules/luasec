@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------------
- * LuaSec 0.8
+ * LuaSec 0.9
  *
  * Copyright (C) 2014-2019 Kim Alvefur, Paul Aurich, Tobias Markmann, 
  *                         Matthew Wild.
