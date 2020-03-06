@@ -941,7 +941,7 @@ LSEC_API int luaopen_ssl_core(lua_State *L)
   luaL_newlib(L, funcs);
 
   lua_pushstring(L, "SOCKET_INVALID");
-  lua_pushnumber(L, SOCKET_INVALID);
+  lua_pushinteger(L, SOCKET_INVALID);
   lua_rawset(L, -3);
 
   return 1;
