@@ -1,4 +1,12 @@
 --------------------------------------------------------------------------------
+LuaSec 1.0.1
+---------------
+This version includes:
+
+
+* Fix luaL_buffinit() can use the stack and broke buffer_meth_receive()
+
+--------------------------------------------------------------------------------
 LuaSec 1.0
 ---------------
 This version includes:
