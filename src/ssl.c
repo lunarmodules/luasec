@@ -48,6 +48,11 @@ static int lsec_socket_error()
 #if defined(WIN32)
   return WSAGetLastError();
 #else
+#if defined(LSEC_OPENSSL_1_1_1)
+  // Bug in OpenSSL 1.1.1
+  if (errno == 0)
+    return LSEC_IO_SSL;
+#endif
   return errno;
 #endif
 }
@@ -182,10 +187,6 @@ static int ssl_send(void *ctx, const char *data, size_t count, size_t *sent,
         ssl->error = SSL_ERROR_SSL;
         return LSEC_IO_SSL;
       }
-      /* Return failure when SSL reports syscall error
-       * but errno is not set to break send operation. */
-      if (errno == 0)
-        return LSEC_IO_SSL;
       if (err == 0)
         return IO_CLOSED;
       return lsec_socket_error();
