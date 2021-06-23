@@ -485,10 +485,13 @@ static int meth_digest(lua_State* L)
  */
 static int meth_valid_at(lua_State* L)
 {
+  int nb, na;
   X509* cert = lsec_checkx509(L, 1);
   time_t time = luaL_checkinteger(L, 2);
-  lua_pushboolean(L, (X509_cmp_time(X509_get0_notAfter(cert), &time)     >= 0
-                      && X509_cmp_time(X509_get0_notBefore(cert), &time) <= 0));
+  nb = X509_cmp_time(X509_get0_notBefore(cert), &time);
+  time -= 1;
+  na = X509_cmp_time(X509_get0_notAfter(cert),  &time);
+  lua_pushboolean(L, nb == -1 && na == 1);
   return 1;
 }
 
