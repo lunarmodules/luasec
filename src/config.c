@@ -81,6 +81,13 @@ LSEC_API int luaopen_ssl_config(lua_State *L)
   lua_rawset(L, -3);
 #endif
 
+#ifndef OPENSSL_NO_OCSP
+  // OCSP
+  lua_pushstring(L, "ocsp");
+  lua_pushboolean(L, 1);
+  lua_rawset(L, -3);
+#endif
+
 #ifndef OPENSSL_NO_EC
   lua_pushstring(L, "curves_list");
   lua_pushboolean(L, 1);

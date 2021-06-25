@@ -19,12 +19,17 @@
 #include <openssl/x509v3.h>
 #include <openssl/dh.h>
 
+#ifndef OPENSSL_NO_OCSP
+#include <openssl/ocsp.h>
+#endif
+
 #include <lua.h>
 #include <lauxlib.h>
 
 #include "compat.h"
 #include "context.h"
 #include "options.h"
+#include "x509.h"
 
 #ifndef OPENSSL_NO_EC
 #include <openssl/ec.h>
@@ -707,6 +712,196 @@ static int set_alpn_cb(lua_State *L)
   return 1;
 }
 
+#ifndef OPENSSL_NO_OCSP
+static int ocsp_server_cb(SSL *ssl, void *arg)
+{
+  int len;
+  BIO *bio;
+  const char *data;
+  unsigned char *r = NULL;
+  OCSP_RESPONSE *resp = NULL;
+  p_context ctx = (p_context)arg;
+  lua_State *L = ctx->L;
+
+  // Retrieve the callback
+  luaL_getmetatable(L, "SSL:OCSP:Registry");
+  lua_pushlightuserdata(L, ctx->context);
+  lua_rawget(L, -2);
+
+  lua_call(L, 0, 1);
+  if (lua_type(L, -1) != LUA_TSTRING) {
+    return SSL_TLSEXT_ERR_NOACK;
+  }
+
+  data = lua_tostring(L, -1);
+  len  = (int)lua_rawlen(L, -1);
+
+  bio = BIO_new_mem_buf(data, len);
+  if (bio == NULL)
+    return SSL_TLSEXT_ERR_NOACK;
+
+  resp = d2i_OCSP_RESPONSE_bio(bio, NULL);
+  BIO_free(bio);
+  if (resp == NULL)
+    return SSL_TLSEXT_ERR_NOACK;
+
+  len = i2d_OCSP_RESPONSE(resp, &r);
+  if (len <= 0) {
+    OCSP_RESPONSE_free(resp);
+    return SSL_TLSEXT_ERR_NOACK;
+  }
+
+  SSL_set_tlsext_status_ocsp_resp(ssl, r, len);
+  OCSP_RESPONSE_free(resp);
+  return SSL_TLSEXT_ERR_OK;
+}
+
+static int ocsp_client_cb(SSL *ssl, void *arg)
+{
+  long len;
+  const unsigned char *b;
+  OCSP_RESPONSE *ocsp = NULL;
+  p_context ctx = (p_context)arg;
+  lua_State *L = ctx->L;
+
+  // Retrieve the callback
+  luaL_getmetatable(L, "SSL:OCSP:Registry");
+  lua_pushlightuserdata(L, ctx->context);
+  lua_rawget(L, -2);
+
+  len = SSL_get_tlsext_status_ocsp_resp(ssl, &b);
+  if (len == -1)
+    lua_pushnil(L);
+  else {
+    ocsp = d2i_OCSP_RESPONSE(NULL, &b, len);
+    lua_pushinteger(L, OCSP_response_status(ocsp));
+    OCSP_RESPONSE_free(ocsp);
+  }
+
+  lua_call(L, 1, 1);
+  return (lua_type(L, -1) != LUA_TBOOLEAN) ? -1 : (int)lua_toboolean(L, -1);
+}
+
+static int set_ocsp_cb(lua_State *L)
+{
+  int ret;
+  p_context ctx = checkctx(L, 1);
+
+  luaL_getmetatable(L, "SSL:OCSP:Registry");
+  lua_pushlightuserdata(L, (void*)ctx->context);
+  lua_pushvalue(L, 2);
+  lua_settable(L, -3);
+
+  ret = (int)SSL_CTX_set_tlsext_status_type(ctx->context, TLSEXT_STATUSTYPE_ocsp);
+  if (ret == 0) {
+    lua_pushboolean(L, 0);
+    return 1;
+  }
+
+  if (ctx->mode == LSEC_MODE_CLIENT)
+    ret = (int)SSL_CTX_set_tlsext_status_cb(ctx->context, ocsp_client_cb);
+  else
+    ret = (int)SSL_CTX_set_tlsext_status_cb(ctx->context, ocsp_server_cb);
+
+  if (ret == 0) {
+    lua_pushboolean(L, 0);
+    return 1;
+  }
+
+  ret = (int)SSL_CTX_set_tlsext_status_arg(ctx->context, ctx);
+  lua_pushboolean(L, ret == 1);
+  return 1;
+}
+
+static int ocsp_build_request(lua_State *L)
+{
+  long len;
+  BIO *bio;
+  X509 *cert;
+  X509 *issuer;
+  OCSP_CERTID *cid;
+  OCSP_REQUEST *req;
+  char *buf;
+
+  cert = lsec_checkx509(L, 1);
+  issuer = lsec_checkx509(L, 2);
+
+  req = OCSP_REQUEST_new();
+  if (req == NULL) {
+    lua_pushboolean(L, 0);
+    return 1;
+  }
+
+  cid = OCSP_cert_to_id(NULL, cert, issuer);
+  if (cid == NULL) {
+    lua_pushboolean(L, 0);
+    return 1;
+  }
+
+  if (OCSP_request_add0_id(req, cid) == NULL) {
+    lua_pushboolean(L, 0);
+    return 1;
+  }
+
+  bio = BIO_new(BIO_s_mem());
+  i2d_OCSP_REQUEST_bio(bio, req);
+  len = BIO_get_mem_data(bio, &buf);
+  lua_pushlstring(L, buf, len);
+
+  BIO_free(bio);
+  OCSP_REQUEST_free(req);
+
+  return 1;
+}
+
+static int ocsp_response_time(lua_State *L)
+{
+  long len;
+  BIO *bio;
+  char *buf;
+  int reason;
+  OCSP_BASICRESP *bs;
+  OCSP_SINGLERESP *sr;
+  OCSP_RESPONSE *res;
+  ASN1_GENERALIZEDTIME *revtime, *thisupd, *nextupd;
+
+  buf = (char*)lua_tostring(L, 1);
+  len = (long)lua_rawlen(L, 1);
+
+  res = d2i_OCSP_RESPONSE(NULL, (const unsigned char**)&buf, (int)len);
+  if (res == NULL) {
+    lua_pushboolean(L, 0);
+    return 1;
+  }
+
+  bs = OCSP_response_get1_basic(res);
+  if (bs == NULL) {
+    lua_pushboolean(L, 0);
+    return 1;
+  }
+
+  sr = OCSP_resp_get0(bs, 0);
+  OCSP_single_get0_status(sr, &reason, &revtime, &thisupd, &nextupd);
+
+  bio = BIO_new(BIO_s_mem());
+  ASN1_GENERALIZEDTIME_print(bio, thisupd);
+  len = BIO_get_mem_data(bio, &buf);
+  lua_pushlstring(L, buf, len);
+  BIO_free(bio);
+
+  bio = BIO_new(BIO_s_mem());
+  ASN1_GENERALIZEDTIME_print(bio, nextupd);
+  len = BIO_get_mem_data(bio, &buf);
+  lua_pushlstring(L, buf, len);
+  BIO_free(bio);
+
+  OCSP_BASICRESP_free(bs);
+  OCSP_RESPONSE_free(res);
+
+  return 2;
+}
+#endif
+
 #if defined(LSEC_ENABLE_DANE)
 /*
  * DANE
@@ -746,6 +941,9 @@ static luaL_Reg funcs[] = {
 #if defined(LSEC_ENABLE_DANE)
   {"setdane",         set_dane},
 #endif
+#if !defined(OPENSSL_NO_OCSP)
+  {"setocspcb",       set_ocsp_cb},
+#endif
   {NULL, NULL}
 };
 
@@ -768,6 +966,10 @@ static int meth_destroy(lua_State *L)
     lua_pushnil(L);
     lua_settable(L, -3);
     luaL_getmetatable(L, "SSL:ALPN:Registry");
+    lua_pushlightuserdata(L, (void*)ctx->context);
+    lua_pushnil(L);
+    lua_settable(L, -3);
+    luaL_getmetatable(L, "SSL:OCSP:Registry");
     lua_pushlightuserdata(L, (void*)ctx->context);
     lua_pushnil(L);
     lua_settable(L, -3);
@@ -908,6 +1110,55 @@ void *lsec_testudata (lua_State *L, int ud, const char *tname) {
 
 /*------------------------------ Initialization ------------------------------*/
 
+#ifndef OPENSSL_NO_OCSP
+struct ocsp_status_response_s {
+  const char *name;
+  int value;
+};
+
+typedef struct ocsp_status_response_s ocsp_status_response_t;
+
+static ocsp_status_response_t status_response[] = {
+  {"successful",       OCSP_RESPONSE_STATUS_SUCCESSFUL},
+  {"malformedrequest", OCSP_RESPONSE_STATUS_MALFORMEDREQUEST},
+  {"internalerror",    OCSP_RESPONSE_STATUS_INTERNALERROR},
+  {"trylater",         OCSP_RESPONSE_STATUS_TRYLATER},
+  {"sigrequired",      OCSP_RESPONSE_STATUS_SIGREQUIRED},
+  {"unauthorized",     OCSP_RESPONSE_STATUS_UNAUTHORIZED},
+  {NULL, 0}
+};
+
+static luaL_Reg ocsp_funcs[] = {
+  {"buildrequest", ocsp_build_request},
+  {"responsetime", ocsp_response_time},
+  {NULL, NULL}
+};
+
+
+/**
+ * OCSP module
+ */
+LSEC_API int luaopen_ssl_context_ocsp(lua_State *L)
+{
+  ocsp_status_response_t *ptr;
+
+  luaL_newlib(L, ocsp_funcs);
+
+  lua_pushstring(L, "status");
+  lua_newtable(L);
+  for (ptr = status_response; ptr->name; ptr++) {
+    lua_pushstring(L, ptr->name);
+    lua_pushinteger(L, ptr->value);
+    lua_rawset(L, -3);
+  }
+  lua_rawset(L, -3);
+
+  return 1;
+}
+#endif
+
+//------------------------------------------------------------------------------
+
 /**
  * Registre the module.
  */
@@ -916,6 +1167,7 @@ LSEC_API int luaopen_ssl_context(lua_State *L)
   luaL_newmetatable(L, "SSL:DH:Registry");      /* Keep all DH callbacks   */
   luaL_newmetatable(L, "SSL:ALPN:Registry");    /* Keep all ALPN callbacks */
   luaL_newmetatable(L, "SSL:Verify:Registry");  /* Keep all verify flags   */
+  luaL_newmetatable(L, "SSL:OCSP:Registry");    /* Keep all OCSP callbacks */
   luaL_newmetatable(L, "SSL:Context");
   setfuncs(L, meta);
 

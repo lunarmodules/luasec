@@ -10,6 +10,11 @@ local context = require("ssl.context")
 local x509    = require("ssl.x509")
 local config  = require("ssl.config")
 
+local ocsp
+if config.capabilities.ocsp then
+  ocsp = require("ssl.context.ocsp")
+end
+
 local unpack  = table.unpack or unpack
 
 -- We must prevent the contexts to be collected before the connections,
@@ -205,6 +210,14 @@ local function newcontext(cfg)
       context.setdane(ctx)
    end
 
+   if config.capabilities.ocsp and cfg.ocsp then
+      msg  = "error setting OCSP"
+      succ = type(cfg.ocsp) == "function"
+      if not succ then return nil, msg end
+      succ = context.setocspcb(ctx, cfg.ocsp)
+      if not succ then return nil, msg end
+   end
+
    return ctx
 end
 
@@ -274,6 +287,7 @@ local _M = {
   _VERSION        = "1.0.1",
   _COPYRIGHT      = core.copyright(),
   config          = config,
+  ocsp            = ocsp,
   loadcertificate = x509.load,
   newcontext      = newcontext,
   wrap            = wrap,
