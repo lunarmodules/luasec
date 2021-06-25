@@ -828,18 +828,18 @@ static int ocsp_build_request(lua_State *L)
 
   req = OCSP_REQUEST_new();
   if (req == NULL) {
-    lua_pushboolean(L, 0);
+    lua_pushnil(L);
     return 1;
   }
 
   cid = OCSP_cert_to_id(NULL, cert, issuer);
   if (cid == NULL) {
-    lua_pushboolean(L, 0);
+    lua_pushnil(L);
     return 1;
   }
 
   if (OCSP_request_add0_id(req, cid) == NULL) {
-    lua_pushboolean(L, 0);
+    lua_pushnil(L);
     return 1;
   }
 
@@ -870,14 +870,16 @@ static int ocsp_response_time(lua_State *L)
 
   res = d2i_OCSP_RESPONSE(NULL, (const unsigned char**)&buf, (int)len);
   if (res == NULL) {
-    lua_pushboolean(L, 0);
-    return 1;
+    lua_pushnil(L);
+    lua_pushnil(L);
+    return 2;
   }
 
   bs = OCSP_response_get1_basic(res);
   if (bs == NULL) {
-    lua_pushboolean(L, 0);
-    return 1;
+    lua_pushnil(L);
+    lua_pushnil(L);
+    return 2;
   }
 
   sr = OCSP_resp_get0(bs, 0);
