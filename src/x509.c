@@ -658,7 +658,7 @@ static int meth_set_encode(lua_State* L)
 /**
  * Get signature name.
  */
-static int meth_get_sinagure_name(lua_State* L)
+static int meth_get_signature_name(lua_State* L)
 {
   p_x509 px = lsec_checkp_x509(L, 1);
   int nid = X509_get_signature_nid(px->cert);
@@ -698,7 +698,7 @@ static luaL_Reg methods[] = {
   {"digest",     meth_digest},
   {"setencode",  meth_set_encode},
   {"extensions", meth_extensions},
-  {"getsignaturename", meth_get_sinagure_name},
+  {"getsignaturename", meth_get_signature_name},
   {"issuer",     meth_issuer},
   {"notbefore",  meth_notbefore},
   {"notafter",   meth_notafter},
