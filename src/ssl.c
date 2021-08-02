@@ -747,6 +747,8 @@ static int sni_cb(SSL *ssl, int *ad, void *arg)
   lua_pop(L, 4);
   /* Found, use this context */
   if (newctx) {
+    p_context pctx = (p_context)SSL_CTX_get_app_data(newctx);
+    pctx->L = L;
     SSL_set_SSL_CTX(ssl, newctx);
     return SSL_TLSEXT_ERR_OK;
   }
