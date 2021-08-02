@@ -13,12 +13,15 @@
 
 
 /* 
-  OpenSSL version: OpenSSL 1.1.1
+  OpenSSL version: OpenSSL 3.0.0-beta2
 */
 
 static lsec_ssl_option_t ssl_options[] = {
 #if defined(SSL_OP_ALL)
   {"all", SSL_OP_ALL},
+#endif
+#if defined(SSL_OP_ALLOW_CLIENT_RENEGOTIATION)
+  {"allow_client_renegotiation", SSL_OP_ALLOW_CLIENT_RENEGOTIATION},
 #endif
 #if defined(SSL_OP_ALLOW_NO_DHE_KEX)
   {"allow_no_dhe_kex", SSL_OP_ALLOW_NO_DHE_KEX},
@@ -32,20 +35,32 @@ static lsec_ssl_option_t ssl_options[] = {
 #if defined(SSL_OP_CISCO_ANYCONNECT)
   {"cisco_anyconnect", SSL_OP_CISCO_ANYCONNECT},
 #endif
+#if defined(SSL_OP_CLEANSE_PLAINTEXT)
+  {"cleanse_plaintext", SSL_OP_CLEANSE_PLAINTEXT},
+#endif
 #if defined(SSL_OP_COOKIE_EXCHANGE)
   {"cookie_exchange", SSL_OP_COOKIE_EXCHANGE},
 #endif
 #if defined(SSL_OP_CRYPTOPRO_TLSEXT_BUG)
   {"cryptopro_tlsext_bug", SSL_OP_CRYPTOPRO_TLSEXT_BUG},
 #endif
+#if defined(SSL_OP_DISABLE_TLSEXT_CA_NAMES)
+  {"disable_tlsext_ca_names", SSL_OP_DISABLE_TLSEXT_CA_NAMES},
+#endif
 #if defined(SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS)
   {"dont_insert_empty_fragments", SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS},
+#endif
+#if defined(SSL_OP_ENABLE_KTLS)
+  {"enable_ktls", SSL_OP_ENABLE_KTLS},
 #endif
 #if defined(SSL_OP_ENABLE_MIDDLEBOX_COMPAT)
   {"enable_middlebox_compat", SSL_OP_ENABLE_MIDDLEBOX_COMPAT},
 #endif
 #if defined(SSL_OP_EPHEMERAL_RSA)
   {"ephemeral_rsa", SSL_OP_EPHEMERAL_RSA},
+#endif
+#if defined(SSL_OP_IGNORE_UNEXPECTED_EOF)
+  {"ignore_unexpected_eof", SSL_OP_IGNORE_UNEXPECTED_EOF},
 #endif
 #if defined(SSL_OP_LEGACY_SERVER_CONNECT)
   {"legacy_server_connect", SSL_OP_LEGACY_SERVER_CONNECT},
@@ -88,6 +103,9 @@ static lsec_ssl_option_t ssl_options[] = {
 #endif
 #if defined(SSL_OP_NO_ENCRYPT_THEN_MAC)
   {"no_encrypt_then_mac", SSL_OP_NO_ENCRYPT_THEN_MAC},
+#endif
+#if defined(SSL_OP_NO_EXTENDED_MASTER_SECRET)
+  {"no_extended_master_secret", SSL_OP_NO_EXTENDED_MASTER_SECRET},
 #endif
 #if defined(SSL_OP_NO_QUERY_MTU)
   {"no_query_mtu", SSL_OP_NO_QUERY_MTU},

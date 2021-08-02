@@ -60,9 +60,12 @@ local function loadoptions(file)
   local options = {}
   local f = assert(io.open(file, "r"))
   for line in f:lines() do
-    local op = string.match(line, "define%s+(SSL_OP_%S+)")
-    if op then
-      table.insert(options, op)
+    local op = string.match(line, "define%s+(SSL_OP_BIT%()")
+    if not op then
+      op = string.match(line, "define%s+(SSL_OP_%S+)")
+      if op then
+        table.insert(options, op)
+      end
     end
   end
   table.sort(options, function(a,b) return a<b end)
