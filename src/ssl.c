@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------------
- * LuaSec 1.0.1
+ * LuaSec 1.0.2
  *
  * Copyright (C) 2014-2021 Kim Alvefur, Paul Aurich, Tobias Markmann, 
  *                         Matthew Wild.
@@ -826,7 +826,7 @@ static int meth_getalpn(lua_State *L)
 
 static int meth_copyright(lua_State *L)
 {
-  lua_pushstring(L, "LuaSec 1.0.1 - Copyright (C) 2006-2021 Bruno Silvestre, UFG"
+  lua_pushstring(L, "LuaSec 1.0.2 - Copyright (C) 2006-2021 Bruno Silvestre, UFG"
 #if defined(WITH_LUASOCKET)
                     "\nLuaSocket 3.0-RC1 - Copyright (C) 2004-2013 Diego Nehab"
 #endif
