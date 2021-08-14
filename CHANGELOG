@@ -8,11 +8,6 @@ This version includes:
 * Fix meth_get_{sinagure => signature}_name function name
 * Fix update the Lua state reference on the selected SSL context after SNI
 * Fix ignore SSL_OP_BIT(n) macro and update option.c
- --------------------------------------------------------------------------------
-LuaSec 1.0.1
----------------
-This version includes:
-
 
 --------------------------------------------------------------------------------
 LuaSec 1.0.1
