@@ -202,7 +202,11 @@ local function newcontext(cfg)
    end
 
    if config.capabilities.dane and cfg.dane then
-      context.setdane(ctx)
+      if type(cfg.dane) == "table" then
+         context.setdane(ctx, unpack(cfg.dane))
+      else
+         context.setdane(ctx)
+      end
    end
 
    return ctx
