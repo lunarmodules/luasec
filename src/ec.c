@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <openssl/objects.h>
 
 #include "ec.h"

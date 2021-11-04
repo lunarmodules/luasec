@@ -448,6 +448,7 @@ static int set_cipher(lua_State *L)
 /**
  * Set the cipher suites.
  */
+#ifndef OPENSSL_IS_BORINGSSL
 static int set_ciphersuites(lua_State *L)
 {
 #if defined(TLS1_3_VERSION)
@@ -462,6 +463,7 @@ static int set_ciphersuites(lua_State *L)
   lua_pushboolean(L, 1);
   return 1;
 }
+#endif /* OPENSSL_IS_BORINGSSL */
 
 /**
  * Set the depth for certificate checking.
@@ -733,7 +735,9 @@ static luaL_Reg funcs[] = {
   {"setalpn",         set_alpn},
   {"setalpncb",       set_alpn_cb},
   {"setcipher",       set_cipher},
+#ifndef OPENSSL_IS_BORINGSSL
   {"setciphersuites", set_ciphersuites},
+#endif
   {"setdepth",        set_depth},
   {"setdhparam",      set_dhparam},
   {"setverify",       set_verify},

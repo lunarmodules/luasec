@@ -39,6 +39,9 @@
 #define X509_up_ref(c)   CRYPTO_add(&c->references, 1, CRYPTO_LOCK_X509)
 #endif
 
+#ifndef SSL_X509_LOOKUP
+#define SSL_X509_LOOKUP SSL_ERROR_WANT_X509_LOOKUP
+#endif
 
 /**
  * Underline socket error.
@@ -299,8 +302,9 @@ static int meth_create(lua_State *L)
     }
     mode = SSL_is_server(ssl->ssl) ? LSEC_MODE_SERVER : LSEC_MODE_CLIENT;
   } else if ((ssl->ssl = luaossl_testssl(L, 1))) {
-    SSL_up_ref(ssl->ssl);
-    mode = SSL_is_server(ssl->ssl) ? LSEC_MODE_SERVER : LSEC_MODE_CLIENT;
+    lua_pushnil(L);
+    lua_pushstring(L, "Can't duplicate an ssl object");
+    return 2;
   } else {
     return luaL_argerror(L, 1, "invalid context");
   }

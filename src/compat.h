@@ -36,7 +36,7 @@
 
 //------------------------------------------------------------------------------
 
-#if (!defined(LIBRESSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x1010000fL))
+#if (!defined(LIBRESSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x1010000fL) && !defined(OPENSSL_IS_BORINGSSL))
 #define LSEC_ENABLE_DANE
 #endif
 
