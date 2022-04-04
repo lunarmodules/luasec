@@ -93,7 +93,7 @@ local function tcp(params)
          self.sock:sni(host)
          self.sock:settimeout(_M.TIMEOUT)
          try(self.sock:dohandshake())
-         reg(self, getmetatable(self.sock))
+         reg(self)
          return 1
       end
       return conn
