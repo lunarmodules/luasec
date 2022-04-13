@@ -1,7 +1,7 @@
 package = "LuaSec"
 version = "1.1.0-1"
 source = {
-  url = "git://github.com/brunoos/luasec",
+  url = "git+https://github.com/brunoos/luasec",
   tag = "v1.1.0",
 }
 description = {
