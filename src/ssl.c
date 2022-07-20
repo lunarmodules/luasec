@@ -690,7 +690,7 @@ static int meth_exportkeyingmaterial(lua_State *L)
 	const unsigned char *context = NULL;
 
 	if(!lua_isnoneornil(L, 4)) {
-		const unsigned char *context = (unsigned char *)luaL_checklstring(L, 4, &contextlen);
+		context = (unsigned char *)luaL_checklstring(L, 4, &contextlen);
 	}
 
 	/* temporary buffer memory-managed by Lua itself */
