@@ -672,6 +672,7 @@ static int meth_getpeerfinished(lua_State *L)
 }
 
 /**
+ * Get some shared keying material
  */
 static int meth_exportkeyingmaterial(lua_State *L)
 {
@@ -684,20 +685,19 @@ static int meth_exportkeyingmaterial(lua_State *L)
   }
 
   size_t llen = 0;
-  const char *label = luaL_checklstring(L, 2, &llen);
-  int olen = luaL_checkinteger(L, 3);
   size_t contextlen = 0;
   const unsigned char *context = NULL;
+  const char *label = (const char*)luaL_checklstring(L, 2, &llen);
+  size_t olen = (size_t)luaL_checkinteger(L, 3);
 
   if (!lua_isnoneornil(L, 4))
-    context = (unsigned char*)luaL_checklstring(L, 4, &contextlen);
+    context = (const unsigned char*)luaL_checklstring(L, 4, &contextlen);
 
   /* Temporary buffer memory-managed by Lua itself */
-  unsigned char *out = lua_newuserdata(L, olen);
+  unsigned char *out = (unsigned char*)lua_newuserdata(L, olen);
 
   if(SSL_export_keying_material(ssl->ssl, out, olen, label, llen, context, contextlen, context != NULL) != 1) {
     lua_pushnil(L);
-    /* Could not find whether OpenSSL keeps any details anywhere */
     lua_pushstring(L, "error exporting keying material");
     return 2;
   }
