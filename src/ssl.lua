@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
--- LuaSec 1.1.0
+-- LuaSec 1.2.0
 --
 -- Copyright (C) 2006-2022 Bruno Silvestre
 --
@@ -275,7 +275,7 @@ core.setmethod("info", info)
 --
 
 local _M = {
-  _VERSION        = "1.1.0",
+  _VERSION        = "1.2.0",
   _COPYRIGHT      = core.copyright(),
   config          = config,
   loadcertificate = x509.load,
