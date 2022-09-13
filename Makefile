@@ -2,7 +2,7 @@
 LUAPATH  ?= /usr/share/lua/5.1
 LUACPATH ?= /usr/lib/lua/5.1
 # OPENSSL
-# LuaRocks may set these 2 variable
+# LuaRocks may set these 2 variables
 OPENSSL_INCDIR ?= /usr/include
 OPENSSL_LIBDIR ?= /usr/lib
 
