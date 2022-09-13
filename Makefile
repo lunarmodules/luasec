@@ -1,6 +1,10 @@
 # Inform the location to install the modules
 LUAPATH  ?= /usr/share/lua/5.1
 LUACPATH ?= /usr/lib/lua/5.1
+# OPENSSL
+# LuaRocks may set these 2 variable
+OPENSSL_INCDIR ?= /usr/include
+OPENSSL_LIBDIR ?= /usr/lib
 
 # Compile with build-in LuaSocket's help files.
 # Comment this lines if you will link with non-internal LuaSocket's help files
@@ -10,8 +14,8 @@ DEFS  = -DWITH_LUASOCKET
 
 # Edit the lines below to inform new path, if necessary.
 # Path below points to internal LuaSocket's help files.
-INC_PATH ?= -I/usr/include
-LIB_PATH ?= -L/usr/lib
+INC_PATH ?= -I/usr/include -I$(OPENSSL_INCDIR)
+LIB_PATH ?= -L/usr/lib -L$(OPENSSL_LIBDIR)
 INCDIR    = -I. $(INC_PATH)
 LIBDIR    = -L./luasocket $(LIB_PATH)
 
