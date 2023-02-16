@@ -713,7 +713,7 @@ static int set_alpn_cb(lua_State *L)
  */
 static unsigned int server_psk_cb(SSL *ssl, const char *identity, unsigned char *psk, unsigned int max_psk_len)
 {
-  int psk_len;
+  size_t psk_len;
   const char *ret_psk;
   SSL_CTX *ctx = SSL_get_SSL_CTX(ssl);
   p_context pctx = (p_context)SSL_CTX_get_app_data(ctx);
@@ -733,7 +733,7 @@ static unsigned int server_psk_cb(SSL *ssl, const char *identity, unsigned char 
     return 0;
   }
 
-  ret_psk = luaL_checklstring(L, -1, &psk_len);
+  ret_psk = luaL_tolstring(L, -1, &psk_len);
   memcpy(psk, ret_psk, (psk_len > max_psk_len) ? max_psk_len : psk_len);
 
   lua_pop(L, 2);
