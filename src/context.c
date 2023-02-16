@@ -721,7 +721,7 @@ static unsigned int server_psk_cb(
   p_context pctx = (p_context)SSL_CTX_get_app_data(ctx);
   lua_State *L = pctx->L;
 
-  luaL_getmetatable(L, "SSL:PSKServer:Registry");
+  luaL_getmetatable(L, "SSL:PSK:Registry");
   lua_pushlightuserdata(L, (void*)pctx->context);
   lua_gettable(L, -2);
 
@@ -752,7 +752,7 @@ static unsigned int server_psk_cb(
 static int set_server_psk_cb(lua_State *L) {
   p_context ctx = checkctx(L, 1);
 
-  luaL_getmetatable(L, "SSL:PSKServer:Registry");
+  luaL_getmetatable(L, "SSL:PSK:Registry");
   lua_pushlightuserdata(L, (void*)ctx->context);
   lua_pushvalue(L, 2);
   lua_settable(L, -3);
@@ -777,7 +777,7 @@ static unsigned int client_psk_cb(
   p_context pctx = (p_context)SSL_CTX_get_app_data(ctx);
   lua_State *L = pctx->L;
 
-  luaL_getmetatable(L, "SSL:PSKClient:Registry");
+  luaL_getmetatable(L, "SSL:PSK:Registry");
   lua_pushlightuserdata(L, (void*)pctx->context);
   lua_gettable(L, -2);
 
@@ -815,7 +815,7 @@ static unsigned int client_psk_cb(
 static int set_client_psk_cb(lua_State *L) {
   p_context ctx = checkctx(L, 1);
 
-  luaL_getmetatable(L, "SSL:PSKClient:Registry");
+  luaL_getmetatable(L, "SSL:PSK:Registry");
   lua_pushlightuserdata(L, (void*)ctx->context);
   lua_pushvalue(L, 2);
   lua_settable(L, -3);
@@ -912,11 +912,7 @@ static int meth_destroy(lua_State *L)
     lua_pushlightuserdata(L, (void*)ctx->context);
     lua_pushnil(L);
     lua_settable(L, -3);
-    luaL_getmetatable(L, "SSL:PSKServer:Registry");
-    lua_pushlightuserdata(L, (void*)ctx->context);
-    lua_pushnil(L);
-    lua_settable(L, -3);
-    luaL_getmetatable(L, "SSL:PSKClient:Registry");
+    luaL_getmetatable(L, "SSL:PSK:Registry");
     lua_pushlightuserdata(L, (void*)ctx->context);
     lua_pushnil(L);
     lua_settable(L, -3);
@@ -1064,8 +1060,7 @@ LSEC_API int luaopen_ssl_context(lua_State *L)
 {
   luaL_newmetatable(L, "SSL:DH:Registry");        /* Keep all DH callbacks   */
   luaL_newmetatable(L, "SSL:ALPN:Registry");      /* Keep all ALPN callbacks */
-  luaL_newmetatable(L, "SSL:PSKServer:Registry"); /* Keep all PSK callbacks */
-  luaL_newmetatable(L, "SSL:PSKClient:Registry"); /* Keep all PSK callbacks */
+  luaL_newmetatable(L, "SSL:PSK:Registry");       /* Keep all PSK callbacks */
   luaL_newmetatable(L, "SSL:Verify:Registry");    /* Keep all verify flags   */
   luaL_newmetatable(L, "SSL:Context");
   setfuncs(L, meta);
