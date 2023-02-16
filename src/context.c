@@ -804,7 +804,7 @@ static unsigned int client_psk_cb(SSL *ssl, const char *hint, char *identity, un
     psk_len = 0;
   else {
     memcpy(identity, ret_identity, identity_len);
-    identity[ret_identity] = 0;
+    identity[identity_len] = 0;
     memcpy(psk, ret_psk, psk_len);
   }
 
