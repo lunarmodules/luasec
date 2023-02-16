@@ -733,7 +733,7 @@ static unsigned int server_psk_cb(SSL *ssl, const char *identity, unsigned char 
     return 0;
   }
 
-  ret_psk = luaL_tolstring(L, -1, &psk_len);
+  ret_psk = luaL_checklstring(L, -1, &psk_len);
 
   if (psk_len == 0 || psk_len > max_psk_len)
     psk_len = 0;
@@ -793,14 +793,14 @@ static unsigned int client_psk_cb(SSL *ssl, const char *hint, char *identity, un
   lua_call(L, 3, 2);
 
   if (!lua_isstring(L, -1) || !lua_isstring(L, -2)) {
-    lua_pop(L, 2);
+    lua_pop(L, 3);
     return 0;
   }
 
-  ret_identity = luaL_tolstring(L, -2, &identity_len);
-  ret_psk = luaL_tolstring(L, -1, &psk_len);
+  ret_identity = luaL_checklstring(L, -2, &identity_len);
+  ret_psk = luaL_checklstring(L, -1, &psk_len);
 
-  if (ret_identity >= max_identity_len || psk_len > max_psk_len)
+  if (identity_len >= max_identity_len || psk_len > max_psk_len)
     psk_len = 0;
   else {
     memcpy(identity, ret_identity, identity_len);
