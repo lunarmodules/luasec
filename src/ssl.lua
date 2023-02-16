@@ -203,24 +203,16 @@ local function newcontext(cfg)
 
    -- PSK
    if cfg.psk then
-      if type(cfg.psk) == "function" then
-         local pskcb = cfg.psk
+      if type(cfg.psk) ~= "function" then
+         return nil, "invalid PSK callback parameter"
+      end
 
-         if cfg.mode == "client" then
-            succ, msg = context.setclientpskcb(ctx, function(hint, max_psk_len)
-               local identity, psk = pskcb(hint, max_psk_len)
-               return identity, psk
-            end)
-            if not succ then return nil, msg end
-         else
-            succ, msg = context.setserverpskcb(ctx, function(identity, max_psk_len)
-               local psk = pskcb(identity, max_psk_len)
-               return psk
-            end)
-            if not succ then return nil, msg end
-         end
-      else
-         return nil, "invalid PSK Callback parameter"
+      if cfg.mode == "client" then
+         succ, msg = context.setclientpskcb(ctx, cfg.psk)
+         if not succ then return nil, msg end
+      elseif cfg.mode == "server" then
+         succ, msg = context.setserverpskcb(ctx, cfg.psk)
+         if not succ then return nil, msg end
       end
    end
 
