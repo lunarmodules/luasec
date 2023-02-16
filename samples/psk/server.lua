@@ -4,17 +4,22 @@
 local socket = require("socket")
 local ssl    = require("ssl")
 
+-- @param identity (string)
+-- @param max_psk_len (number)
+-- @return psk (string)
+local function pskcb(identity, max_psk_len)
+   print(string.format("PSK Callback: identity=%q, max_psk_len=%d", identity, max_psk_len))
+   if identity == "abcd" then
+     return "1234"
+  end
+  return nil
+end
+
 local params = {
    mode = "server",
    protocol = "any",
    options = "all",
-   psk = function(identity, max_psk_len)
-      print("PSK Callback: identity=", identity, ", max_psk_len=", max_psk_len)
-      if identity == "abcd" then
-         return "1234"
-      end
-      return nil
-   end
+   psk = pskcb,
 }
 
 

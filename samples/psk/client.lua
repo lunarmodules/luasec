@@ -4,13 +4,20 @@
 local socket = require("socket")
 local ssl    = require("ssl")
 
+-- @param hint (nil | string)
+-- @param max_identity_len (number)
+-- @param max_psk_len (number)
+-- @return identity (string)
+-- @return PSK (string)
+local function pskcb(hint, max_identity_len, max_psk_len)
+   print(string.format("PSK Callback: hint=%q, max_identity_len=%d, max_psk_len=%d", hint, max_identity_len, max_psk_len))
+   return "abcd", "1234"
+end
+
 local params = {
    mode = "client",
    protocol = "tlsv1_2",
-   psk = function(hint, max_psk_len)
-      print("PSK Callback: hint=", hint, ", max_psk_len=", max_psk_len)
-      return "abcd", "1234"
-   end
+   psk = pskcb,
 }
 
 local peer = socket.tcp()
