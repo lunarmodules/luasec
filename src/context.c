@@ -742,9 +742,10 @@ static unsigned int server_psk_cb(SSL *ssl, const char *identity, unsigned char 
 }
 
 /**
- * Set a psk callback for server.
+ * Set a PSK callback for server.
  */
-static int set_server_psk_cb(lua_State *L) {
+static int set_server_psk_cb(lua_State *L)
+{
   p_context ctx = checkctx(L, 1);
 
   luaL_getmetatable(L, "SSL:PSK:Registry");
