@@ -814,7 +814,7 @@ static unsigned int client_psk_cb(SSL *ssl, const char *hint, char *identity, un
 }
 
 /**
- * Set a psk callback for client.
+ * Set a PSK callback for client.
  */
 static int set_client_psk_cb(lua_State *L) {
   p_context ctx = checkctx(L, 1);
