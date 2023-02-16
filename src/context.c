@@ -728,13 +728,17 @@ static unsigned int server_psk_cb(SSL *ssl, const char *identity, unsigned char 
 
   lua_call(L, 2, 1);
 
-  if (!lua_isstring(L, -1) || lua_objlen(L, -1) == 0) {
+  if (!lua_isstring(L, -1)) {
     lua_pop(L, 2);
     return 0;
   }
 
   ret_psk = luaL_tolstring(L, -1, &psk_len);
-  memcpy(psk, ret_psk, (psk_len > max_psk_len) ? max_psk_len : psk_len);
+
+  if (psk_len == 0 || psk_len > max_psk_len)
+    psk_len = 0;
+  else
+    memcpy(psk, ret_psk, psk_len);
 
   lua_pop(L, 2);
 
