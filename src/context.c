@@ -711,7 +711,8 @@ static int set_alpn_cb(lua_State *L)
 /**
  * Callback to select the PSK.
  */
-static unsigned int server_psk_cb(SSL *ssl, const char *identity, unsigned char *psk, unsigned int max_psk_len)
+static unsigned int server_psk_cb(SSL *ssl, const char *identity, unsigned char *psk,
+  unsigned int max_psk_len)
 {
   size_t psk_len;
   const char *ret_psk;
@@ -733,7 +734,7 @@ static unsigned int server_psk_cb(SSL *ssl, const char *identity, unsigned char 
     return 0;
   }
 
-  ret_psk = luaL_checklstring(L, -1, &psk_len);
+  ret_psk = lua_tolstring(L, -1, &psk_len);
 
   if (psk_len == 0 || psk_len > max_psk_len)
     psk_len = 0;
@@ -766,8 +767,8 @@ static int set_server_psk_cb(lua_State *L)
 /*
  * Client callback to PSK.
  */
-static unsigned int client_psk_cb(SSL *ssl, const char *hint, char *identity, unsigned int max_identity_len,
-  unsigned char *psk, unsigned int max_psk_len)
+static unsigned int client_psk_cb(SSL *ssl, const char *hint, char *identity,
+  unsigned int max_identity_len, unsigned char *psk, unsigned int max_psk_len)
 {
   size_t psk_len;
   size_t identity_len;
@@ -797,8 +798,8 @@ static unsigned int client_psk_cb(SSL *ssl, const char *hint, char *identity, un
     return 0;
   }
 
-  ret_identity = luaL_checklstring(L, -2, &identity_len);
-  ret_psk = luaL_checklstring(L, -1, &psk_len);
+  ret_identity = lua_tolstring(L, -2, &identity_len);
+  ret_psk = lua_tolstring(L, -1, &psk_len);
 
   if (identity_len >= max_identity_len || psk_len > max_psk_len)
     psk_len = 0;
