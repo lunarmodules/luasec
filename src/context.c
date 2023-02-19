@@ -765,6 +765,18 @@ static int set_server_psk_cb(lua_State *L)
 }
 
 /*
+ * Set the PSK indentity hint.
+ */
+static int set_psk_identity_hint(lua_State *L)
+{
+  p_context ctx = checkctx(L, 1);
+  const char *hint = luaL_checkstring(L, 2);
+  int ret = SSL_CTX_use_psk_identity_hint(ctx->context, hint);
+  lua_pushboolean(L, ret);
+  return 1;
+}
+
+/*
  * Client callback to PSK.
  */
 static unsigned int client_psk_cb(SSL *ssl, const char *hint, char *identity,
@@ -882,6 +894,7 @@ static luaL_Reg funcs[] = {
   {"setdhparam",      set_dhparam},
   {"setverify",       set_verify},
   {"setoptions",      set_options},
+  {"setpskhint",      set_psk_identity_hint},
   {"setserverpskcb",  set_server_psk_cb},
   {"setclientpskcb",  set_client_psk_cb},
   {"setmode",         set_mode},

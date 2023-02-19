@@ -19,7 +19,15 @@ local params = {
    mode = "server",
    protocol = "any",
    options = "all",
+
+-- PSK with just a callback
    psk = pskcb,
+
+-- PSK with identity hint
+--   psk = {
+--      hint = "hintpsksample",
+--      callback = pskcb,
+--   },
 }
 
 
