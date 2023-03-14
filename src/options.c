@@ -13,7 +13,7 @@
 
 
 /* 
-  OpenSSL version: OpenSSL 3.0.0-beta2
+  OpenSSL version: OpenSSL 3.0.8
 */
 
 static lsec_ssl_option_t ssl_options[] = {
