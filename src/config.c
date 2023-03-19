@@ -74,6 +74,12 @@ LSEC_API int luaopen_ssl_config(lua_State *L)
   lua_pushboolean(L, 1);
   lua_rawset(L, -3);
 
+#ifdef LSEC_ENABLE_PSK
+  lua_pushstring(L, "psk");
+  lua_pushboolean(L, 1);
+  lua_rawset(L, -3);
+#endif
+
 #ifdef LSEC_ENABLE_DANE
   // DANE
   lua_pushstring(L, "dane");

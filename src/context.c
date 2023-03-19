@@ -707,6 +707,7 @@ static int set_alpn_cb(lua_State *L)
   return 1;
 }
 
+#if defined(LSEC_ENABLE_PSK)
 /**
  * Callback to select the PSK.
  */
@@ -841,6 +842,7 @@ static int set_client_psk_cb(lua_State *L) {
   lua_pushboolean(L, 1);
   return 1;
 }
+#endif
 
 #if defined(LSEC_ENABLE_DANE)
 /*
@@ -893,9 +895,11 @@ static luaL_Reg funcs[] = {
   {"setdhparam",      set_dhparam},
   {"setverify",       set_verify},
   {"setoptions",      set_options},
+#if defined(LSEC_ENABLE_PSK)
   {"setpskhint",      set_psk_identity_hint},
   {"setserverpskcb",  set_server_psk_cb},
   {"setclientpskcb",  set_client_psk_cb},
+#endif
   {"setmode",         set_mode},
 #if !defined(OPENSSL_NO_EC)
   {"setcurve",        set_curve},

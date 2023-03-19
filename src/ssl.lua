@@ -202,7 +202,7 @@ local function newcontext(cfg)
    end
 
    -- PSK
-   if cfg.psk then
+   if config.capabilities.psk and cfg.psk then
       if cfg.mode == "client" then
          if type(cfg.psk) ~= "function" then
             return nil, "invalid PSK configuration"
