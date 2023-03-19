@@ -4,6 +4,11 @@
 local socket = require("socket")
 local ssl    = require("ssl")
 
+if not ssl.config.capabilities.psk then
+   print("[ERRO] PSK not available")
+   os.exit(1)
+end
+
 -- @param hint (nil | string)
 -- @param max_identity_len (number)
 -- @param max_psk_len (number)
