@@ -47,8 +47,8 @@ static int lsec_socket_error()
 #if defined(WIN32)
   return WSAGetLastError();
 #else
-#if defined(LSEC_OPENSSL_1_1_1)
-  // Bug in OpenSSL 1.1.1
+#if defined(LSEC_OPENSSL_ERRNO_BUG)
+  // Bug in OpenSSL
   if (errno == 0)
     return LSEC_IO_SSL;
 #endif
