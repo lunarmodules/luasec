@@ -366,7 +366,7 @@ static int meth_shutdown(lua_State *L) {
     lua_pushnil(L);
     ssl->state = LSEC_STATE_CLOSED;
     return 2;
-  case -1:
+  default:
     lua_pushboolean(L, 0);
     ssl->error = SSL_get_error(ssl->ssl, err);
     switch (ssl->error) {
@@ -389,6 +389,8 @@ static int meth_shutdown(lua_State *L) {
     }
     return 2;
   }
+  // unreachable
+  return 0;
 }
 
 /**
