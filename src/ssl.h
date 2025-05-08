@@ -32,7 +32,6 @@ typedef struct t_ssl_ {
   t_timeout tm;
   SSL *ssl;
   int state;
-  int shutdown;
   int error;
 } t_ssl;
 typedef t_ssl* p_ssl;
