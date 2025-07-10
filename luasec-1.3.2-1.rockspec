@@ -46,7 +46,7 @@ build = {
          modules = {
             ssl = {
                defines = {
-                  "WITH_LUASOCKET", "LUASOCKET_DEBUG",
+                  "WITH_LUASOCKET", "LUASOCKET_DEBUG", "OPENSSL_API_COMPAT=0x10101000L"
                },
                incdirs = {
                   "$(OPENSSL_INCDIR)", "src/", "src/luasocket",
@@ -80,7 +80,8 @@ build = {
                defines = {
                   "WIN32", "NDEBUG", "_WINDOWS", "_USRDLL", "LSEC_EXPORTS", "BUFFER_DEBUG", "LSEC_API=__declspec(dllexport)",
                   "WITH_LUASOCKET", "LUASOCKET_DEBUG",
-                  "LUASEC_INET_NTOP", "WINVER=0x0501", "_WIN32_WINNT=0x0501", "NTDDI_VERSION=0x05010300"
+                  "LUASEC_INET_NTOP", "WINVER=0x0501", "_WIN32_WINNT=0x0501", "NTDDI_VERSION=0x05010300",
+                  "OPENSSL_API_COMPAT=0x10101000L"
                },
                libdirs = {
                   "$(OPENSSL_LIBDIR)",
