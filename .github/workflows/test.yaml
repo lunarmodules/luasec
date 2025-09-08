@@ -1,0 +1,384 @@
+name: Test
+
+on:
+  push:
+    paths-ignore:
+      - CHANGELOG
+      - INSTALL
+      - LICENSE
+      - '*.md'
+
+  pull_request:
+    paths-ignore:
+      - CHANGELOG
+      - INSTALL
+      - LICENSE
+      - '*.md'
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        lua-version:
+          - 5.1
+          - 5.2
+          - 5.3
+          - 5.4
+          - luajit
+          - luajit-openresty
+
+        os:
+          - ubuntu-latest
+          - macos-latest
+
+          # MSVC-only
+          - windows-latest
+
+    steps:
+      - name: Checkout LuaSec
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup OpenSSL (Unix)
+        if: ${{ runner.os != 'Windows' }}
+        run: |
+          if [ "${{ runner.os }}" = "Linux" ]; then
+            sudo apt install -y libssl-dev
+          elif [ "${{ runner.os }}" = "macOS" ]; then
+            brew install openssl
+          else
+            echo "Unknown runner OS"
+            exit 1
+          fi
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+        if: ${{ runner.os == 'Windows' }}
+
+      - name: Setup Lua
+        uses: luarocks/gh-actions-lua@989f8e6ffba55ce1817e236478c98558e598776c # v11
+        if: ${{ runner.os != 'Windows' || !startsWith(matrix.lua-version, 'luajit') }}
+        with:
+          luaVersion: ${{ matrix.lua-version }}
+
+      - name: Checkout LuaJIT (Windows)
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        if: ${{ runner.os == 'Windows' && matrix.lua-version == 'luajit' }}
+        with:
+          repository: LuaJIT/LuaJIT
+          path: LuaJIT
+
+      - name: Checkout OpenResty (Windows)
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        if: ${{ runner.os == 'Windows' && matrix.lua-version == 'luajit-openresty' }}
+        with:
+          repository: openresty/luajit2
+          path: LuaJIT
+
+      - name: Build LuaJIT / OpenResty (Windows)
+        if: ${{ runner.os == 'Windows' && startsWith(matrix.lua-version, 'luajit') }}
+        shell: cmd
+        run: |
+          cd LuaJIT
+          cd src
+          msvcbuild.bat
+
+      - name: Install LuaJIT / OpenResty (Windows)
+        if: ${{ runner.os == 'Windows' && startsWith(matrix.lua-version, 'luajit') }}
+        shell: cmd
+        run: |
+          SET "LUA_DIR=${{ github.workspace }}\.lua"
+          SET "LUA_BINDIR=%LUA_DIR%\bin"
+          SET "LUA_INCDIR=%LUA_DIR%\include"
+          SET "LUA_LIBDIR=%LUA_DIR%\lib"
+          SET "INSTALL_LMOD=%LUA_BINDIR%\lua"
+          SET "LUA_JITDIR=%INSTALL_LMOD%\jit"
+          IF EXIST "%LUA_DIR%\" RMDIR /S /Q "%LUA_DIR%"
+          MKDIR "%LUA_DIR%"
+          MKDIR "%LUA_BINDIR%"
+          MKDIR "%LUA_INCDIR%"
+          MKDIR "%LUA_LIBDIR%"
+          MKDIR "%INSTALL_LMOD%"
+          MKDIR "%LUA_JITDIR%"
+          cd LuaJIT
+          cd src
+          COPY luajit.exe lua.exe
+          COPY lua.exe    "%LUA_BINDIR%"
+          COPY luajit.exe "%LUA_BINDIR%"
+          COPY lua51.dll  "%LUA_BINDIR%"
+          COPY lua51.lib  "%LUA_LIBDIR%"
+          COPY jit\*.lua  "%LUA_JITDIR%"
+          FOR %%F IN (luaconf.h lua.h lualib.h lauxlib.h lua.hpp luajit.h) DO COPY %%F "%LUA_INCDIR%"
+          ECHO %LUA_BINDIR%>>${{ github.path }}
+
+      - name: Display Lua version
+        run: lua -v
+
+      - name: Setup LuaRocks
+        uses: luarocks/gh-actions-luarocks@7c85eeff60655651b444126f2a78be784e836a0a # v6
+
+      # OpenSSL binaries MSVC-compatible
+      # from ( https://slproweb.com/products/Win32OpenSSL.html )
+      # are already installed at C:\Program Files\OpenSSL
+      - name: Configure LuaRocks for OpenSSL (Windows)
+        if: ${{ runner.os == 'Windows' }}
+        run: luarocks config "variables.OPENSSL_DIR" "C:\Program Files\OpenSSL"
+
+      - name: Configure LuaRocks for OpenSSL (macOS)
+        if: ${{ runner.os == 'macOS' }}
+        run: |
+          if [ -d "/opt/homebrew/opt/openssl@3" ]; then
+            luarocks config "variables.OPENSSL_DIR" "/opt/homebrew/opt/openssl@3"
+          else
+            echo "OpenSSL directory not found"
+            exit 1
+          fi
+
+      - name: Display LuaRocks config
+        run: luarocks config
+
+      - name: Lint rockspecs (Windows)
+        if: ${{ runner.os == 'Windows' }}
+        shell: cmd
+        run: |
+          FOR %%F IN (*.rockspec) DO (
+            luarocks lint %%F
+
+            IF %ERRORLEVEL% NEQ 0 (
+              ECHO Failed to lint %%F
+              EXIT /B 1
+            )
+          )
+
+      - name: Lint rockspecs (Unix)
+        if: ${{ runner.os != 'Windows' }}
+        run: |
+          for rockspec in ./*.rockspec; do
+            luarocks lint $rockspec
+
+            if ! [ $? = 0 ]; then
+              echo "Failed to lint $rockspec"
+              exit 1
+            fi
+          done
+
+      - name: Build LuaSec
+        run: luarocks make luasec-dev-1.rockspec
+
+  # MinGW-w64 binaries
+  # provided by MSYS2
+  test-MinGW-w64:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: cmd
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        lua-version:
+          - 5.1.5
+          - 5.2.4
+          - 5.3.6
+          - 5.4.8
+          - luajit
+          - luajit-openresty
+
+        MSYS2-CONFIG:
+          # MinGW-w64 with MSVCRT
+          - sys: mingw64
+            env: x86_64
+
+          # MinGW-w64 with UCRT
+          - sys: ucrt64
+            env: ucrt-x86_64
+
+          # LLVM-MinGW-w64
+          - sys: clang64
+            env: clang-x86_64
+
+    env:
+      MSYS2_SED: C:\msys64\usr\bin\sed.exe
+      MSYS2_BASH: C:\msys64\usr\bin\bash.exe
+      MSYS2_MINGW_W64_DIR: C:\msys64\${{ matrix.MSYS2-CONFIG.sys }}
+      MSYS2_PACKAGES: "mingw-w64-${{ matrix.MSYS2-CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2-CONFIG.env }}-make mingw-w64-${{ matrix.MSYS2-CONFIG.env }}-openssl"
+
+    steps:
+
+      - name: Checkout LuaSec
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      # When running many concurrent jobs,
+      # pacman might fail to download packages
+      # from MSYS2 servers due a high load.
+      # So, retry the installation a few times
+      - name: Install C compiler, GNU Make and OpenSSL
+        run: |
+          SET "TRIES=0"
+          SET "MAX_TRIES=5"
+          SET "SECS_TO_WAIT=1"
+
+          GOTO :INSTALL_FROM_MSYS2
+
+          :INSTALL_FROM_MSYS2
+          ${{ env.MSYS2_BASH }} -lc "pacman -S ${{ env.MSYS2_PACKAGES }} --noconfirm"
+
+          IF %ERRORLEVEL% EQU 0 (
+            ECHO ${{ env.MSYS2_MINGW_W64_DIR }}\bin>>${{ github.path }}
+          ) ELSE (
+            SET /A "TRIES=TRIES+1"
+            IF %TRIES% LSS %MAX_TRIES% (
+              ECHO Attempt %TRIES% out of %MAX_TRIES% to install packages failed
+              SET /A "SECS_TO_WAIT*=2"
+              ECHO Waiting %SECS_TO_WAIT% seconds to retry
+              SLEEP %SECS_TO_WAIT%
+              GOTO :INSTALL_FROM_MSYS2
+            ) ELSE (
+              ECHO Failed to install MinGW-w64 and dependencies from MSYS2
+              EXIT /B 1
+            )
+          )
+
+      - name: Display C compiler info
+        run: cc --version
+
+      - name: Restore Lua ${{ matrix.lua-version }} tarball from cache
+        if: ${{ !startsWith(matrix.lua-version, 'luajit') }}
+        id: restore-lua-tarball
+        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: lua-${{ matrix.lua-version }}.tar.gz
+          key: lua-${{ matrix.lua-version }}
+
+      - name: Download Lua ${{ matrix.lua-version }} tarball
+        if: ${{ !startsWith(matrix.lua-version, 'luajit') && steps.restore-lua-tarball.outputs.cache-hit != 'true' }}
+        run: curl --ssl-no-revoke -L -O "https://lua.org/ftp/lua-${{ matrix.lua-version }}.tar.gz"
+
+      - name: Save Lua ${{ matrix.lua-version }} tarball to cache
+        if: ${{ !startsWith(matrix.lua-version, 'luajit') && steps.restore-lua-tarball.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: lua-${{ matrix.lua-version }}.tar.gz
+          key: lua-${{ matrix.lua-version }}
+
+      - name: Extract Lua ${{ matrix.lua-version }} source code
+        if: ${{ !startsWith(matrix.lua-version, 'luajit') }}
+        run: tar -xf lua-${{ matrix.lua-version }}.tar.gz
+
+      - name: Patch Lua 5.1 Makefile to remove shell comment
+        if: ${{ matrix.lua-version == '5.1.5' }}
+        run: |
+          cd lua-${{ matrix.lua-version }}
+          cd src
+          ${{ env.MSYS2_SED }} -e "s|# DLL needs all object files||" -i Makefile
+
+      - name: Build Lua ${{ matrix.lua-version }}
+        if: ${{ !startsWith(matrix.lua-version, 'luajit') }}
+        run: mingw32-make -C lua-${{ matrix.lua-version }} "CC=cc -std=gnu99" mingw
+
+      - name: Install Lua ${{ matrix.lua-version }}
+        if: ${{ !startsWith(matrix.lua-version, 'luajit') }}
+        run: |
+          SET "LUA_DIR=${{ github.workspace }}\.lua"
+          SET "LUA_BINDIR=%LUA_DIR%\bin"
+          SET "LUA_INCDIR=%LUA_DIR%\include"
+          SET "LUA_LIBDIR=%LUA_DIR%\lib"
+          IF EXIST "%LUA_DIR%\" RMDIR /S /Q "%LUA_DIR%"
+          MKDIR "%LUA_DIR%"
+          MKDIR "%LUA_BINDIR%"
+          MKDIR "%LUA_INCDIR%"
+          MKDIR "%LUA_LIBDIR%"
+          cd lua-${{ matrix.lua-version }}
+          cd src
+          COPY lua.exe    "%LUA_BINDIR%"
+          COPY luac.exe   "%LUA_BINDIR%"
+          FOR %%F IN (*.dll) DO COPY %%F "%LUA_BINDIR%"
+          IF "${{ matrix.lua-version }}"=="5.1.5" (
+            FOR %%F IN (luaconf.h lua.h lualib.h lauxlib.h ..\etc\lua.hpp) DO COPY %%F "%LUA_INCDIR%"
+          ) ELSE (
+            FOR %%F IN (luaconf.h lua.h lualib.h lauxlib.h lua.hpp) DO COPY %%F "%LUA_INCDIR%"
+          )
+          ECHO %LUA_BINDIR%>>${{ github.path }}
+
+      - name: Checkout LuaJIT
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        if: ${{ matrix.lua-version == 'luajit' }}
+        with:
+          repository: LuaJIT/LuaJIT
+          path: LuaJIT
+
+      - name: Checkout OpenResty
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        if: ${{ matrix.lua-version == 'luajit-openresty' }}
+        with:
+          repository: openresty/luajit2
+          path: LuaJIT
+
+      - name: Build LuaJIT / OpenResty
+        if: ${{ startsWith(matrix.lua-version, 'luajit') }}
+        run: |
+          cd LuaJIT
+          cd src
+          mingw32-make DEFAULT_CC=cc SHELL=cmd all
+
+      - name: Install LuaJIT / OpenResty
+        if: ${{ startsWith(matrix.lua-version, 'luajit') }}
+        run: |
+          SET "LUA_DIR=${{ github.workspace }}\.lua"
+          SET "LUA_BINDIR=%LUA_DIR%\bin"
+          SET "LUA_INCDIR=%LUA_DIR%\include"
+          SET "LUA_LIBDIR=%LUA_DIR%\lib"
+          SET "INSTALL_LMOD=%LUA_BINDIR%\lua"
+          SET "LUA_JITDIR=%INSTALL_LMOD%\jit"
+          IF EXIST "%LUA_DIR%\" RMDIR /S /Q "%LUA_DIR%"
+          MKDIR "%LUA_DIR%"
+          MKDIR "%LUA_BINDIR%"
+          MKDIR "%LUA_INCDIR%"
+          MKDIR "%LUA_LIBDIR%"
+          MKDIR "%INSTALL_LMOD%"
+          MKDIR "%LUA_JITDIR%"
+          cd LuaJIT
+          cd src
+          COPY luajit.exe lua.exe
+          COPY lua.exe    "%LUA_BINDIR%"
+          COPY luajit.exe "%LUA_BINDIR%"
+          COPY lua51.dll  "%LUA_BINDIR%"
+          COPY jit\*.lua  "%LUA_JITDIR%"
+          FOR %%F IN (luaconf.h lua.h lualib.h lauxlib.h lua.hpp luajit.h) DO COPY %%F "%LUA_INCDIR%"
+          ECHO %LUA_BINDIR%>>${{ github.path }}
+
+      - name: Display Lua version
+        run: lua -v
+
+      - name: Setup LuaRocks
+        uses: luarocks/gh-actions-luarocks@7c85eeff60655651b444126f2a78be784e836a0a # v6
+
+      - name: Configure LuaRocks for MinGW-w64
+        run: |
+          luarocks config "variables.CC" "cc"
+          luarocks config "variables.LD" "cc"
+          luarocks config "variables.LUA_LIBDIR" "${{ github.workspace }}\.lua\bin"
+          luarocks config "external_deps_dirs[1]" "${{ env.MSYS2_MINGW_W64_DIR }}"
+
+      - name: Display LuaRocks config
+        run: luarocks config
+
+      - name: Lint rockspecs
+        shell: cmd
+        run: |
+          FOR %%F IN (*.rockspec) DO (
+            luarocks lint %%F
+
+            IF %ERRORLEVEL% NEQ 0 (
+              ECHO Failed to lint %%F
+              EXIT /B 1
+            )
+          )
+
+      - name: Build LuaSec
+        run: luarocks make luasec-dev-1.rockspec
