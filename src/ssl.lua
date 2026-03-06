@@ -253,6 +253,11 @@ local function wrap(sock, cfg)
    local s, msg = core.create(ctx)
    if s then
       core.setfd(s, sock:getfd())
+      -- Add TCP socket method passthroughs
+      s.getpeername = function() return sock:getpeername() end
+      s.getsockname = function() return sock:getsockname() end
+      s.getoption = function(self, ...) return sock:getoption(...) end
+      s.setoption = function(self, ...) return sock:setoption(...) end
       sock:setfd(core.SOCKET_INVALID)
       registry[s] = ctx
       return s
