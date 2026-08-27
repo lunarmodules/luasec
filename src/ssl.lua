@@ -133,6 +133,10 @@ end
 --
 local function newcontext(cfg)
    local succ, msg, ctx
+   if cfg.host then
+      return nil, "cfg.host is not supported by newcontext; " ..
+         "for automatic hostname verification use ssl.wrap instead"
+   end
    -- Create the context
    ctx, msg = context.create(cfg.protocol)
    if not ctx then return nil, msg end
@@ -315,7 +319,9 @@ local function wrap(sock, cfg)
          return nil, "cfg.host must not be combined with cfg.dane; " ..
             "DANE clients must set the peer hostname via conn:setdane(host) instead"
       end
+      cfg.host = nil
       ctx, msg = newcontext(cfg)
+      cfg.host = host
       if not ctx then return nil, msg end
    else
       ctx = cfg
