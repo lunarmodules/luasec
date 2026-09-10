@@ -401,10 +401,6 @@ static int meth_handshake(lua_State *L)
     DH_free(selected_ctx->dh_param);
     selected_ctx->dh_param = NULL;
   }
-  if (ctx->alpn) {
-    free(ctx->alpn);
-    ctx->alpn = NULL;
-  }
   if (err == IO_DONE) {
     lua_pushboolean(L, 1);
     return 1;
