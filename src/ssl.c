@@ -386,6 +386,7 @@ static int meth_setfd(lua_State *L)
 static int meth_handshake(lua_State *L)
 {
   int err;
+  p_context selected_ctx;
   p_ssl ssl = (p_ssl)luaL_checkudata(L, 1, "SSL:Connection");
   p_context ctx = (p_context)SSL_CTX_get_app_data(SSL_get_SSL_CTX(ssl->ssl));
   ctx->L = L;
@@ -394,9 +395,11 @@ static int meth_handshake(lua_State *L)
     DH_free(ctx->dh_param);
     ctx->dh_param = NULL;
   }
-  if (ctx->alpn) {
-    free(ctx->alpn);
-    ctx->alpn = NULL;
+  /* SNI may have selected a different context for the DH callback. */
+  selected_ctx = (p_context)SSL_CTX_get_app_data(SSL_get_SSL_CTX(ssl->ssl));
+  if (selected_ctx != ctx && selected_ctx->dh_param) {
+    DH_free(selected_ctx->dh_param);
+    selected_ctx->dh_param = NULL;
   }
   if (err == IO_DONE) {
     lua_pushboolean(L, 1);
