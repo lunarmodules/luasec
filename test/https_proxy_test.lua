@@ -156,6 +156,17 @@ do
       "CONNECT/TLS ordering")
 end
 
+-- An IPv4 origin uses an unbracketed CONNECT authority and Host header.
+do
+   local ok = connect(
+      { host = "127.0.0.1", port = 8443 }, "proxy.example", 8080,
+      response("HTTP/1.1 200 Connection Established"))
+   assert_equal(ok, true, "IPv4 CONNECT failed")
+   assert_equal(socket_state.sent,
+      "CONNECT 127.0.0.1:8443 HTTP/1.1\r\nHost: 127.0.0.1:8443\r\n\r\n",
+      "IPv4 origin CONNECT request")
+end
+
 -- Bracketed IPv6 is normalized to exactly one pair of brackets.
 do
    local ok = connect(
