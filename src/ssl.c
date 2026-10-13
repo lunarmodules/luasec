@@ -359,7 +359,7 @@ static int meth_shutdown(lua_State *L) {
   switch (err) {
   case 0:
     lua_pushboolean(L, 0);
-    lua_pushnil(L);
+    lua_pushliteral(L, "wantread");
     return 2;
   case 1:
     lua_pushboolean(L, 1);
