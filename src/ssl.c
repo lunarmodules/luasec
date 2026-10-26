@@ -506,6 +506,7 @@ static int meth_getpeercertificate(lua_State *L)
   if (n == 0) {
     cert = SSL_get_peer_certificate(ssl->ssl);
     if (cert)
+      /* Do not need to increment the reference counting of the object. */
       lsec_pushx509(L, cert);
     else
       lua_pushnil(L);
@@ -523,7 +524,7 @@ static int meth_getpeercertificate(lua_State *L)
   }
   cert = sk_X509_value(certs, n);
   /* Increment the reference counting of the object. */
-  /* See SSL_get_peer_certificate() source code.     */
+  /* See SSL_get_peer_cert_chain() */
   X509_up_ref(cert);
   lsec_pushx509(L, cert);
   return 1;
@@ -554,8 +555,12 @@ static int meth_getlocalcertificate(lua_State *L)
   }
   if (n == 0) {
     cert = SSL_get_certificate(ssl->ssl);
-    if (cert)
+    if (cert) {
+      /* Increment the reference counting of the object. */
+      /* See SSL_get_peer_certificate() */
+      X509_up_ref(cert);
       lsec_pushx509(L, cert);
+    }
     else
       lua_pushnil(L);
     return 1;
@@ -573,8 +578,6 @@ static int meth_getlocalcertificate(lua_State *L)
       return 1;
     }
     cert = sk_X509_value(certs, n);
-    /* Increment the reference counting of the object. */
-    /* See SSL_get_peer_certificate() source code.     */
     X509_up_ref(cert);
     lsec_pushx509(L, cert);
   }
@@ -599,15 +602,19 @@ static int meth_getpeerchain(lua_State *L)
   }
   lua_newtable(L);
   if (SSL_is_server(ssl->ssl)) {
-    lsec_pushx509(L, SSL_get_peer_certificate(ssl->ssl));
-    lua_rawseti(L, -2, idx++);
+    cert = SSL_get_peer_certificate(ssl->ssl);
+    if (cert) {
+      /* Do not need to increment the reference counting of the object. */
+      lsec_pushx509(L, cert);
+      lua_rawseti(L, -2, idx++);
+    }
   }
   certs = SSL_get_peer_cert_chain(ssl->ssl);
   n_certs = sk_X509_num(certs);
   for (i = 0; i < n_certs; i++) {
     cert = sk_X509_value(certs, i);
     /* Increment the reference counting of the object. */
-    /* See SSL_get_peer_certificate() source code.     */
+    /* See SSL_get_peer_cert_chain() */
     X509_up_ref(cert);
     lsec_pushx509(L, cert);
     lua_rawseti(L, -2, idx++);
@@ -633,15 +640,21 @@ static int meth_getlocalchain(lua_State *L)
   }
   lua_newtable(L);
   if (SSL_is_server(ssl->ssl)) {
-    lsec_pushx509(L, SSL_get_certificate(ssl->ssl));
-    lua_rawseti(L, -2, idx++);
+    cert = SSL_get_certificate(ssl->ssl);
+    if (cert) {
+      /* Increment the reference counting of the object. */
+      /* See SSL_get_peer_certificate() */
+      X509_up_ref(cert);
+      lsec_pushx509(L, cert);
+      lua_rawseti(L, -2, idx++);
+    }
   }
   if(SSL_get0_chain_certs(ssl->ssl, &certs)) {
     n_certs = sk_X509_num(certs);
     for (i = 0; i < n_certs; i++) {
       cert = sk_X509_value(certs, i);
       /* Increment the reference counting of the object. */
-      /* See SSL_get_peer_certificate() source code.     */
+      /* See SSL_get0_chain_certs() */
       X509_up_ref(cert);
       lsec_pushx509(L, cert);
       lua_rawseti(L, -2, idx++);
