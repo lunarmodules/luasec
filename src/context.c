@@ -369,6 +369,51 @@ static int load_locations(lua_State *L)
 }
 
 /**
+ * Load a CA certificate bundle from a string.
+ */
+static int load_cadata(lua_State *L)
+{
+  SSL_CTX *ctx = lsec_checkcontext(L, 1);
+  size_t len;
+  const char *cadata = luaL_checklstring(L, 2, &len);
+  X509_STORE *store = SSL_CTX_get_cert_store(ctx);
+  if (!store)
+  {
+    lua_pushboolean(L, 0);
+    lua_pushliteral(L, "error loading CA data (no X509 store)");
+    return 2;
+  }
+
+  BIO *bio = BIO_new_mem_buf(cadata, (int)len);
+  if (!bio)
+  {
+    lua_pushboolean(L, 0);
+    lua_pushliteral(L, "error loading CA data (failed to load string into memory)");
+    return 2;
+  }
+
+  X509 *cert = NULL;
+
+  while ((cert = PEM_read_bio_X509(bio, NULL, 0, NULL)) != NULL)
+  {
+    if (!X509_STORE_add_cert(store, cert))
+    {
+      X509_free(cert);
+      BIO_free(bio);
+      lua_pushboolean(L, 0);
+      lua_pushfstring(L, "error loading CA data (%s)",
+        ERR_reason_error_string(ERR_get_error()));
+      return 2;
+    }
+    X509_free(cert);
+  }
+
+  BIO_free(bio);
+  lua_pushboolean(L, 1);
+  return 1;
+}
+
+/**
  * Load the certificate file.
  */
 static int load_cert(lua_State *L)
@@ -884,6 +929,7 @@ static int set_dane(lua_State *L)
 static luaL_Reg funcs[] = {
   {"create",          create},
   {"locations",       load_locations},
+  {"cadata",          load_cadata},
   {"loadcert",        load_cert},
   {"loadkey",         load_key},
   {"checkkey",        check_key},
