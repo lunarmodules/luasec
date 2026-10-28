@@ -652,6 +652,7 @@ static int alpn_cb(SSL *s, const unsigned char **out, unsigned char *outlen,
                    const unsigned char *in, unsigned int inlen, void *arg)
 {
   int ret;
+  unsigned int pos, len;
   size_t server_len;
   const char *server;
   p_context ctx = (p_context)arg;
@@ -679,14 +680,24 @@ static int alpn_cb(SSL *s, const unsigned char **out, unsigned char *outlen,
     return SSL_TLSEXT_ERR_NOACK;
   } 
 
-  // Copy the result because lua_pop() can collect the pointer
-  ctx->alpn = malloc(*outlen);
-  memcpy(ctx->alpn, (void*)*out, *outlen);
-  *out = (const unsigned char*)ctx->alpn;
+  /* Use the matching bytes in OpenSSL's input buffer so the Lua string
+   * can be collected. OpenSSL permits out to point directly into in:
+   * https://docs.openssl.org/3.0/man3/SSL_CTX_set_alpn_select_cb/#description
+   */
+  for (pos = 0; pos < inlen; pos += len) {
+    len = in[pos++];
+    if (len == 0 || len > inlen - pos)
+      break;
+    if (len == *outlen && memcmp(in + pos, *out, len) == 0) {
+      *out = in + pos;
+      lua_pop(L, 2);
+      return SSL_TLSEXT_ERR_OK;
+    }
+  }
 
+  /* A negotiated protocol must exist in the client list. */
   lua_pop(L, 2);
-
-  return SSL_TLSEXT_ERR_OK;
+  return SSL_TLSEXT_ERR_ALERT_FATAL;
 }
 
 /**
