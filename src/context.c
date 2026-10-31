@@ -7,6 +7,7 @@
  *--------------------------------------------------------------------------*/
 
 #include <string.h>
+#include <stdbool.h>
 
 #if defined(WIN32)
 #include <windows.h>
@@ -438,11 +439,11 @@ static int load_cadata(lua_State *L)
   if (!BIO_reset(bio))
   {
     lua_pushboolean(L, 0);
-    lua_pushboolean(L, "error loading CA data (BIO reset failed)");
+    lua_pushliteral(L, "error loading CA data (BIO reset failed)");
     return 2;
   }
 
-  X509 *crl = NULL;
+  X509_CRL *crl = NULL;
 
   while ((crl = PEM_read_bio_X509_CRL(bio, NULL, 0, NULL)) != NULL)
   {
