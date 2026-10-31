@@ -414,8 +414,6 @@ static int load_cadata(lua_State *L)
   }
 
   err = ERR_peek_last_error();
-  BIO_free(bio);
-
   // If everything went as planned:
   // - at least one certificate was loaded,
   // - the last error is in the PEM library, and
@@ -435,8 +433,46 @@ static int load_cadata(lua_State *L)
     }
     return 2;
   }
-
   ERR_clear_error();
+
+  if (!BIO_reset(bio))
+  {
+    lua_pushboolean(L, 0);
+    lua_pushboolean(L, "error loading CA data (BIO reset failed)");
+    return 2;
+  }
+
+  X509 *crl = NULL;
+
+  while ((crl = PEM_read_bio_X509_CRL(bio, NULL, 0, NULL)) != NULL)
+  {
+    if (!X509_STORE_add_crl(store, crl))
+    {
+      X509_CRL_free(crl);
+      BIO_free(bio);
+      lua_pushboolean(L, 0);
+      lua_pushfstring(L, "error loading CA data (%s)",
+        ERR_reason_error_string(ERR_get_error()));
+      return 2;
+    }
+    X509_CRL_free(crl);
+    ERR_clear_error();
+  }
+
+  BIO_free(bio);
+
+  err = ERR_peek_last_error();
+  // Some bundles don't have CRLs, so only check that the error is what we
+  // expect.
+  if (!(ERR_GET_LIB(err) == ERR_LIB_PEM && ERR_GET_REASON(err) == PEM_R_NO_START_LINE))
+  {
+    lua_pushboolean(L, 0);
+    lua_pushfstring(L, "error loading CA data (%s)",
+        ERR_reason_error_string(ERR_get_error()));
+    return 2;
+  }
+  ERR_clear_error();
+
   lua_pushboolean(L, 1);
   return 1;
 }
